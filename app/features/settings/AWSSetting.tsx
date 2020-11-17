@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import TextField from '@material-ui/core/TextField';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { FormControl, InputLabel } from '@material-ui/core';
+import {
+  FormControl,
+  InputLabel,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+} from '@material-ui/core';
 import * as O from 'fp-ts/Option';
-import { pipe, constVoid, constUndefined, identity } from 'fp-ts/lib/function';
+import { sequenceT } from 'fp-ts/Apply';
+import { pipe, constVoid, identity, constant } from 'fp-ts/lib/function';
+import { AWSConfig } from '../../types';
+import { regions } from '../../constants/regions.json';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -23,10 +30,8 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface AWSSettingProps {
-  accessId: O.Option<string>;
-  secretAccessKey: O.Option<string>;
-  bucket: O.Option<string>;
-  region: O.Option<string>;
+  config: O.Option<AWSConfig>;
+  onSubmit: (config: AWSConfig) => void;
 }
 
 interface AWSSettingState {
@@ -39,13 +44,25 @@ interface AWSSettingState {
 const AWSSetting = (props: AWSSettingProps) => {
   const classes = useStyles();
 
-  const { accessId, secretAccessKey, bucket, region } = props;
+  const { config } = props;
 
   const [state, setState] = useState<AWSSettingState>({
-    accessId,
-    secretAccessKey,
-    bucket,
-    region,
+    accessId: pipe(
+      config,
+      O.map((x) => x.accessId)
+    ),
+    secretAccessKey: pipe(
+      config,
+      O.map((x) => x.secretAccessKey)
+    ),
+    bucket: pipe(
+      config,
+      O.map((x) => x.bucket)
+    ),
+    region: pipe(
+      config,
+      O.map((x) => x.region)
+    ),
   });
 
   const handleChange = (
@@ -62,14 +79,41 @@ const AWSSetting = (props: AWSSettingProps) => {
     );
   };
 
+  const handSubmit = (event: React.FormEvent<unknown>) => {
+    event.preventDefault();
+
+    const sequenceTOption = sequenceT(O.Applicative);
+
+    pipe(
+      sequenceTOption(
+        state.accessId,
+        state.secretAccessKey,
+        state.bucket,
+        state.region
+      ),
+      O.map(([accessId, secretAccessKey, bucket, region]) => ({
+        accessId,
+        secretAccessKey,
+        bucket,
+        region,
+      })),
+      O.fold(constVoid, props.onSubmit)
+    );
+  };
+
   return (
-    <form className={classes.root} noValidate autoComplete="off">
+    <form
+      className={classes.root}
+      noValidate
+      autoComplete="off"
+      onSubmit={handSubmit}
+    >
       <TextField
         required
         id="access_id"
         name="accessId"
         label="Access Key ID"
-        value={pipe(state.accessId, O.fold(constUndefined, identity))}
+        value={pipe(state.accessId, O.fold(constant(''), identity))}
         onChange={handleChange}
       />
       <TextField
@@ -78,7 +122,7 @@ const AWSSetting = (props: AWSSettingProps) => {
         name="secretAccessKey"
         type="password"
         label="Secret Access Key"
-        value={pipe(state.secretAccessKey, O.fold(constUndefined, identity))}
+        value={pipe(state.secretAccessKey, O.fold(constant(''), identity))}
         onChange={handleChange}
       />
       <TextField
@@ -86,7 +130,7 @@ const AWSSetting = (props: AWSSettingProps) => {
         id="bucket"
         label="Bucket"
         name="bucket"
-        value={pipe(state.bucket, O.fold(constUndefined, identity))}
+        value={pipe(state.bucket, O.fold(constant(''), identity))}
         onChange={handleChange}
       />
       <FormControl className={classes.formControl}>
@@ -95,15 +139,19 @@ const AWSSetting = (props: AWSSettingProps) => {
           labelId="aws-region"
           id="region"
           name="region"
-          value={pipe(state.region, O.fold(constUndefined, identity))}
+          value={pipe(state.region, O.fold(constant(''), identity))}
           onChange={handleChange}
         >
-          <MenuItem value="ap-southeast-1">ap-southeast-1</MenuItem>
-          <MenuItem value="ap-southeast-2">ap-southeast-2</MenuItem>
-          <MenuItem value="ap-northeast-1">ap-northeast-1</MenuItem>
+          {regions.map((r) => (
+            <MenuItem value={r} key={`region-${r}`}>
+              {r}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
-      <input type="submit" value="Save" />
+      <Button type="submit" variant="contained" size="medium" color="primary">
+        Save
+      </Button>
     </form>
   );
 };

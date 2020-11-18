@@ -29,6 +29,8 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+const sequenceTOption = sequenceT(O.Applicative);
+
 interface AWSSettingProps {
   config: O.Option<AWSConfig>;
   onSubmit: (config: AWSConfig) => void;
@@ -73,7 +75,10 @@ const AWSSetting = (props: AWSSettingProps) => {
       O.fold(constVoid, (name: string) =>
         setState({
           ...state,
-          [name]: O.some(event.target.value as string),
+          [name]: pipe(
+            O.some(event.target.value as string),
+            O.filter((x) => x.trim() !== '')
+          ),
         })
       )
     );
@@ -81,8 +86,6 @@ const AWSSetting = (props: AWSSettingProps) => {
 
   const handSubmit = (event: React.FormEvent<unknown>) => {
     event.preventDefault();
-
-    const sequenceTOption = sequenceT(O.Applicative);
 
     pipe(
       sequenceTOption(
@@ -108,50 +111,73 @@ const AWSSetting = (props: AWSSettingProps) => {
       autoComplete="off"
       onSubmit={handSubmit}
     >
-      <TextField
-        required
-        id="access_id"
-        name="accessId"
-        label="Access Key ID"
-        value={pipe(state.accessId, O.fold(constant(''), identity))}
-        onChange={handleChange}
-      />
-      <TextField
-        required
-        id="secret_access_key"
-        name="secretAccessKey"
-        type="password"
-        label="Secret Access Key"
-        value={pipe(state.secretAccessKey, O.fold(constant(''), identity))}
-        onChange={handleChange}
-      />
-      <TextField
-        required
-        id="bucket"
-        label="Bucket"
-        name="bucket"
-        value={pipe(state.bucket, O.fold(constant(''), identity))}
-        onChange={handleChange}
-      />
-      <FormControl className={classes.formControl}>
-        <InputLabel id="region_lable">Region</InputLabel>
-        <Select
-          labelId="aws-region"
-          id="region"
-          name="region"
-          value={pipe(state.region, O.fold(constant(''), identity))}
+      <div>
+        <TextField
+          required
+          error={O.isNone(state.accessId)}
+          id="access_id"
+          name="accessId"
+          label="Access Key ID"
+          value={pipe(state.accessId, O.fold(constant(''), identity))}
           onChange={handleChange}
+        />
+        <TextField
+          required
+          error={O.isNone(state.secretAccessKey)}
+          id="secret_access_key"
+          name="secretAccessKey"
+          type="password"
+          label="Secret Access Key"
+          value={pipe(state.secretAccessKey, O.fold(constant(''), identity))}
+          onChange={handleChange}
+        />
+        <TextField
+          required
+          error={O.isNone(state.bucket)}
+          id="bucket"
+          label="Bucket"
+          name="bucket"
+          value={pipe(state.bucket, O.fold(constant(''), identity))}
+          onChange={handleChange}
+        />
+        <FormControl className={classes.formControl}>
+          <InputLabel required error={O.isNone(state.region)} id="region_lable">
+            Region
+          </InputLabel>
+          <Select
+            labelId="aws-region"
+            id="region"
+            name="region"
+            error={O.isNone(state.region)}
+            value={pipe(state.region, O.fold(constant(''), identity))}
+            onChange={handleChange}
+          >
+            {regions.map((r) => (
+              <MenuItem value={r} key={`region-${r}`}>
+                {r}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
+      <div>
+        <Button
+          type="submit"
+          variant="contained"
+          size="medium"
+          color="primary"
+          disabled={O.isNone(
+            sequenceTOption(
+              state.accessId,
+              state.secretAccessKey,
+              state.bucket,
+              state.region
+            )
+          )}
         >
-          {regions.map((r) => (
-            <MenuItem value={r} key={`region-${r}`}>
-              {r}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Button type="submit" variant="contained" size="medium" color="primary">
-        Save
-      </Button>
+          Save
+        </Button>
+      </div>
     </form>
   );
 };

@@ -3,8 +3,11 @@ import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
+import * as O from 'fp-ts/Option';
+import { pipe } from 'fp-ts/function';
 // eslint-disable-next-line import/no-cycle
 import createRootReducer from './rootReducer';
+import * as Storage from './localStorage';
 
 export const history = createHashHistory();
 const rootReducer = createRootReducer(history);
@@ -32,6 +35,13 @@ export const configuredStore = (initialState?: RootState) => {
     reducer: rootReducer,
     middleware,
     preloadedState: initialState,
+  });
+
+  store.subscribe(() => {
+    pipe(
+      store.getState().settings.awsConfig,
+      O.map((x) => Storage.saveToStorage('aws_config', x))
+    );
   });
 
   if (process.env.NODE_ENV === 'development' && module.hot) {

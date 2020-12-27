@@ -1,4 +1,6 @@
 {
   "HOME": "/",
-  "COUNTER": "/counter"
+  "COUNTER": "/counter",
+  "SETTING": "/setting",
+  "IMAGES": "/images"
 }

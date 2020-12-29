@@ -9,6 +9,7 @@ export default function Home(): JSX.Element {
       <h2>Home</h2>
       <Link to={routes.COUNTER}>to Counter</Link>
       <Link to={routes.SETTING}>to SETTING</Link>
+      <Link to={routes.IMAGES}>to IMAGES</Link>
     </div>
   );
 }

@@ -5,15 +5,22 @@ import * as TE from 'fp-ts/TaskEither';
 import * as A from 'fp-ts/Array';
 import * as E from 'fp-ts/Either';
 import { sequenceS } from 'fp-ts/Apply';
-import { pipe, constVoid, identity, constant } from 'fp-ts/lib/function';
-import ImageList from '@material-ui/core/ImageList';
-import ImageListItem from '@material-ui/core/ImageListItem';
+import { pipe, constVoid } from 'fp-ts/lib/function';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
 import { S3 } from 'aws-sdk';
 import { AWSConfig } from '../../types';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'space-around',
+      overflow: 'hidden',
+      backgroundColor: theme.palette.background.paper,
+    },
+    gridList: {
       width: 500,
       height: 450,
     },
@@ -52,7 +59,7 @@ const ImageBrowser = (props: ImageBrowserProps) => {
       secretAccessKey,
       region,
     });
-    pipe(
+    const program = pipe(
       TE.fromTask(() =>
         s3
           .listObjects({
@@ -103,21 +110,18 @@ const ImageBrowser = (props: ImageBrowserProps) => {
         return constVoid();
       })
     );
+    program();
   }, [accessId, secretAccessKey, region, bucket]);
 
   return (
     <div className={classes.root}>
-      <ImageList variant="masonry" cols={3} gap={8}>
+      <GridList cellHeight={160} className={classes.gridList} cols={3}>
         {state.images.map((item) => (
-          <ImageListItem key={item.key}>
-            <img
-              srcSet={`${item.src}?w=161&fit=crop&auto=format 1x,
-                ${item.src}?w=161&fit=crop&auto=format&dpr=2 2x`}
-              alt={item.key}
-            />
-          </ImageListItem>
+          <GridListTile key={item.key} cols={1}>
+            <img src={item.src} alt={item.key} />
+          </GridListTile>
         ))}
-      </ImageList>
+      </GridList>
     </div>
   );
 };

@@ -10,6 +10,7 @@ import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import { S3 } from 'aws-sdk';
 import { AWSConfig } from '../../types';
+import Image from './Image';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -24,6 +25,19 @@ const useStyles = makeStyles((theme: Theme) =>
       width: 500,
       height: 450,
     },
+    modalStyle: {
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    },
+    paper: {
+      position: 'absolute',
+      width: 400,
+      backgroundColor: theme.palette.background.paper,
+      border: '2px solid #000',
+      boxShadow: theme.shadows[5],
+      padding: theme.spacing(2, 4, 3),
+    },
   })
 );
 
@@ -31,13 +45,8 @@ interface ImageBrowserProps {
   config: AWSConfig;
 }
 
-type ImageInfo = {
-  src: string;
-  key: string;
-};
-
 interface ImageBrowserState {
-  images: ImageInfo[];
+  keys: string[];
   currentPointer: O.Option<string>;
 }
 
@@ -48,29 +57,30 @@ const ImageBrowser = (props: ImageBrowserProps) => {
     config: { accessId, secretAccessKey, region, bucket },
   } = props;
 
+  const s3 = new S3({
+    accessKeyId: accessId,
+    secretAccessKey,
+    region,
+  });
+
   const [state, setState] = useState<ImageBrowserState>({
-    images: [],
+    keys: [],
     currentPointer: O.none,
   });
 
   useEffect(() => {
-    const s3 = new S3({
-      accessKeyId: accessId,
-      secretAccessKey,
-      region,
-    });
     const program = pipe(
       TE.fromTask(() =>
         s3
           .listObjects({
             Bucket: bucket,
-            MaxKeys: 500,
+            MaxKeys: 50,
           })
           .promise()
       ),
       TE.mapLeft((e) => new Error(`Failed to list objects, error is ${e}`)),
       TE.chain((res) => {
-        const images = pipe(
+        const keys = pipe(
           TE.fromEither(
             E.fromNullable(new Error('There is no keys in bucket'))(
               res.Contents
@@ -82,26 +92,13 @@ const ImageBrowser = (props: ImageBrowserProps) => {
                 E.fromNullable(new Error('The key is empty'))(k.Key)
               )
             )
-          ),
-          TE.chain((keys) =>
-            A.array.traverse(TE.taskEither)(keys, (k) =>
-              pipe(
-                TE.fromTask(() =>
-                  s3.getSignedUrlPromise('getObject', {
-                    Bucket: bucket,
-                    Key: k,
-                  })
-                ),
-                TE.map((url) => ({ src: url, key: k }))
-              )
-            )
           )
         );
 
         const currentPointer = TE.of(O.fromNullable(res.NextMarker));
 
         return sequenceS(TE.taskEither)({
-          images,
+          keys,
           currentPointer,
         });
       }),
@@ -113,12 +110,21 @@ const ImageBrowser = (props: ImageBrowserProps) => {
     program();
   }, [accessId, secretAccessKey, region, bucket]);
 
+  const getImage = (key: string): TE.TaskEither<Error, string> => {
+    return TE.fromTask(() =>
+      s3.getSignedUrlPromise('getObject', {
+        Bucket: bucket,
+        Key: key,
+      })
+    );
+  };
+
   return (
     <div className={classes.root}>
       <GridList cellHeight={160} className={classes.gridList} cols={3}>
-        {state.images.map((item) => (
-          <GridListTile key={item.key} cols={1}>
-            <img src={item.src} alt={item.key} />
+        {state.keys.map((key) => (
+          <GridListTile key={key} cols={1}>
+            <Image src={getImage(key)} />
           </GridListTile>
         ))}
       </GridList>

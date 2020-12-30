@@ -1,6 +1,7 @@
 import React from 'react';
 import * as O from 'fp-ts/Option';
 import { useSelector } from 'react-redux';
+import { Container } from '@material-ui/core';
 import ImageBrowser from '../features/images/ImageBrowser';
 import { selectAWSConfig } from '../features/settings/settingsSlice';
 
@@ -9,5 +10,9 @@ export default function ImagePage() {
   if (O.isNone(value)) {
     return <div>There is no AWS credentials</div>;
   }
-  return <ImageBrowser config={value.value} />;
+  return (
+    <Container maxWidth="xl">
+      <ImageBrowser config={value.value} />
+    </Container>
+  );
 }

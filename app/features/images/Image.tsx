@@ -7,6 +7,10 @@ import { Modal } from '@material-ui/core';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    image: {
+      maxWidth: '100%',
+      maxHeight: '100%',
+    },
     paper: {
       position: 'absolute',
       width: 400,
@@ -25,10 +29,6 @@ const modalStyle = {
 };
 type ImageProps = {
   src: TE.TaskEither<Error, string>;
-};
-type ImageState = {
-  src: O.Option<string>;
-  modal: boolean;
 };
 
 const Image = (props: ImageProps) => {
@@ -67,6 +67,7 @@ const Image = (props: ImageProps) => {
         onClick={handleModalOpen}
         onKeyUp={handleModalOpen}
         role="presentation"
+        className={classes.image}
       />
       <Modal
         open={isModal}
@@ -75,7 +76,7 @@ const Image = (props: ImageProps) => {
         aria-describedby="simple-modal-description"
       >
         <div style={modalStyle} className={classes.paper}>
-          <img src={imgSrc.value} alt="" />
+          <img src={imgSrc.value} alt="" className={classes.image} />
         </div>
       </Modal>
     </div>

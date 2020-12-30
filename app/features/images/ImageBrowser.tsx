@@ -22,8 +22,11 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: theme.palette.background.paper,
     },
     gridList: {
-      width: 500,
-      height: 450,
+      maxHeight: '800px',
+    },
+    gridListTile: {
+      display: 'flex',
+      alignItems: 'center',
     },
     modalStyle: {
       top: '50%',
@@ -123,7 +126,7 @@ const ImageBrowser = (props: ImageBrowserProps) => {
     <div className={classes.root}>
       <GridList cellHeight={160} className={classes.gridList} cols={3}>
         {state.keys.map((key) => (
-          <GridListTile key={key} cols={1}>
+          <GridListTile key={key} cols={1} className={classes.gridListTile}>
             <Image src={getImage(key)} />
           </GridListTile>
         ))}

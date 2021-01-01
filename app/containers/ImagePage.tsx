@@ -5,20 +5,30 @@ import {
   Container,
   AppBar,
   Typography,
-  Button,
   Toolbar,
   makeStyles,
   createStyles,
   Theme,
   IconButton,
+  CircularProgress,
+  Snackbar,
+  Backdrop,
 } from '@material-ui/core';
+import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+
 import AddAPhoto from '@material-ui/icons/AddAPhoto';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Redirect } from 'react-router';
 import ImageBrowser from '../features/images/ImageBrowser';
 import { selectAWSConfig } from '../features/settings/settingsSlice';
 import routes from '../constants/routes.json';
 import { uploadImgs, fetchImages } from '../utils/imagesThunk';
+import { selectInformation, clearInfo, clearError } from '../utils/infoSlice';
+
+function Alert(props: AlertProps) {
+  // eslint-disable-next-line react/jsx-props-no-spreading
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -34,24 +44,30 @@ const useStyles = makeStyles((theme: Theme) =>
     uploadInput: {
       display: 'none',
     },
+    backdrop: {
+      zIndex: theme.zIndex.drawer + 1,
+      color: '#fff',
+    },
   })
 );
 
 export default function ImagePage() {
   const awsConfig = useSelector(selectAWSConfig);
+  const notification = useSelector(selectInformation);
+  const { inProgress } = notification;
   const dispatch = useDispatch();
   const classes = useStyles();
 
   useEffect(() => {
     dispatch(fetchImages(O.none));
-  });
+  }, [awsConfig]);
 
   const handleUploadClick = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0];
       if (file) {
         const suffix = file.type.split('/')[1];
-        const fileName = `${uuid.v4()}.${suffix}`;
+        const fileName = `${uuidv4()}.${suffix}`;
         dispatch(uploadImgs([{ name: fileName, content: file }]));
       }
     }
@@ -91,6 +107,29 @@ export default function ImagePage() {
       <Container maxWidth="xl">
         <ImageBrowser />
       </Container>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={O.isSome(notification.info)}
+        autoHideDuration={6000}
+        onClose={() => dispatch(clearInfo())}
+      >
+        <Alert onClose={() => dispatch(clearInfo())} severity="info">
+          {O.getOrElse(() => '')(notification.info)}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={O.isSome(notification.error)}
+        autoHideDuration={6000}
+        onClose={() => dispatch(clearError())}
+      >
+        <Alert onClose={() => dispatch(clearError())} severity="error">
+          {O.getOrElse(() => '')(notification.error)}
+        </Alert>
+      </Snackbar>
+      <Backdrop className={classes.backdrop} open={inProgress}>
+        <CircularProgress />
+      </Backdrop>
     </div>
   );
 }

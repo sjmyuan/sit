@@ -1,11 +1,10 @@
-import {
-  createSlice,
-  PayloadAction,
-  SliceCaseReducers,
-} from '@reduxjs/toolkit';
+import { createSlice, SliceCaseReducers } from '@reduxjs/toolkit';
 import { O } from '../types';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
+
+// eslint-disable-next-line import/no-cycle
+import { fetchImages } from './imagesThunk';
 
 export interface InfoState {
   info: O.Option<string>;
@@ -17,25 +16,29 @@ const infoSlice = createSlice<InfoState, SliceCaseReducers<InfoState>>({
   name: 'information',
   initialState: { info: O.none, error: O.none, inProgress: false },
   reducers: {
-    showInfo: (state, action: PayloadAction<string>) => {
-      state.inProgress = false;
-      state.error = O.none;
-      state.info = O.some(action.payload);
-    },
-    showError: (state, action: PayloadAction<string>) => {
-      state.inProgress = false;
+    clearInfo: (state) => {
       state.info = O.none;
-      state.error = O.some(action.payload);
     },
-    startProcess: (state) => {
+    clearError: (state) => {
+      state.error = O.none;
+    },
+  },
+  extraReducers: {
+    [fetchImages.pending]: (state, _) => {
       state.inProgress = true;
-      state.info = O.none;
-      state.error = O.none;
+    },
+    [fetchImages.fulfilled]: (state, _) => {
+      state.inProgress = false;
+      state.info = O.some('Success');
+    },
+    [fetchImages.rejected]: (state, action) => {
+      state.inProgress = false;
+      state.error = O.some(action.payload);
     },
   },
 });
 
-export const { showInfo, showError, startProcess } = infoSlice.actions;
+export const { clearInfo, clearError } = infoSlice.actions;
 
 export default infoSlice.reducer;
 

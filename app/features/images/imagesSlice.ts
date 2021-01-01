@@ -18,7 +18,7 @@ const imagesSlice = createSlice<ImagesState, SliceCaseReducers<ImagesState>>({
   extraReducers: {
     [fetchImages.fulfilled]: (state, action) => {
       const info = action.payload as S3ObjectPage;
-      state.images = [...state.images, ...info.objects];
+      state.images = [...info.objects, ...state.images];
       state.pointer = info.pointer;
     },
   },

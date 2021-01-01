@@ -28,28 +28,13 @@ const modalStyle = {
   transform: 'translate(-50%, -50%)',
 };
 type ImageProps = {
-  src: TE.TaskEither<Error, string>;
+  src: string;
 };
 
 const Image = (props: ImageProps) => {
   const classes = useStyles();
   const { src: propSrc } = props;
-  const [imgSrc, setImgSrc] = useState<O.Option<string>>(O.none);
   const [isModal, setModal] = useState<boolean>(false);
-
-  useEffect(() => {
-    pipe(
-      propSrc,
-      TE.map((src) => {
-        setImgSrc(O.some(src));
-        return constVoid();
-      })
-    )();
-  }, [propSrc]);
-
-  if (O.isNone(imgSrc)) {
-    return <div />;
-  }
 
   const handleModalClose = () => {
     setModal(false);
@@ -62,7 +47,7 @@ const Image = (props: ImageProps) => {
   return (
     <div>
       <img
-        src={imgSrc.value}
+        src={propSrc}
         alt=""
         onClick={handleModalOpen}
         onKeyUp={handleModalOpen}
@@ -76,7 +61,7 @@ const Image = (props: ImageProps) => {
         aria-describedby="simple-modal-description"
       >
         <div style={modalStyle} className={classes.paper}>
-          <img src={imgSrc.value} alt="" className={classes.image} />
+          <img src={propSrc} alt="" className={classes.image} />
         </div>
       </Modal>
     </div>

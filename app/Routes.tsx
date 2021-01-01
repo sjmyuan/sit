@@ -1,10 +1,12 @@
 /* eslint react/jsx-props-no-spreading: off */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Switch, Route } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import routes from './constants/routes.json';
 import App from './containers/App';
 import HomePage from './containers/HomePage';
 import ImagePage from './containers/ImagePage';
+import { loadConfig } from './features/settings/settingsSlice';
 
 // Lazily load routes and code split with webpack
 const LazyCounterPage = React.lazy(() =>
@@ -29,6 +31,10 @@ const SettingPage = (props: Record<string, any>) => (
 );
 
 export default function Routes() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(loadConfig());
+  });
   return (
     <App>
       <Switch>

@@ -4,16 +4,8 @@ import * as O from 'fp-ts/Option';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { history, configuredStore } from './store';
 import './app.global.css';
-import { getFromStorage } from './localStorage';
-import { AWSConfig } from './types';
 
-const awsConfig = getFromStorage<AWSConfig>('aws_config');
-
-const store = configuredStore({
-  settings: { awsConfig: O.fromEither(awsConfig) },
-  counter: { value: 1 },
-  router: undefined as any,
-});
+const store = configuredStore();
 
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 

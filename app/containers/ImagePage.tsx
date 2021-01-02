@@ -16,14 +16,20 @@ import {
 } from '@material-ui/core';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
 
-import AddAPhoto from '@material-ui/icons/AddAPhoto';
+import {
+  AddAPhoto,
+  Refresh,
+  ChevronLeft,
+  ChevronRight,
+} from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { Redirect } from 'react-router';
 import ImageBrowser from '../features/images/ImageBrowser';
 import { selectAWSConfig } from '../features/settings/settingsSlice';
 import routes from '../constants/routes.json';
-import { uploadImgs, fetchImages } from '../utils/imagesThunk';
+import { uploadImgs, fetchImages, refreshImages } from '../utils/imagesThunk';
 import { selectInformation, clearInfo, clearError } from '../utils/infoSlice';
+import { selectImages } from '../features/images/imagesSlice';
 
 function Alert(props: AlertProps) {
   // eslint-disable-next-line react/jsx-props-no-spreading
@@ -54,12 +60,14 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function ImagePage() {
   const awsConfig = useSelector(selectAWSConfig);
   const notification = useSelector(selectInformation);
+  const images = useSelector(selectImages);
   const { inProgress } = notification;
+  const { previousPointer, nextPointer } = images;
   const dispatch = useDispatch();
   const classes = useStyles();
 
   useEffect(() => {
-    dispatch(fetchImages(O.none));
+    dispatch(refreshImages());
   }, [awsConfig]);
 
   const handleUploadClick = (event: ChangeEvent<HTMLInputElement>) => {
@@ -71,6 +79,18 @@ export default function ImagePage() {
         dispatch(uploadImgs([{ name: fileName, content: file }]));
       }
     }
+  };
+
+  const handleRefreshClick = () => {
+    dispatch(refreshImages());
+  };
+
+  const handlePreviousPageClick = () => {
+    dispatch(fetchImages(previousPointer));
+  };
+
+  const handleNextPageClick = () => {
+    dispatch(fetchImages(nextPointer));
   };
 
   if (O.isNone(awsConfig)) {
@@ -85,6 +105,32 @@ export default function ImagePage() {
             Images
           </Typography>
           <div>
+            <IconButton
+              color="inherit"
+              aria-label="previous page"
+              component="span"
+              disabled={O.isNone(previousPointer)}
+              onClick={handlePreviousPageClick}
+            >
+              <ChevronLeft />
+            </IconButton>
+            <IconButton
+              color="inherit"
+              aria-label="next page"
+              component="span"
+              disabled={O.isNone(nextPointer)}
+              onClick={handleNextPageClick}
+            >
+              <ChevronRight />
+            </IconButton>
+            <IconButton
+              color="inherit"
+              aria-label="refresh picture"
+              component="span"
+              onClick={handleRefreshClick}
+            >
+              <Refresh />
+            </IconButton>
             <label htmlFor="icon-button-file">
               <IconButton
                 color="inherit"

@@ -48,9 +48,36 @@ export const fetchImages = createAsyncThunk(
         (_) => new Error('No AWS Credentials')
       ),
       TE.chain((x) => {
+        // empty pointer means there is no more images
+        if (O.isNone(pointer)) {
+          return TE.of({ objects: [], pointer });
+        }
         const awsConfig = x.awsConfig as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
         return listObjects(s3, awsConfig.value.bucket)(pointer, x.pageSize);
+      }),
+      TE.fold<Error, S3ObjectPage, unknown>(
+        (e) => T.of(rejectWithValue(e)),
+        (r) => T.of(r)
+      )
+    )();
+  }
+);
+
+export const refreshImages = createAsyncThunk(
+  'images/refresh',
+  (_, { getState, rejectWithValue }) => {
+    return pipe(
+      getState(),
+      getSettings,
+      TE.filterOrElse(
+        (x) => O.isSome(x.awsConfig),
+        () => new Error('No AWS Credentials')
+      ),
+      TE.chain((x) => {
+        const awsConfig = x.awsConfig as O.Some<AWSConfig>;
+        const s3 = s3Client(awsConfig.value);
+        return listObjects(s3, awsConfig.value.bucket)(O.none, x.pageSize);
       }),
       TE.fold<Error, S3ObjectPage, unknown>(
         (e) => T.of(rejectWithValue(e)),

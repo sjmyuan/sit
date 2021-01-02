@@ -4,7 +4,7 @@ import { O } from '../types';
 import { RootState } from '../store';
 
 // eslint-disable-next-line import/no-cycle
-import { fetchImages, uploadImgs } from './imagesThunk';
+import { fetchImages, uploadImgs, refreshImages } from './imagesThunk';
 
 export interface InfoState {
   info: O.Option<string>;
@@ -43,6 +43,17 @@ const infoSlice = createSlice<InfoState, SliceCaseReducers<InfoState>>({
       state.info = O.some('Success');
     },
     [uploadImgs.rejected]: (state, action) => {
+      state.inProgress = false;
+      state.error = O.some(action.payload);
+    },
+    [refreshImages.pending]: (state, _) => {
+      state.inProgress = true;
+    },
+    [refreshImages.fulfilled]: (state, _) => {
+      state.inProgress = false;
+      state.info = O.some('Success');
+    },
+    [refreshImages.rejected]: (state, action) => {
       state.inProgress = false;
       state.error = O.some(action.payload);
     },

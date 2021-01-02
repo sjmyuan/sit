@@ -44,7 +44,7 @@ const ImageBrowser = () => {
 
   return (
     <div className={classes.root}>
-      <GridList cellHeight={160} className={classes.gridList} cols={3}>
+      <GridList cellHeight="auto" className={classes.gridList} cols={4}>
         {images.images.map(({ key, url }) => (
           <GridListTile key={key} cols={1} className={classes.gridListTile}>
             <Image src={url} />

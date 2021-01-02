@@ -31,7 +31,6 @@ import routes from '../constants/routes.json';
 import { uploadImgs, fetchImages, refreshImages } from '../utils/imagesThunk';
 import { selectInformation, clearInfo, clearError } from '../utils/infoSlice';
 import { selectImages } from '../features/images/imagesSlice';
-import { FileInfo } from '../types';
 
 function Alert(props: AlertProps) {
   // eslint-disable-next-line react/jsx-props-no-spreading
@@ -72,6 +71,30 @@ export default function ImagePage() {
     dispatch(refreshImages());
   }, [awsConfig]);
 
+  const uploadPictureInClipboard = () => {
+    const image = clipboard.readImage('clipboard');
+    if (!image.isEmpty()) {
+      const fileName = `${uuidv4()}.png`;
+      dispatch(
+        uploadImgs([{ name: fileName, content: new Blob([image.toPNG()]) }])
+      );
+    }
+  };
+
+  useEffect(() => {
+    const handleUserKeyUp = (event: { ctrlKey: boolean; keyCode: number }) => {
+      const { ctrlKey, keyCode } = event;
+
+      if (ctrlKey && keyCode === 86) {
+        uploadPictureInClipboard();
+      }
+    };
+    window.addEventListener('keyup', handleUserKeyUp);
+    return () => {
+      window.removeEventListener('keyup', handleUserKeyUp);
+    };
+  });
+
   const handleUploadClick = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0];
@@ -93,16 +116,6 @@ export default function ImagePage() {
 
   const handleNextPageClick = () => {
     dispatch(fetchImages(nextPointer));
-  };
-
-  const handleUploadCopiedPictureClick = () => {
-    const image = clipboard.readImage('clipboard');
-    if (!image.isEmpty()) {
-      const fileName = `${uuidv4()}.png`;
-      dispatch(
-        uploadImgs([{ name: fileName, content: new Blob([image.toPNG()]) }])
-      );
-    }
   };
 
   if (O.isNone(awsConfig)) {
@@ -163,7 +176,7 @@ export default function ImagePage() {
               color="inherit"
               aria-label="upload copied picture"
               component="span"
-              onClick={handleUploadCopiedPictureClick}
+              onClick={uploadPictureInClipboard}
             >
               <FlipToFront />
             </IconButton>

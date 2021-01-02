@@ -15,8 +15,6 @@ import {
 import { s3Client, listObjects, putObjects } from './aws';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
-// eslint-disable-next-line import/no-cycle
-import { SettingsState } from '../features/settings/settingsSlice';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isRootState = (state: any): state is RootState => {
@@ -24,14 +22,13 @@ const isRootState = (state: any): state is RootState => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getSettings = (state: any): TE.TaskEither<Error, SettingsState> => {
+const getRootState = (state: any): TE.TaskEither<Error, RootState> => {
   return pipe(
     state,
     TE.fromPredicate(
       isRootState,
       (x) => new Error(`${JSON.stringify(x)} is not root state`)
-    ),
-    TE.map((x) => x.settings)
+    )
   );
 };
 
@@ -42,19 +39,22 @@ export const fetchImages = createAsyncThunk(
   (pointer: O.Option<string>, { getState, rejectWithValue }) => {
     return pipe(
       getState(),
-      getSettings,
+      getRootState,
       TE.filterOrElse(
-        (x) => O.isSome(x.awsConfig),
-        (_) => new Error('No AWS Credentials')
+        (x) => O.isSome(x.settings.awsConfig),
+        () => new Error('No AWS Credentials')
       ),
       TE.chain((x) => {
         // empty pointer means there is no more images
         if (O.isNone(pointer)) {
           return TE.of({ objects: [], pointer });
         }
-        const awsConfig = x.awsConfig as O.Some<AWSConfig>;
+        const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
-        return listObjects(s3, awsConfig.value.bucket)(pointer, x.pageSize);
+        return listObjects(s3, awsConfig.value.bucket)(
+          pointer,
+          x.settings.pageSize
+        );
       }),
       TE.fold<Error, S3ObjectPage, unknown>(
         (e) => T.of(rejectWithValue(e)),
@@ -69,15 +69,18 @@ export const refreshImages = createAsyncThunk(
   (_, { getState, rejectWithValue }) => {
     return pipe(
       getState(),
-      getSettings,
+      getRootState,
       TE.filterOrElse(
-        (x) => O.isSome(x.awsConfig),
+        (x) => O.isSome(x.settings.awsConfig),
         () => new Error('No AWS Credentials')
       ),
       TE.chain((x) => {
-        const awsConfig = x.awsConfig as O.Some<AWSConfig>;
+        const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
-        return listObjects(s3, awsConfig.value.bucket)(O.none, x.pageSize);
+        return listObjects(s3, awsConfig.value.bucket)(
+          O.none,
+          x.settings.pageSize
+        );
       }),
       TE.fold<Error, S3ObjectPage, unknown>(
         (e) => T.of(rejectWithValue(e)),
@@ -92,13 +95,13 @@ export const uploadImgs = createAsyncThunk(
   (images: FileInfo[], { getState, rejectWithValue }) => {
     return pipe(
       getState(),
-      getSettings,
+      getRootState,
       TE.filterOrElse(
-        (x) => O.isSome(x.awsConfig),
-        (_) => new Error('No AWS Credentials')
+        (x) => O.isSome(x.settings.awsConfig),
+        () => new Error('No AWS Credentials')
       ),
       TE.chain((x) => {
-        const awsConfig = x.awsConfig as O.Some<AWSConfig>;
+        const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
         const reducedImages: TE.TaskEither<
           Error,
@@ -106,7 +109,7 @@ export const uploadImgs = createAsyncThunk(
         > = A.array.traverse(TE.taskEither)(images, ({ name, content }) => {
           return pipe(
             TE.fromTask<unknown, Blob>(() =>
-              imgReduce.toBlob(content, { max: x.resolution })
+              imgReduce.toBlob(content, { max: x.settings.resolution })
             ),
             TE.mapLeft(E.toError),
             TE.map<Blob, FileInfo>((blob) => ({ name, content: blob }))

@@ -78,10 +78,10 @@ export const listObjects = (s3: S3, bucket: string) => (
   return pipe(
     TE.fromTask(() =>
       s3
-        .listObjects({
+        .listObjectsV2({
           Bucket: bucket,
           MaxKeys: pageSize,
-          Marker: markder,
+          ContinuationToken: markder,
         })
         .promise()
     ),
@@ -92,7 +92,20 @@ export const listObjects = (s3: S3, bucket: string) => (
           E.fromNullable(new Error('There is no keys in bucket'))(res.Contents)
         ),
         TE.chain((contents) => {
-          const objects = A.array.traverse(TE.taskEither)(contents, (k) =>
+          const sortedContents = A.sort(
+            Ord.fromCompare<S3.Object>((x, y) => {
+              if (x.LastModified && y.LastModified) {
+                return x.LastModified.getTime() > y.LastModified.getTime()
+                  ? -1
+                  : 1;
+              }
+              if (x.LastModified) {
+                return -1;
+              }
+              return 1;
+            })
+          )(contents);
+          const objects = A.array.traverse(TE.taskEither)(sortedContents, (k) =>
             pipe(
               TE.fromEither(
                 E.fromNullable(new Error('The key is empty'))(k.Key)
@@ -102,15 +115,7 @@ export const listObjects = (s3: S3, bucket: string) => (
             )
           );
 
-          const pointer =
-            res.IsTruncated === true
-              ? TE.of(
-                  pipe(
-                    A.last(contents),
-                    O.chain((x) => O.fromNullable(x.Key))
-                  )
-                )
-              : TE.of(O.none);
+          const pointer = TE.of(O.fromNullable(res.NextContinuationToken));
 
           return sequenceS(TE.taskEither)({
             objects,

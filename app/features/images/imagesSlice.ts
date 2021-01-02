@@ -12,19 +12,27 @@ import {
 
 export interface ImagesState {
   images: S3ObjectInfo[];
+  historyPointer: string[];
   previousPointer: O.Option<string>;
+  currentPointer: O.Option<string>;
   nextPointer: O.Option<string>;
 }
 
 const imagesSlice = createSlice<ImagesState, SliceCaseReducers<ImagesState>>({
   name: 'images',
-  initialState: { images: [], nextPointer: O.none, previousPointer: O.none },
+  initialState: {
+    images: [],
+    nextPointer: O.none,
+    currentPointer: O.none,
+    previousPointer: O.none,
+  },
   reducers: {},
   extraReducers: {
     [fetchImages.fulfilled]: (state, action) => {
       const info = action.payload as S3ObjectPage;
       state.images = info.objects;
-      state.previousPointer = state.nextPointer;
+      state.previousPointer = state.currentPointer;
+      state.currentPointer = state.nextPointer;
       state.nextPointer = info.pointer;
     },
     [uploadImgs.fulfilled]: (state, action) => {
@@ -35,6 +43,7 @@ const imagesSlice = createSlice<ImagesState, SliceCaseReducers<ImagesState>>({
       const info = action.payload as S3ObjectPage;
       state.images = info.objects;
       state.previousPointer = O.none;
+      state.currentPointer = O.none;
       state.nextPointer = info.pointer;
     },
   },

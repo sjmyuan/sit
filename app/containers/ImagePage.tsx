@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect } from 'react';
+import React, { ChangeEvent, useEffect, MouseEvent } from 'react';
 import * as O from 'fp-ts/Option';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -15,12 +15,13 @@ import {
   Backdrop,
 } from '@material-ui/core';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
-
+import { clipboard } from 'electron';
 import {
   AddAPhoto,
   Refresh,
   ChevronLeft,
   ChevronRight,
+  FlipToFront,
 } from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { Redirect } from 'react-router';
@@ -30,6 +31,7 @@ import routes from '../constants/routes.json';
 import { uploadImgs, fetchImages, refreshImages } from '../utils/imagesThunk';
 import { selectInformation, clearInfo, clearError } from '../utils/infoSlice';
 import { selectImages } from '../features/images/imagesSlice';
+import { FileInfo } from '../types';
 
 function Alert(props: AlertProps) {
   // eslint-disable-next-line react/jsx-props-no-spreading
@@ -93,6 +95,16 @@ export default function ImagePage() {
     dispatch(fetchImages(nextPointer));
   };
 
+  const handleUploadCopiedPictureClick = () => {
+    const image = clipboard.readImage('clipboard');
+    if (!image.isEmpty()) {
+      const fileName = `${uuidv4()}.png`;
+      dispatch(
+        uploadImgs([{ name: fileName, content: new Blob([image.toPNG()]) }])
+      );
+    }
+  };
+
   if (O.isNone(awsConfig)) {
     return <Redirect to={routes.SETTING} />;
   }
@@ -147,6 +159,14 @@ export default function ImagePage() {
                 onChange={handleUploadClick}
               />
             </label>
+            <IconButton
+              color="inherit"
+              aria-label="upload copied picture"
+              component="span"
+              onClick={handleUploadCopiedPictureClick}
+            >
+              <FlipToFront />
+            </IconButton>
           </div>
         </Toolbar>
       </AppBar>

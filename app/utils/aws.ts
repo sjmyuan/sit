@@ -1,6 +1,7 @@
 import { sequenceS } from 'fp-ts/Apply';
 import { S3 } from 'aws-sdk';
 import { pipe, identity } from 'fp-ts/lib/function';
+import * as Ord from 'fp-ts/Ord';
 import {
   AWSConfig,
   AppErrorOr,

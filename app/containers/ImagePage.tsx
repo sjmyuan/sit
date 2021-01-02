@@ -108,7 +108,7 @@ export default function ImagePage() {
         <ImageBrowser />
       </Container>
       <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}
         autoHideDuration={6000}
         onClose={() => dispatch(clearInfo())}
@@ -118,7 +118,7 @@ export default function ImagePage() {
         </Alert>
       </Snackbar>
       <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.error)}
         autoHideDuration={6000}
         onClose={() => dispatch(clearError())}

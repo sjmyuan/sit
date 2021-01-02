@@ -1,7 +1,17 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { pipe } from 'fp-ts/lib/function';
 import reduce from 'image-blob-reduce';
-import { O, AWSConfig, TE, T, S3ObjectPage, FileInfo, A, E } from '../types';
+import {
+  O,
+  AWSConfig,
+  TE,
+  T,
+  S3ObjectPage,
+  FileInfo,
+  A,
+  E,
+  S3ObjectInfo,
+} from '../types';
 import { s3Client, listObjects, putObjects } from './aws';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
@@ -81,7 +91,7 @@ export const uploadImgs = createAsyncThunk(
           TE.chain(putObjects(s3, awsConfig.value.bucket))
         );
       }),
-      TE.fold<Error, string[], unknown>(
+      TE.fold<Error, S3ObjectInfo[], unknown>(
         (e) => T.of(rejectWithValue(e)),
         (r) => T.of(r)
       )

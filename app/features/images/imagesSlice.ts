@@ -4,7 +4,7 @@ import * as O from 'fp-ts/Option';
 import { RootState } from '../../store';
 import { S3ObjectInfo, S3ObjectPage } from '../../types';
 // eslint-disable-next-line import/no-cycle
-import { fetchImages } from '../../utils/imagesThunk';
+import { fetchImages, uploadImgs } from '../../utils/imagesThunk';
 
 export interface ImagesState {
   images: S3ObjectInfo[];
@@ -20,6 +20,10 @@ const imagesSlice = createSlice<ImagesState, SliceCaseReducers<ImagesState>>({
       const info = action.payload as S3ObjectPage;
       state.images = [...info.objects, ...state.images];
       state.pointer = info.pointer;
+    },
+    [uploadImgs.fulfilled]: (state, action) => {
+      const info = action.payload as S3ObjectInfo[];
+      state.images = [...info, ...state.images];
     },
   },
 });

@@ -10,6 +10,7 @@ import {
   O,
   S3ObjectPage,
   FileInfo,
+  S3ObjectInfo,
 } from '../types';
 
 export const s3Client = (config: AWSConfig) => {
@@ -35,7 +36,7 @@ export const getSignedUrl = (s3: S3, bucket: string) => (
 export const putObject = (s3: S3, bucket: string) => (
   key: string,
   blob: Blob
-): AppErrorOr<string> => {
+): AppErrorOr<S3ObjectInfo> => {
   return pipe(
     TE.tryCatch(
       () =>
@@ -49,13 +50,17 @@ export const putObject = (s3: S3, bucket: string) => (
           .promise(),
       E.toError
     ),
-    TE.chain((_) => getSignedUrl(s3, bucket)(key))
+    TE.chain((_) => getSignedUrl(s3, bucket)(key)),
+    TE.map((url) => ({
+      key,
+      url,
+    }))
   );
 };
 
 export const putObjects = (s3: S3, bucket: string) => (
   objects: FileInfo[]
-): AppErrorOr<string[]> => {
+): AppErrorOr<S3ObjectInfo[]> => {
   return A.array.traverse(TE.taskEither)(objects, ({ name, content }) =>
     putObject(s3, bucket)(name, content)
   );

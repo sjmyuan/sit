@@ -72,6 +72,10 @@ const useStyles = makeStyles((theme: Theme) =>
       left: '50%',
       transform: 'translate(-50%, -50%)',
     },
+    container: {
+      marginTop: '10px',
+      marginBottom: '10px',
+    },
   })
 );
 
@@ -153,7 +157,7 @@ export default function ImagePage() {
 
   return (
     <div className={classes.root}>
-      <AppBar position="static">
+      <AppBar position="sticky">
         <Toolbar>
           <Typography variant="h6" className={classes.title}>
             Images
@@ -220,7 +224,7 @@ export default function ImagePage() {
           </div>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="xl">
+      <Container className={classes.container} maxWidth="xl">
         <ImageBrowser />
       </Container>
       <Snackbar

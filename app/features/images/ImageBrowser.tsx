@@ -15,9 +15,7 @@ const useStyles = makeStyles((theme: Theme) =>
       overflow: 'hidden',
       backgroundColor: theme.palette.background.paper,
     },
-    gridList: {
-      maxHeight: '800px',
-    },
+    gridList: {},
     gridListTile: {
       display: 'flex',
       alignItems: 'center',

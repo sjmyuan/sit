@@ -18,15 +18,13 @@ const useStyles = makeStyles((theme: Theme) =>
       border: '2px solid #000',
       boxShadow: theme.shadows[5],
       padding: theme.spacing(2, 4, 3),
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
     },
   })
 );
 
-const modalStyle = {
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-};
 type ImageProps = {
   src: string;
 };
@@ -60,7 +58,7 @@ const Image = (props: ImageProps) => {
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
       >
-        <div style={modalStyle} className={classes.paper}>
+        <div className={classes.paper}>
           <img src={propSrc} alt="" className={classes.image} />
         </div>
       </Modal>

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, MouseEvent } from 'react';
+import React, { ChangeEvent, useEffect, MouseEvent, useState } from 'react';
 import * as O from 'fp-ts/Option';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -13,6 +13,7 @@ import {
   CircularProgress,
   Snackbar,
   Backdrop,
+  Modal,
 } from '@material-ui/core';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
 import { clipboard } from 'electron';
@@ -22,11 +23,15 @@ import {
   ChevronLeft,
   ChevronRight,
   FlipToFront,
+  Settings,
 } from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { Redirect } from 'react-router';
 import ImageBrowser from '../features/images/ImageBrowser';
-import { selectAWSConfig } from '../features/settings/settingsSlice';
+import {
+  selectAWSConfig,
+  updateAWSConfig,
+} from '../features/settings/settingsSlice';
 import routes from '../constants/routes.json';
 import {
   uploadImgs,
@@ -35,6 +40,7 @@ import {
 } from '../utils/imagesThunk';
 import { selectInformation, clearInfo, clearError } from '../utils/infoSlice';
 import { selectImages, resetPointer } from '../features/images/imagesSlice';
+import AWSSetting from '../features/settings/AWSSetting';
 
 function Alert(props: AlertProps) {
   // eslint-disable-next-line react/jsx-props-no-spreading
@@ -59,6 +65,17 @@ const useStyles = makeStyles((theme: Theme) =>
       zIndex: theme.zIndex.drawer + 1,
       color: '#fff',
     },
+    modal: {
+      position: 'absolute',
+      maxWidth: 400,
+      backgroundColor: theme.palette.background.paper,
+      border: '2px solid #000',
+      boxShadow: theme.shadows[5],
+      padding: theme.spacing(2, 4, 3),
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    },
   })
 );
 
@@ -75,6 +92,8 @@ export default function ImagePage() {
     dispatch(resetPointer());
     dispatch(fetchNextPageImages());
   }, [awsConfig]);
+
+  const [settingsSwitch, setSettingsSwitch] = useState<boolean>(false);
 
   const uploadPictureInClipboard = () => {
     const image = clipboard.readImage('clipboard');
@@ -99,6 +118,14 @@ export default function ImagePage() {
       window.removeEventListener('keyup', handleUserKeyUp);
     };
   });
+
+  const handleCloseSettings = () => {
+    setSettingsSwitch(false);
+  };
+
+  const handleOpenSettingsClick = () => {
+    setSettingsSwitch(true);
+  };
 
   const handleUploadClick = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -186,6 +213,14 @@ export default function ImagePage() {
             >
               <FlipToFront />
             </IconButton>
+            <IconButton
+              color="inherit"
+              aria-label="open settings"
+              component="span"
+              onClick={handleOpenSettingsClick}
+            >
+              <Settings />
+            </IconButton>
           </div>
         </Toolbar>
       </AppBar>
@@ -215,6 +250,21 @@ export default function ImagePage() {
       <Backdrop className={classes.backdrop} open={inProgress}>
         <CircularProgress />
       </Backdrop>
+      <Modal
+        open={settingsSwitch}
+        onClose={handleCloseSettings}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        <div className={classes.modal}>
+          <AWSSetting
+            config={awsConfig}
+            onSubmit={(config) => {
+              dispatch(updateAWSConfig(config));
+            }}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

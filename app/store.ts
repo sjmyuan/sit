@@ -1,17 +1,36 @@
-import { configureStore, getDefaultMiddleware, Action } from '@reduxjs/toolkit';
+import {
+  configureStore,
+  getDefaultMiddleware,
+  Action,
+  combineReducers,
+} from '@reduxjs/toolkit';
 import { createHashHistory } from 'history';
-import { routerMiddleware } from 'connected-react-router';
+import { routerMiddleware, connectRouter } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
 import * as O from 'fp-ts/Option';
 import { pipe } from 'fp-ts/function';
-// eslint-disable-next-line import/no-cycle
-import createRootReducer from './rootReducer';
-import * as Storage from './localStorage';
+import * as Storage from './utils/localStorage';
+import settingsReducer from './features/settings/settingsSlice';
+import infoReducer from './utils/infoSlice';
+import imagesReducer from './features/images/imagesSlice';
+
+function createRootReducer(history: History) {
+  return combineReducers({
+    router: connectRouter(history),
+    settings: settingsReducer,
+    information: infoReducer,
+    images: imagesReducer,
+  });
+}
 
 export const history = createHashHistory();
 const rootReducer = createRootReducer(history);
 export type RootState = ReturnType<typeof rootReducer>;
+
+export const selectImages = (state: RootState) => state.images;
+export const selectInformation = (state: RootState) => state.information;
+export const selectAWSConfig = (state: RootState) => state.settings.awsConfig;
 
 const router = routerMiddleware(history);
 const middleware = [...getDefaultMiddleware(), router];
@@ -44,13 +63,6 @@ export const configuredStore = (initialState?: RootState) => {
     );
   });
 
-  if (process.env.NODE_ENV === 'development' && module.hot) {
-    module.hot.accept(
-      './rootReducer',
-      // eslint-disable-next-line global-require
-      () => store.replaceReducer(require('./rootReducer').default)
-    );
-  }
   return store;
 };
 export type Store = ReturnType<typeof configuredStore>;

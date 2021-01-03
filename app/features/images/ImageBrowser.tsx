@@ -4,7 +4,7 @@ import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import { useSelector } from 'react-redux';
 import Image from './Image';
-import { selectImages } from './imagesSlice';
+import { selectImages } from '../../store';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

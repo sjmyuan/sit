@@ -4,10 +4,8 @@ import {
   SliceCaseReducers,
 } from '@reduxjs/toolkit';
 import * as O from 'fp-ts/Option';
-// eslint-disable-next-line import/no-cycle
-import { RootState } from '../../store';
 import { AWSConfig, E } from '../../types';
-import { getFromStorage } from '../../localStorage';
+import { getFromStorage } from '../../utils/localStorage';
 
 export interface SettingsState {
   awsConfig: O.Option<AWSConfig>;
@@ -42,5 +40,3 @@ const settingsSlice = createSlice<
 export const { updateAWSConfig, loadConfig } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
-
-export const selectAWSConfig = (state: RootState) => state.settings.awsConfig;

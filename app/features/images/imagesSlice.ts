@@ -1,9 +1,6 @@
 import { createSlice, SliceCaseReducers } from '@reduxjs/toolkit';
 import * as O from 'fp-ts/Option';
-// eslint-disable-next-line import/no-cycle
-import { RootState } from '../../store';
 import { S3ObjectInfo, S3ObjectPage } from '../../types';
-// eslint-disable-next-line import/no-cycle
 import {
   fetchNextPageImages,
   uploadImgs,
@@ -53,5 +50,3 @@ const imagesSlice = createSlice<ImagesState, SliceCaseReducers<ImagesState>>({
 export const { resetPointer } = imagesSlice.actions;
 
 export default imagesSlice.reducer;
-
-export const selectImages = (state: RootState) => state.images;

@@ -13,13 +13,21 @@ import {
   S3ObjectInfo,
 } from '../types';
 import { s3Client, listObjects, putObjects } from './aws';
-// eslint-disable-next-line import/no-cycle
-import { RootState } from '../store';
-// eslint-disable-next-line import/no-cycle
-import { ImagesState } from '../features/images/imagesSlice';
+
+type RequiedState = {
+  settings: {
+    awsConfig: O.Option<AWSConfig>;
+    pageSize: number;
+    resolution: number;
+  };
+  images: {
+    historyPointer: O.Option<string>[];
+    nextPointer: O.Option<string>;
+  };
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isRootState = (state: any): state is RootState => {
+const isRequiredState = (state: any): state is RequiedState => {
   return state.settings !== undefined && state.images !== undefined;
 };
 
@@ -28,7 +36,7 @@ const validateState = (state: any) => {
   return pipe(
     state,
     TE.fromPredicate(
-      isRootState,
+      isRequiredState,
       (x) => new Error(`${JSON.stringify(x)} is not root state`)
     ),
     TE.filterOrElse(
@@ -46,7 +54,7 @@ export const fetchNextPageImages = createAsyncThunk(
     return pipe(
       getState(),
       validateState,
-      TE.chain<Error, RootState, S3ObjectPage>((x) => {
+      TE.chain<Error, RequiedState, S3ObjectPage>((x) => {
         const { nextPointer } = x.images;
         // empty pointer means there is no more images
         if (O.isNone(nextPointer)) {
@@ -73,8 +81,8 @@ export const fetchPreviousPageImages = createAsyncThunk(
     return pipe(
       getState(),
       validateState,
-      TE.chain<Error, RootState, S3ObjectPage>((x) => {
-        const { historyPointer } = x.images as ImagesState;
+      TE.chain<Error, RequiedState, S3ObjectPage>((x) => {
+        const { historyPointer } = x.images;
         // empty pointer means there is no more images
         if (historyPointer.length < 2) {
           return TE.left(new Error('Previous page is empty'));
@@ -102,7 +110,7 @@ export const uploadImgs = createAsyncThunk(
     return pipe(
       getState(),
       validateState,
-      TE.chain<Error, RootState, S3ObjectInfo[]>((x) => {
+      TE.chain<Error, RequiedState, S3ObjectInfo[]>((x) => {
         const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
         const reducedImages: TE.TaskEither<

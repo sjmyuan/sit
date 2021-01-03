@@ -1,9 +1,6 @@
 import { createSlice, SliceCaseReducers } from '@reduxjs/toolkit';
 import { O } from '../types';
-// eslint-disable-next-line import/no-cycle
-import { RootState } from '../store';
 
-// eslint-disable-next-line import/no-cycle
 import {
   fetchNextPageImages,
   uploadImgs,
@@ -67,5 +64,3 @@ const infoSlice = createSlice<InfoState, SliceCaseReducers<InfoState>>({
 export const { clearInfo, clearError } = infoSlice.actions;
 
 export default infoSlice.reducer;
-
-export const selectInformation = (state: RootState) => state.information;

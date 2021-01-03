@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { render } from 'react-dom';
-import * as O from 'fp-ts/Option';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
+import { Provider } from 'react-redux';
 import { history, configuredStore } from './store';
 import './app.global.css';
 
@@ -11,10 +11,12 @@ const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
 document.addEventListener('DOMContentLoaded', () => {
   // eslint-disable-next-line global-require
-  const Root = require('./containers/Root').default;
+  const Root = require('./Root').default;
   render(
     <AppContainer>
-      <Root store={store} history={history} />
+      <Provider store={store}>
+        <Root history={history} />
+      </Provider>
     </AppContainer>,
     document.getElementById('root')
   );

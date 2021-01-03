@@ -26,21 +26,17 @@ import {
   Settings,
 } from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
-import { Redirect } from 'react-router';
 import ImageBrowser from '../features/images/ImageBrowser';
-import {
-  selectAWSConfig,
-  updateAWSConfig,
-} from '../features/settings/settingsSlice';
-import routes from '../constants/routes.json';
+import { updateAWSConfig } from '../features/settings/settingsSlice';
 import {
   uploadImgs,
   fetchPreviousPageImages,
   fetchNextPageImages,
 } from '../utils/imagesThunk';
-import { selectInformation, clearInfo, clearError } from '../utils/infoSlice';
-import { selectImages, resetPointer } from '../features/images/imagesSlice';
+import { clearInfo, clearError } from '../utils/infoSlice';
+import { resetPointer } from '../features/images/imagesSlice';
 import AWSSetting from '../features/settings/AWSSetting';
+import { selectInformation, selectAWSConfig, selectImages } from '../store';
 
 function Alert(props: AlertProps) {
   // eslint-disable-next-line react/jsx-props-no-spreading
@@ -152,7 +148,7 @@ export default function ImagePage() {
   };
 
   if (O.isNone(awsConfig)) {
-    return <Redirect to={routes.SETTING} />;
+    setSettingsSwitch(true);
   }
 
   return (

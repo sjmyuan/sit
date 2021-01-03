@@ -15,6 +15,8 @@ import {
 import { s3Client, listObjects, putObjects } from './aws';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
+// eslint-disable-next-line import/no-cycle
+import { ImagesState } from '../features/images/imagesSlice';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isRootState = (state: any): state is RootState => {
@@ -22,37 +24,38 @@ const isRootState = (state: any): state is RootState => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getRootState = (state: any): TE.TaskEither<Error, RootState> => {
+const validateState = (state: any) => {
   return pipe(
     state,
     TE.fromPredicate(
       isRootState,
       (x) => new Error(`${JSON.stringify(x)} is not root state`)
+    ),
+    TE.filterOrElse(
+      (x) => O.isSome(x.settings.awsConfig),
+      () => new Error('No AWS Credentials')
     )
   );
 };
 
 const imgReduce = reduce();
 
-export const fetchImages = createAsyncThunk(
-  'images/fetch',
-  (pointer: O.Option<string>, { getState, rejectWithValue }) => {
+export const fetchNextPageImages = createAsyncThunk(
+  'images/fetchNextpage',
+  (_, { getState, rejectWithValue }) => {
     return pipe(
       getState(),
-      getRootState,
-      TE.filterOrElse(
-        (x) => O.isSome(x.settings.awsConfig),
-        () => new Error('No AWS Credentials')
-      ),
-      TE.chain((x) => {
+      validateState,
+      TE.chain<Error, RootState, S3ObjectPage>((x) => {
+        const { nextPointer } = x.images;
         // empty pointer means there is no more images
-        if (O.isNone(pointer)) {
-          return TE.of({ objects: [], pointer });
+        if (O.isNone(nextPointer)) {
+          return TE.left(new Error('Next page is empty'));
         }
         const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
         return listObjects(s3, awsConfig.value.bucket)(
-          pointer,
+          nextPointer,
           x.settings.pageSize
         );
       }),
@@ -64,21 +67,24 @@ export const fetchImages = createAsyncThunk(
   }
 );
 
-export const refreshImages = createAsyncThunk(
-  'images/refresh',
+export const fetchPreviousPageImages = createAsyncThunk(
+  'images/fetchPreviousPage',
   (_, { getState, rejectWithValue }) => {
     return pipe(
       getState(),
-      getRootState,
-      TE.filterOrElse(
-        (x) => O.isSome(x.settings.awsConfig),
-        () => new Error('No AWS Credentials')
-      ),
-      TE.chain((x) => {
+      validateState,
+      TE.chain<Error, RootState, S3ObjectPage>((x) => {
+        const { historyPointer } = x.images as ImagesState;
+        // empty pointer means there is no more images
+        if (historyPointer.length < 2) {
+          return TE.left(new Error('Previous page is empty'));
+        }
+
+        const previousPointer = historyPointer[historyPointer.length - 2];
         const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
         return listObjects(s3, awsConfig.value.bucket)(
-          O.none,
+          previousPointer,
           x.settings.pageSize
         );
       }),
@@ -95,12 +101,8 @@ export const uploadImgs = createAsyncThunk(
   (images: FileInfo[], { getState, rejectWithValue }) => {
     return pipe(
       getState(),
-      getRootState,
-      TE.filterOrElse(
-        (x) => O.isSome(x.settings.awsConfig),
-        () => new Error('No AWS Credentials')
-      ),
-      TE.chain((x) => {
+      validateState,
+      TE.chain<Error, RootState, S3ObjectInfo[]>((x) => {
         const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
         const reducedImages: TE.TaskEither<

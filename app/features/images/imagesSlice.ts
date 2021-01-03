@@ -5,16 +5,14 @@ import { RootState } from '../../store';
 import { S3ObjectInfo, S3ObjectPage } from '../../types';
 // eslint-disable-next-line import/no-cycle
 import {
-  fetchImages,
+  fetchNextPageImages,
   uploadImgs,
-  refreshImages,
+  fetchPreviousPageImages,
 } from '../../utils/imagesThunk';
 
 export interface ImagesState {
   images: S3ObjectInfo[];
-  historyPointer: string[];
-  previousPointer: O.Option<string>;
-  currentPointer: O.Option<string>;
+  historyPointer: O.Option<string>[];
   nextPointer: O.Option<string>;
 }
 
@@ -22,32 +20,37 @@ const imagesSlice = createSlice<ImagesState, SliceCaseReducers<ImagesState>>({
   name: 'images',
   initialState: {
     images: [],
-    nextPointer: O.none,
-    currentPointer: O.none,
-    previousPointer: O.none,
+    historyPointer: [],
+    nextPointer: O.some(''),
   },
-  reducers: {},
+  reducers: {
+    resetPointer: (state) => {
+      state.images = [];
+      state.historyPointer = [];
+      state.nextPointer = O.some('');
+    },
+  },
   extraReducers: {
-    [fetchImages.fulfilled]: (state, action) => {
+    [fetchNextPageImages.fulfilled]: (state, action) => {
       const info = action.payload as S3ObjectPage;
       state.images = info.objects;
-      state.previousPointer = state.currentPointer;
-      state.currentPointer = state.nextPointer;
+      state.historyPointer.push(state.nextPointer);
+      state.nextPointer = info.pointer;
+    },
+    [fetchPreviousPageImages.fulfilled]: (state, action) => {
+      const info = action.payload as S3ObjectPage;
+      state.images = info.objects;
+      state.historyPointer.pop();
       state.nextPointer = info.pointer;
     },
     [uploadImgs.fulfilled]: (state, action) => {
       const info = action.payload as S3ObjectInfo[];
       state.images = [...info, ...state.images];
     },
-    [refreshImages.fulfilled]: (state, action) => {
-      const info = action.payload as S3ObjectPage;
-      state.images = info.objects;
-      state.previousPointer = O.none;
-      state.currentPointer = O.none;
-      state.nextPointer = info.pointer;
-    },
   },
 });
+
+export const { resetPointer } = imagesSlice.actions;
 
 export default imagesSlice.reducer;
 

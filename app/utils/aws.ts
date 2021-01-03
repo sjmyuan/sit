@@ -73,7 +73,7 @@ export const listObjects = (s3: S3, bucket: string) => (
 ): AppErrorOr<S3ObjectPage> => {
   const markder: undefined | string = O.fold<string, undefined | string>(
     () => undefined,
-    identity
+    (x) => (x === '' ? undefined : x)
   )(pagePointer);
 
   return pipe(

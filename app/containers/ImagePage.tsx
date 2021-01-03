@@ -28,9 +28,13 @@ import { Redirect } from 'react-router';
 import ImageBrowser from '../features/images/ImageBrowser';
 import { selectAWSConfig } from '../features/settings/settingsSlice';
 import routes from '../constants/routes.json';
-import { uploadImgs, fetchImages, refreshImages } from '../utils/imagesThunk';
+import {
+  uploadImgs,
+  fetchPreviousPageImages,
+  fetchNextPageImages,
+} from '../utils/imagesThunk';
 import { selectInformation, clearInfo, clearError } from '../utils/infoSlice';
-import { selectImages } from '../features/images/imagesSlice';
+import { selectImages, resetPointer } from '../features/images/imagesSlice';
 
 function Alert(props: AlertProps) {
   // eslint-disable-next-line react/jsx-props-no-spreading
@@ -63,12 +67,13 @@ export default function ImagePage() {
   const notification = useSelector(selectInformation);
   const images = useSelector(selectImages);
   const { inProgress } = notification;
-  const { previousPointer, nextPointer } = images;
+  const { historyPointer, nextPointer } = images;
   const dispatch = useDispatch();
   const classes = useStyles();
 
   useEffect(() => {
-    dispatch(refreshImages());
+    dispatch(resetPointer());
+    dispatch(fetchNextPageImages());
   }, [awsConfig]);
 
   const uploadPictureInClipboard = () => {
@@ -107,15 +112,16 @@ export default function ImagePage() {
   };
 
   const handleRefreshClick = () => {
-    dispatch(refreshImages());
+    dispatch(resetPointer());
+    dispatch(fetchNextPageImages());
   };
 
   const handlePreviousPageClick = () => {
-    dispatch(fetchImages(previousPointer));
+    dispatch(fetchPreviousPageImages());
   };
 
   const handleNextPageClick = () => {
-    dispatch(fetchImages(nextPointer));
+    dispatch(fetchNextPageImages());
   };
 
   if (O.isNone(awsConfig)) {
@@ -134,7 +140,7 @@ export default function ImagePage() {
               color="inherit"
               aria-label="previous page"
               component="span"
-              disabled={O.isNone(previousPointer)}
+              disabled={historyPointer.length < 2}
               onClick={handlePreviousPageClick}
             >
               <ChevronLeft />

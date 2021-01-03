@@ -15,23 +15,11 @@ const useStyles = makeStyles((theme: Theme) =>
       overflow: 'hidden',
       backgroundColor: theme.palette.background.paper,
     },
-    gridList: {},
     gridListTile: {
       display: 'flex',
       alignItems: 'center',
-    },
-    modalStyle: {
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    },
-    paper: {
-      position: 'absolute',
-      width: 400,
-      backgroundColor: theme.palette.background.paper,
-      border: '2px solid #000',
-      boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
+      overflow: 'hidden',
+      position: 'relative',
     },
   })
 );
@@ -42,9 +30,13 @@ const ImageBrowser = () => {
 
   return (
     <div className={classes.root}>
-      <GridList cellHeight="auto" className={classes.gridList} cols={4}>
+      <GridList cellHeight="auto" cols={4}>
         {images.images.map(({ key, url }) => (
-          <GridListTile key={key} cols={1} className={classes.gridListTile}>
+          <GridListTile
+            classes={{ tile: classes.gridListTile }}
+            key={key}
+            cols={1}
+          >
             <Image src={url} />
           </GridListTile>
         ))}

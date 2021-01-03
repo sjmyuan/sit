@@ -13,11 +13,8 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     paper: {
       position: 'absolute',
-      width: 400,
       backgroundColor: theme.palette.background.paper,
-      border: '2px solid #000',
       boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
@@ -52,12 +49,7 @@ const Image = (props: ImageProps) => {
         role="presentation"
         className={classes.image}
       />
-      <Modal
-        open={isModal}
-        onClose={handleModalClose}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
+      <Modal open={isModal} onClose={handleModalClose}>
         <div className={classes.paper}>
           <img src={propSrc} alt="" className={classes.image} />
         </div>

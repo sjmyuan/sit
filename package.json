@@ -100,7 +100,7 @@
       "./resources/**"
     ],
     "publish": {
-      "provider": "shangjiaming.yuan@gmail.com",
+      "provider": "github",
       "owner": "shangjiaming.yuan@gmail.com",
       "repo": "https://github.com/sjmyuan/sit",
       "private": false

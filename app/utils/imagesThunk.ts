@@ -68,7 +68,7 @@ export const fetchNextPageImages = createAsyncThunk(
         );
       }),
       TE.fold<Error, S3ObjectPage, unknown>(
-        (e) => T.of(rejectWithValue(e)),
+        (e) => T.of(rejectWithValue(e.message)),
         (r) => T.of(r)
       )
     )();
@@ -97,7 +97,7 @@ export const fetchPreviousPageImages = createAsyncThunk(
         );
       }),
       TE.fold<Error, S3ObjectPage, unknown>(
-        (e) => T.of(rejectWithValue(e)),
+        (e) => T.of(rejectWithValue(e.message)),
         (r) => T.of(r)
       )
     )();
@@ -132,7 +132,7 @@ export const uploadImgs = createAsyncThunk(
         );
       }),
       TE.fold<Error, S3ObjectInfo[], unknown>(
-        (e) => T.of(rejectWithValue(e)),
+        (e) => T.of(rejectWithValue(e.message)),
         (r) => T.of(r)
       )
     )();

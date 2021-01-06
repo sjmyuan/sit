@@ -88,12 +88,16 @@ export default function ImagePage() {
   const dispatch = useDispatch();
   const classes = useStyles();
 
-  useEffect(() => {
-    dispatch(resetPointer());
-    dispatch(fetchNextPageImages());
-  }, [awsConfig]);
-
   const [settingsSwitch, setSettingsSwitch] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (O.isSome(awsConfig)) {
+      dispatch(resetPointer());
+      dispatch(fetchNextPageImages());
+    } else {
+      setSettingsSwitch(true);
+    }
+  }, [awsConfig]);
 
   const uploadPictureInClipboard = () => {
     const image = clipboard.readImage('clipboard');
@@ -150,10 +154,6 @@ export default function ImagePage() {
   const handleNextPageClick = () => {
     dispatch(fetchNextPageImages());
   };
-
-  if (O.isNone(awsConfig)) {
-    setSettingsSwitch(true);
-  }
 
   return (
     <div className={classes.root}>
@@ -260,6 +260,7 @@ export default function ImagePage() {
           <AWSSetting
             config={awsConfig}
             onSubmit={(config) => {
+              setSettingsSwitch(false);
               dispatch(updateAWSConfig(config));
             }}
           />

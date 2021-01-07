@@ -1,10 +1,18 @@
+/* eslint-disable react/jsx-wrap-multilines */
 import React from 'react';
+import { clipboard } from 'electron';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import GridList from '@material-ui/core/GridList';
-import GridListTile from '@material-ui/core/GridListTile';
-import { useSelector } from 'react-redux';
+import {
+  GridList,
+  GridListTile,
+  GridListTileBar,
+  IconButton,
+} from '@material-ui/core';
+import { Link as CopyKeyIcon } from '@material-ui/icons';
+import { useSelector, useDispatch } from 'react-redux';
 import Image from './Image';
 import { selectImages } from '../../store';
+import { setInfo } from '../../utils/infoSlice';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -21,12 +29,21 @@ const useStyles = makeStyles((theme: Theme) =>
       overflow: 'hidden',
       position: 'relative',
     },
+    icon: {
+      color: 'rgba(255, 255, 255, 0.54)',
+    },
   })
 );
 
 const ImageBrowser = () => {
   const classes = useStyles();
   const images = useSelector(selectImages);
+  const dispatch = useDispatch();
+
+  const copyLink = (link: string) => {
+    clipboard.writeText(link);
+    dispatch(setInfo('Copied to Clipboard!'));
+  };
 
   return (
     <div className={classes.root}>
@@ -38,6 +55,17 @@ const ImageBrowser = () => {
             cols={1}
           >
             <Image src={url} />
+            <GridListTileBar
+              actionIcon={
+                <IconButton
+                  aria-label={`copy ${key}`}
+                  className={classes.icon}
+                  onClick={() => copyLink(key)}
+                >
+                  <CopyKeyIcon />
+                </IconButton>
+              }
+            />
           </GridListTile>
         ))}
       </GridList>

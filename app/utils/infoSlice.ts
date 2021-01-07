@@ -17,6 +17,12 @@ const infoSlice = createSlice<InfoState, SliceCaseReducers<InfoState>>({
   name: 'information',
   initialState: { info: O.none, error: O.none, inProgress: false },
   reducers: {
+    setInfo: (state, action) => {
+      state.info = O.some(action.payload);
+    },
+    setError: (state, action) => {
+      state.error = O.some(action.payload);
+    },
     clearInfo: (state) => {
       state.info = O.none;
     },
@@ -61,6 +67,6 @@ const infoSlice = createSlice<InfoState, SliceCaseReducers<InfoState>>({
   },
 });
 
-export const { clearInfo, clearError } = infoSlice.actions;
+export const { setInfo, setError, clearInfo, clearError } = infoSlice.actions;
 
 export default infoSlice.reducer;

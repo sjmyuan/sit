@@ -34,7 +34,7 @@ import {
   fetchPreviousPageImages,
   fetchNextPageImages,
 } from '../utils/imagesThunk';
-import { clearInfo, clearError } from '../utils/infoSlice';
+import { clearInfo, clearError, setError } from '../utils/infoSlice';
 import { resetPointer } from '../features/images/imagesSlice';
 import {
   selectInformation,
@@ -43,6 +43,7 @@ import {
   selectSettings,
 } from '../store';
 import SettingPage from './SettingPage';
+import ClipboardImage from '../features/images/ClipboardImage';
 
 function Alert(props: AlertProps) {
   // eslint-disable-next-line react/jsx-props-no-spreading
@@ -95,6 +96,9 @@ export default function ImagePage() {
   const classes = useStyles();
 
   const [settingsSwitch, setSettingsSwitch] = useState<boolean>(false);
+  const [clipboardImageSwitch, setClipboardImageSwitch] = useState<boolean>(
+    false
+  );
 
   useDeepCompareEffect(() => {
     if (O.isSome(awsConfig)) {
@@ -108,10 +112,9 @@ export default function ImagePage() {
   const uploadPictureInClipboard = () => {
     const image = clipboard.readImage('clipboard');
     if (!image.isEmpty()) {
-      const fileName = `${uuidv4()}.png`;
-      dispatch(
-        uploadImgs([{ name: fileName, content: new Blob([image.toPNG()]) }])
-      );
+      setClipboardImageSwitch(true);
+    } else {
+      dispatch(setError('No Image in Clipboard'));
     }
   };
 
@@ -147,6 +150,10 @@ export default function ImagePage() {
         dispatch(uploadImgs([{ name: fileName, content: file }]));
       }
     }
+  };
+
+  const handleCloseClipboardImage = () => {
+    setClipboardImageSwitch(false);
   };
 
   const handleRefreshClick = () => {
@@ -265,6 +272,16 @@ export default function ImagePage() {
       >
         <div className={classes.modal}>
           <SettingPage />
+        </div>
+      </Modal>
+      <Modal
+        open={clipboardImageSwitch}
+        onClose={handleCloseClipboardImage}
+        aria-labelledby="clipboard-image-modal"
+        aria-describedby="clipboard-image-description"
+      >
+        <div className={classes.modal}>
+          <ClipboardImage />
         </div>
       </Modal>
     </div>

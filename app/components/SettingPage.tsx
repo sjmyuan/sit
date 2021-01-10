@@ -6,6 +6,7 @@ import {
   Tab,
   Box,
   Typography,
+  AppBar,
 } from '@material-ui/core';
 import AWSSetting from '../features/settings/AWSSetting';
 import ImageSetting from '../features/settings/ImageSetting';
@@ -13,8 +14,8 @@ import ImageSetting from '../features/settings/ImageSetting';
 interface TabPanelProps {
   // eslint-disable-next-line react/require-default-props
   children?: React.ReactNode;
-  index: any;
-  value: any;
+  index: number;
+  value: number;
 }
 
 function TabPanel(props: TabPanelProps) {
@@ -42,11 +43,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.paper,
-    display: 'flex',
-    height: 224,
-  },
-  tabs: {
-    borderRight: `1px solid ${theme.palette.divider}`,
+    width: '100%',
   },
 }));
 
@@ -60,25 +57,28 @@ const SettingPage = () => {
 
   return (
     <div className={classes.root}>
-      <Tabs
-        orientation="vertical"
-        variant="scrollable"
-        value={value}
-        onChange={handleChange}
-        aria-label="Setting Page"
-        className={classes.tabs}
-      >
-        <Tab
-          label="AWS"
-          id="vertical-tab-0"
-          aria-controls="vertical-tabpanel-0"
-        />
-        <Tab
-          label="Image"
-          id="vertical-tab-1"
-          aria-controls="vertical-tabpanel-1"
-        />
-      </Tabs>
+      <AppBar position="static" color="default">
+        <Tabs
+          variant="scrollable"
+          indicatorColor="primary"
+          textColor="primary"
+          value={value}
+          onChange={handleChange}
+          aria-label="Setting Page"
+          className={classes.tabs}
+        >
+          <Tab
+            label="AWS"
+            id="vertical-tab-0"
+            aria-controls="vertical-tabpanel-0"
+          />
+          <Tab
+            label="Image"
+            id="vertical-tab-1"
+            aria-controls="vertical-tabpanel-1"
+          />
+        </Tabs>
+      </AppBar>
       <TabPanel value={value} index={0}>
         <AWSSetting />
       </TabPanel>

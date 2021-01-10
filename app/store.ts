@@ -36,6 +36,10 @@ export const selectAWSSettings = (state: RootState) => {
   };
 };
 
+export const selectSettings = (state: RootState) => {
+  return state.settings;
+};
+
 const router = routerMiddleware(history);
 const middleware = [...getDefaultMiddleware(), router];
 

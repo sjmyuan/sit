@@ -14,6 +14,7 @@ export interface SettingsState {
   region: O.Option<string>;
   pageSize: number;
   resolution: number;
+  cdn: O.Option<string>;
 }
 
 const settingsSlice = createSlice<
@@ -26,8 +27,9 @@ const settingsSlice = createSlice<
     secretAccessKey: O.none,
     bucket: O.none,
     region: O.none,
-    pageSize: 20,
+    pageSize: 10,
     resolution: 480,
+    cdn: O.none,
   },
   reducers: {
     updateAccessId: (state, action: PayloadAction<O.Option<string>>) => {
@@ -48,6 +50,9 @@ const settingsSlice = createSlice<
     updateResolution: (state, action: PayloadAction<number>) => {
       state.resolution = action.payload;
     },
+    updateCDN: (state, action: PayloadAction<O.Option<string>>) => {
+      state.cdn = action.payload;
+    },
     saveConfig: (state) => {
       pipe(
         state.accessId,
@@ -65,6 +70,10 @@ const settingsSlice = createSlice<
         state.region,
         O.map((x) => saveToStorage('region', x))
       );
+      pipe(
+        state.cdn,
+        O.map((x) => saveToStorage('cdn', x))
+      );
       saveToStorage('resolution', state.resolution);
       saveToStorage('page_size', state.pageSize);
     },
@@ -75,8 +84,9 @@ const settingsSlice = createSlice<
       );
       state.region = O.fromEither(getFromStorage<string>('region'));
       state.bucket = O.fromEither(getFromStorage<string>('bucket'));
+      state.cdn = O.fromEither(getFromStorage<string>('cdn'));
 
-      state.pageSize = O.getOrElse(() => 20)(
+      state.pageSize = O.getOrElse(() => 10)(
         O.fromEither(getFromStorage<number>('page_size'))
       );
 
@@ -94,6 +104,7 @@ export const {
   updateRegion,
   updatePageSize,
   updateResolution,
+  updateCDN,
   saveConfig,
   loadConfig,
 } = settingsSlice.actions;

@@ -36,8 +36,8 @@ import {
 } from '../utils/imagesThunk';
 import { clearInfo, clearError } from '../utils/infoSlice';
 import { resetPointer } from '../features/images/imagesSlice';
-import AWSSetting from '../features/settings/AWSSetting';
 import { selectInformation, selectAWSConfig, selectImages } from '../store';
+import SettingPage from './SettingPage';
 
 function Alert(props: AlertProps) {
   // eslint-disable-next-line react/jsx-props-no-spreading
@@ -259,7 +259,7 @@ export default function ImagePage() {
         aria-describedby="simple-modal-description"
       >
         <div className={classes.modal}>
-          <AWSSetting />
+          <SettingPage />
         </div>
       </Modal>
     </div>

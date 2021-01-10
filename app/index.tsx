@@ -12,6 +12,7 @@ const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 document.addEventListener('DOMContentLoaded', () => {
   // eslint-disable-next-line global-require
   const Root = require('./Root').default;
+
   render(
     <AppContainer>
       <Provider store={store}>

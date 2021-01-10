@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { pipe } from 'fp-ts/lib/function';
 import reduce from 'image-blob-reduce';
+import { sequenceS } from 'fp-ts/Apply';
 import {
   O,
   AWSConfig,
@@ -16,7 +17,10 @@ import { s3Client, listObjects, putObjects } from './aws';
 
 type RequiedState = {
   settings: {
-    awsConfig: O.Option<AWSConfig>;
+    secretAccessKey: O.Option<string>;
+    accessId: O.Option<string>;
+    bucket: O.Option<string>;
+    region: O.Option<string>;
     pageSize: number;
     resolution: number;
   };
@@ -24,6 +28,17 @@ type RequiedState = {
     historyPointer: O.Option<string>[];
     nextPointer: O.Option<string>;
   };
+};
+
+const getAWSConfig = (state: RequiedState): O.Option<AWSConfig> => {
+  const awsConfig = {
+    accessId: state.settings.accessId,
+    secretAccessKey: state.settings.secretAccessKey,
+    bucket: state.settings.bucket,
+    region: state.settings.region,
+  };
+
+  return sequenceS(O.option)(awsConfig);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,7 +55,7 @@ const validateState = (state: any) => {
       (x) => new Error(`${JSON.stringify(x)} is not root state`)
     ),
     TE.filterOrElse(
-      (x) => O.isSome(x.settings.awsConfig),
+      (x) => O.isSome(getAWSConfig(x)),
       () => new Error('No AWS Credentials')
     )
   );
@@ -60,7 +75,7 @@ export const fetchNextPageImages = createAsyncThunk(
         if (O.isNone(nextPointer)) {
           return TE.left(new Error('Next page is empty'));
         }
-        const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
+        const awsConfig = getAWSConfig(x) as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
         return listObjects(s3, awsConfig.value.bucket)(
           nextPointer,
@@ -89,7 +104,7 @@ export const fetchPreviousPageImages = createAsyncThunk(
         }
 
         const previousPointer = historyPointer[historyPointer.length - 2];
-        const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
+        const awsConfig = getAWSConfig(x) as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
         return listObjects(s3, awsConfig.value.bucket)(
           previousPointer,
@@ -111,7 +126,7 @@ export const uploadImgs = createAsyncThunk(
       getState(),
       validateState,
       TE.chain<Error, RequiedState, S3ObjectInfo[]>((x) => {
-        const awsConfig = x.settings.awsConfig as O.Some<AWSConfig>;
+        const awsConfig = getAWSConfig(x) as O.Some<AWSConfig>;
         const s3 = s3Client(awsConfig.value);
         const reducedImages: TE.TaskEither<
           Error,

@@ -26,8 +26,9 @@ import {
   Settings,
 } from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
+import useDeepCompareEffect from 'use-deep-compare-effect';
 import ImageBrowser from '../features/images/ImageBrowser';
-import { updateAWSConfig } from '../features/settings/settingsSlice';
+import { saveConfig } from '../features/settings/settingsSlice';
 import {
   uploadImgs,
   fetchPreviousPageImages,
@@ -90,7 +91,7 @@ export default function ImagePage() {
 
   const [settingsSwitch, setSettingsSwitch] = useState<boolean>(false);
 
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     if (O.isSome(awsConfig)) {
       dispatch(resetPointer());
       dispatch(fetchNextPageImages());
@@ -125,6 +126,7 @@ export default function ImagePage() {
 
   const handleCloseSettings = () => {
     setSettingsSwitch(false);
+    dispatch(saveConfig());
   };
 
   const handleOpenSettingsClick = () => {
@@ -257,13 +259,7 @@ export default function ImagePage() {
         aria-describedby="simple-modal-description"
       >
         <div className={classes.modal}>
-          <AWSSetting
-            config={awsConfig}
-            onSubmit={(config) => {
-              setSettingsSwitch(false);
-              dispatch(updateAWSConfig(config));
-            }}
-          />
+          <AWSSetting />
         </div>
       </Modal>
     </div>

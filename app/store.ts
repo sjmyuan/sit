@@ -5,6 +5,7 @@ import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
 import * as O from 'fp-ts/Option';
 import { pipe } from 'fp-ts/function';
+import { sequenceS } from 'fp-ts/Apply';
 import * as Storage from './utils/localStorage';
 import createRootReducer from './rootReducer';
 
@@ -14,7 +15,26 @@ export type RootState = ReturnType<typeof rootReducer>;
 
 export const selectImages = (state: RootState) => state.images;
 export const selectInformation = (state: RootState) => state.information;
-export const selectAWSConfig = (state: RootState) => state.settings.awsConfig;
+
+export const selectAWSConfig = (state: RootState) => {
+  const awsConfig = {
+    accessId: state.settings.accessId,
+    secretAccessKey: state.settings.secretAccessKey,
+    bucket: state.settings.bucket,
+    region: state.settings.region,
+  };
+
+  return sequenceS(O.option)(awsConfig);
+};
+
+export const selectAWSSettings = (state: RootState) => {
+  return {
+    accessId: state.settings.accessId,
+    secretAccessKey: state.settings.secretAccessKey,
+    bucket: state.settings.bucket,
+    region: state.settings.region,
+  };
+};
 
 const router = routerMiddleware(history);
 const middleware = [...getDefaultMiddleware(), router];
@@ -38,13 +58,6 @@ export const configuredStore = (initialState?: RootState) => {
     reducer: rootReducer,
     middleware,
     preloadedState: initialState,
-  });
-
-  store.subscribe(() => {
-    pipe(
-      store.getState().settings.awsConfig,
-      O.map((x) => Storage.saveToStorage('aws_config', x))
-    );
   });
 
   if (process.env.NODE_ENV === 'development' && module.hot) {

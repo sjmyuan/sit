@@ -4,11 +4,14 @@ import {
   SliceCaseReducers,
 } from '@reduxjs/toolkit';
 import * as O from 'fp-ts/Option';
-import { AWSConfig, E } from '../../types';
-import { getFromStorage } from '../../utils/localStorage';
+import { pipe } from 'fp-ts/lib/function';
+import { saveToStorage, getFromStorage } from '../../utils/localStorage';
 
 export interface SettingsState {
-  awsConfig: O.Option<AWSConfig>;
+  accessId: O.Option<string>;
+  secretAccessKey: O.Option<string>;
+  bucket: O.Option<string>;
+  region: O.Option<string>;
   pageSize: number;
   resolution: number;
 }
@@ -18,13 +21,60 @@ const settingsSlice = createSlice<
   SliceCaseReducers<SettingsState>
 >({
   name: 'settings',
-  initialState: { awsConfig: O.none, pageSize: 20, resolution: 480 },
+  initialState: {
+    accessId: O.none,
+    secretAccessKey: O.none,
+    bucket: O.none,
+    region: O.none,
+    pageSize: 20,
+    resolution: 480,
+  },
   reducers: {
-    updateAWSConfig: (state, action: PayloadAction<AWSConfig>) => {
-      state.awsConfig = O.some(action.payload);
+    updateAccessId: (state, action: PayloadAction<O.Option<string>>) => {
+      state.accessId = action.payload;
+    },
+    updateSecretAccessKey: (state, action: PayloadAction<O.Option<string>>) => {
+      state.secretAccessKey = action.payload;
+    },
+    updateBucket: (state, action: PayloadAction<O.Option<string>>) => {
+      state.bucket = action.payload;
+    },
+    updateRegion: (state, action: PayloadAction<O.Option<string>>) => {
+      state.region = action.payload;
+    },
+    updatePageSize: (state, action: PayloadAction<number>) => {
+      state.pageSize = action.payload;
+    },
+    updateResolution: (state, action: PayloadAction<number>) => {
+      state.resolution = action.payload;
+    },
+    saveConfig: (state) => {
+      pipe(
+        state.accessId,
+        O.map((x) => saveToStorage('access_id', x))
+      );
+      pipe(
+        state.secretAccessKey,
+        O.map((x) => saveToStorage('secret_access_key', x))
+      );
+      pipe(
+        state.bucket,
+        O.map((x) => saveToStorage('bucket', x))
+      );
+      pipe(
+        state.region,
+        O.map((x) => saveToStorage('region', x))
+      );
+      saveToStorage('resolution', state.resolution);
+      saveToStorage('page_size', state.pageSize);
     },
     loadConfig: (state) => {
-      state.awsConfig = O.fromEither(getFromStorage<AWSConfig>('aws_config'));
+      state.accessId = O.fromEither(getFromStorage<string>('access_id'));
+      state.secretAccessKey = O.fromEither(
+        getFromStorage<string>('secret_access_key')
+      );
+      state.region = O.fromEither(getFromStorage<string>('region'));
+      state.bucket = O.fromEither(getFromStorage<string>('bucket'));
 
       state.pageSize = O.getOrElse(() => 20)(
         O.fromEither(getFromStorage<number>('page_size'))
@@ -37,6 +87,15 @@ const settingsSlice = createSlice<
   },
 });
 
-export const { updateAWSConfig, loadConfig } = settingsSlice.actions;
+export const {
+  updateAccessId,
+  updateSecretAccessKey,
+  updateBucket,
+  updateRegion,
+  updatePageSize,
+  updateResolution,
+  saveConfig,
+  loadConfig,
+} = settingsSlice.actions;
 
 export default settingsSlice.reducer;

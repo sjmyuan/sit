@@ -200,8 +200,8 @@
     "@types/uuid": "^8.3.0",
     "@types/webpack": "^4.41.21",
     "@types/webpack-env": "^1.15.2",
-    "@typescript-eslint/eslint-plugin": "^3.6.1",
-    "@typescript-eslint/parser": "^3.6.1",
+    "@typescript-eslint/eslint-plugin": "^4.12.0",
+    "@typescript-eslint/parser": "^4.12.0",
     "awesome-typescript-loader": "^5.2.1",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.1.0",
@@ -295,6 +295,7 @@
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19",
     "styled-components": "^5.2.1",
+    "use-deep-compare-effect": "^1.6.1",
     "uuid": "^8.3.2"
   },
   "devEngines": {

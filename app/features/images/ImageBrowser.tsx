@@ -60,7 +60,7 @@ const ImageBrowser = () => {
                 <IconButton
                   aria-label={`copy ${key}`}
                   className={classes.icon}
-                  onClick={() => copyLink(key)}
+                  onClick={() => copyLink(url)}
                 >
                   <CopyKeyIcon />
                 </IconButton>

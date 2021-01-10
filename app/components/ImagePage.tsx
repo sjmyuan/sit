@@ -36,7 +36,12 @@ import {
 } from '../utils/imagesThunk';
 import { clearInfo, clearError } from '../utils/infoSlice';
 import { resetPointer } from '../features/images/imagesSlice';
-import { selectInformation, selectAWSConfig, selectImages } from '../store';
+import {
+  selectInformation,
+  selectAWSConfig,
+  selectImages,
+  selectSettings,
+} from '../store';
 import SettingPage from './SettingPage';
 
 function Alert(props: AlertProps) {
@@ -81,6 +86,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ImagePage() {
   const awsConfig = useSelector(selectAWSConfig);
+  const settings = useSelector(selectSettings);
   const notification = useSelector(selectInformation);
   const images = useSelector(selectImages);
   const { inProgress } = notification;
@@ -97,7 +103,7 @@ export default function ImagePage() {
     } else {
       setSettingsSwitch(true);
     }
-  }, [awsConfig]);
+  }, [awsConfig, settings.cdn, settings.pageSize]);
 
   const uploadPictureInClipboard = () => {
     const image = clipboard.readImage('clipboard');

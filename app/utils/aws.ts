@@ -34,7 +34,7 @@ export const getSignedUrl = (s3: S3, bucket: string) => (
   );
 };
 
-export const putObject = (s3: S3, bucket: string) => (
+export const putObject = (s3: S3, bucket: string, cdn: O.Option<string>) => (
   key: string,
   blob: Blob
 ): AppErrorOr<S3ObjectInfo> => {
@@ -51,7 +51,11 @@ export const putObject = (s3: S3, bucket: string) => (
           .promise(),
       E.toError
     ),
-    TE.chain((_) => getSignedUrl(s3, bucket)(key)),
+    TE.chain((_) =>
+      O.isSome(cdn)
+        ? TE.of(`${cdn.value}${key}`)
+        : getSignedUrl(s3, bucket)(key)
+    ),
     TE.map((url) => ({
       key,
       url,
@@ -59,17 +63,18 @@ export const putObject = (s3: S3, bucket: string) => (
   );
 };
 
-export const putObjects = (s3: S3, bucket: string) => (
+export const putObjects = (s3: S3, bucket: string, cdn: O.Option<string>) => (
   objects: FileInfo[]
 ): AppErrorOr<S3ObjectInfo[]> => {
   return A.array.traverse(TE.taskEither)(objects, ({ name, content }) =>
-    putObject(s3, bucket)(name, content)
+    putObject(s3, bucket, cdn)(name, content)
   );
 };
 
 export const listObjects = (s3: S3, bucket: string) => (
   pagePointer: O.Option<string>,
-  pageSize: number
+  pageSize: number,
+  cdn: O.Option<string>
 ): AppErrorOr<S3ObjectPage> => {
   const markder: undefined | string = O.fold<string, undefined | string>(
     () => undefined,
@@ -111,7 +116,11 @@ export const listObjects = (s3: S3, bucket: string) => (
               TE.fromEither(
                 E.fromNullable(new Error('The key is empty'))(k.Key)
               ),
-              TE.chain(getSignedUrl(s3, bucket)),
+              TE.chain((key) =>
+                O.isSome(cdn)
+                  ? TE.of(`${cdn.value}${key}`)
+                  : getSignedUrl(s3, bucket)(key)
+              ),
               TE.map((url) => ({ key: k.Key, url }))
             )
           );

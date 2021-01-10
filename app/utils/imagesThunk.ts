@@ -23,6 +23,7 @@ type RequiedState = {
     region: O.Option<string>;
     pageSize: number;
     resolution: number;
+    cdn: O.Option<string>;
   };
   images: {
     historyPointer: O.Option<string>[];
@@ -79,7 +80,8 @@ export const fetchNextPageImages = createAsyncThunk(
         const s3 = s3Client(awsConfig.value);
         return listObjects(s3, awsConfig.value.bucket)(
           nextPointer,
-          x.settings.pageSize
+          x.settings.pageSize,
+          x.settings.cdn
         );
       }),
       TE.fold<Error, S3ObjectPage, unknown>(
@@ -108,7 +110,8 @@ export const fetchPreviousPageImages = createAsyncThunk(
         const s3 = s3Client(awsConfig.value);
         return listObjects(s3, awsConfig.value.bucket)(
           previousPointer,
-          x.settings.pageSize
+          x.settings.pageSize,
+          x.settings.cdn
         );
       }),
       TE.fold<Error, S3ObjectPage, unknown>(
@@ -143,7 +146,7 @@ export const uploadImgs = createAsyncThunk(
 
         return pipe(
           reducedImages,
-          TE.chain(putObjects(s3, awsConfig.value.bucket))
+          TE.chain(putObjects(s3, awsConfig.value.bucket, x.settings.cdn))
         );
       }),
       TE.fold<Error, S3ObjectInfo[], unknown>(

@@ -7,12 +7,14 @@ import {
   GridListTile,
   GridListTileBar,
   IconButton,
+  Box,
 } from '@material-ui/core';
-import { Link as CopyKeyIcon } from '@material-ui/icons';
+import { Link as CopyKeyIcon, DeleteOutline } from '@material-ui/icons';
 import { useSelector, useDispatch } from 'react-redux';
 import Image from './Image';
 import { selectImages } from '../../store';
 import { setInfo } from '../../utils/infoSlice';
+import { deleteImgs } from '../../utils/imagesThunk';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -29,8 +31,12 @@ const useStyles = makeStyles((theme: Theme) =>
       overflow: 'hidden',
       position: 'relative',
     },
+    bar: {
+      height: '30px',
+    },
     icon: {
       color: 'rgba(255, 255, 255, 0.54)',
+      padding: '6px',
     },
   })
 );
@@ -45,9 +51,13 @@ const ImageBrowser = () => {
     dispatch(setInfo('Copied to Clipboard!'));
   };
 
+  const deleteImage = (key: string) => {
+    dispatch(deleteImgs([key]));
+  };
+
   return (
     <div className={classes.root}>
-      <GridList cellHeight="auto" cols={4}>
+      <GridList cellHeight={180} cols={4} spacing={12}>
         {images.images.map(({ key, url }) => (
           <GridListTile
             classes={{ tile: classes.gridListTile }}
@@ -56,14 +66,24 @@ const ImageBrowser = () => {
           >
             <Image src={url} />
             <GridListTileBar
+              className={classes.bar}
               actionIcon={
-                <IconButton
-                  aria-label={`copy ${key}`}
-                  className={classes.icon}
-                  onClick={() => copyLink(url)}
-                >
-                  <CopyKeyIcon />
-                </IconButton>
+                <Box>
+                  <IconButton
+                    aria-label={`delete ${key}`}
+                    className={classes.icon}
+                    onClick={() => deleteImage(key)}
+                  >
+                    <DeleteOutline />
+                  </IconButton>
+                  <IconButton
+                    aria-label={`copy ${key}`}
+                    className={classes.icon}
+                    onClick={() => copyLink(url)}
+                  >
+                    <CopyKeyIcon />
+                  </IconButton>
+                </Box>
               }
             />
           </GridListTile>

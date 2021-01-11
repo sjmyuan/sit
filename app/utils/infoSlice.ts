@@ -5,6 +5,7 @@ import {
   fetchNextPageImages,
   uploadImgs,
   fetchPreviousPageImages,
+  deleteImgs,
 } from './imagesThunk';
 
 export interface InfoState {
@@ -61,6 +62,17 @@ const infoSlice = createSlice<InfoState, SliceCaseReducers<InfoState>>({
       state.info = O.some('Success');
     },
     [uploadImgs.rejected]: (state, action) => {
+      state.inProgress = false;
+      state.error = O.some(action.payload);
+    },
+    [deleteImgs.pending]: (state, _) => {
+      state.inProgress = true;
+    },
+    [deleteImgs.fulfilled]: (state, _) => {
+      state.inProgress = false;
+      state.info = O.some('Success');
+    },
+    [deleteImgs.rejected]: (state, action) => {
       state.inProgress = false;
       state.error = O.some(action.payload);
     },

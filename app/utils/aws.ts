@@ -1,6 +1,6 @@
 import { sequenceS } from 'fp-ts/Apply';
 import { S3 } from 'aws-sdk';
-import { pipe, identity } from 'fp-ts/lib/function';
+import { pipe, identity, constVoid } from 'fp-ts/lib/function';
 import * as Ord from 'fp-ts/Ord';
 import {
   AWSConfig,
@@ -60,6 +60,35 @@ export const putObject = (s3: S3, bucket: string, cdn: O.Option<string>) => (
       key,
       url,
     }))
+  );
+};
+
+export const deleteObject = (s3: S3, bucket: string) => (
+  key: string
+): AppErrorOr<void> => {
+  return pipe(
+    TE.tryCatch(
+      () =>
+        s3
+          .deleteObject({
+            Bucket: bucket,
+            Key: key,
+          })
+          .promise(),
+      E.toError
+    ),
+    TE.map(() => constVoid())
+  );
+};
+
+export const deleteObjects = (s3: S3, bucket: string) => (
+  keys: string[]
+): AppErrorOr<void> => {
+  return pipe(
+    A.array.traverse(TE.taskEither)(keys, (key) =>
+      deleteObject(s3, bucket)(key)
+    ),
+    TE.map(() => constVoid())
   );
 };
 

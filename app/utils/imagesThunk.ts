@@ -13,7 +13,7 @@ import {
   E,
   S3ObjectInfo,
 } from '../types';
-import { s3Client, listObjects, putObjects } from './aws';
+import { s3Client, listObjects, putObjects, deleteObjects } from './aws';
 
 type RequiedState = {
   settings: {
@@ -152,6 +152,25 @@ export const uploadImgs = createAsyncThunk(
       TE.fold<Error, S3ObjectInfo[], unknown>(
         (e) => T.of(rejectWithValue(e.message)),
         (r) => T.of(r)
+      )
+    )();
+  }
+);
+
+export const deleteImgs = createAsyncThunk(
+  'images/delete',
+  (images: string[], { getState, rejectWithValue }) => {
+    return pipe(
+      getState(),
+      validateState,
+      TE.chain<Error, RequiedState, void>((x) => {
+        const awsConfig = getAWSConfig(x) as O.Some<AWSConfig>;
+        const s3 = s3Client(awsConfig.value);
+        return deleteObjects(s3, awsConfig.value.bucket)(images);
+      }),
+      TE.fold<Error, void, unknown>(
+        (e) => T.of(rejectWithValue(e.message)),
+        () => T.of(images)
       )
     )();
   }

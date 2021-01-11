@@ -71,7 +71,10 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     modal: {
       position: 'absolute',
-      maxWidth: 800,
+      maxWidth: '70%',
+      maxHeight: '70%',
+      minWidth: '50%',
+      minHeight: '50%',
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
       boxShadow: theme.shadows[5],

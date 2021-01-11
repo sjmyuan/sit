@@ -14,9 +14,10 @@ import {
   Snackbar,
   Backdrop,
   Modal,
+  Button,
 } from '@material-ui/core';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
-import { clipboard } from 'electron';
+import { clipboard, NativeImage } from 'electron';
 import {
   AddAPhoto,
   Refresh,
@@ -109,7 +110,7 @@ export default function ImagePage() {
     }
   }, [awsConfig, settings.cdn, settings.pageSize]);
 
-  const uploadPictureInClipboard = () => {
+  const handleOpenClipboardImage = () => {
     const image = clipboard.readImage('clipboard');
     if (!image.isEmpty()) {
       setClipboardImageSwitch(true);
@@ -118,12 +119,16 @@ export default function ImagePage() {
     }
   };
 
+  const handleCloseClipboardImage = () => {
+    setClipboardImageSwitch(false);
+  };
+
   useEffect(() => {
     const handleUserKeyUp = (event: { ctrlKey: boolean; keyCode: number }) => {
       const { ctrlKey, keyCode } = event;
 
       if (ctrlKey && keyCode === 86) {
-        uploadPictureInClipboard();
+        handleOpenClipboardImage();
       }
     };
     window.addEventListener('keyup', handleUserKeyUp);
@@ -141,7 +146,7 @@ export default function ImagePage() {
     setSettingsSwitch(true);
   };
 
-  const handleUploadClick = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleUploadFileImage = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0];
       if (file) {
@@ -152,8 +157,12 @@ export default function ImagePage() {
     }
   };
 
-  const handleCloseClipboardImage = () => {
+  const handleUploadClipboardImage = (nativeImage: NativeImage) => {
     setClipboardImageSwitch(false);
+    const fileName = `${uuidv4()}.png`;
+    dispatch(
+      uploadImgs([{ name: fileName, content: new Blob([nativeImage.toPNG()]) }])
+    );
   };
 
   const handleRefreshClick = () => {
@@ -216,14 +225,14 @@ export default function ImagePage() {
                 className={classes.uploadInput}
                 id="icon-button-file"
                 type="file"
-                onChange={handleUploadClick}
+                onChange={handleUploadFileImage}
               />
             </label>
             <IconButton
               color="inherit"
               aria-label="upload copied picture"
               component="span"
-              onClick={uploadPictureInClipboard}
+              onClick={handleOpenClipboardImage}
             >
               <FlipToFront />
             </IconButton>
@@ -281,7 +290,7 @@ export default function ImagePage() {
         aria-describedby="clipboard-image-description"
       >
         <div className={classes.modal}>
-          <ClipboardImage />
+          <ClipboardImage onUpload={handleUploadClipboardImage} />
         </div>
       </Modal>
     </div>

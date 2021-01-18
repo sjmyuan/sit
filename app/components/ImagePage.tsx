@@ -6,17 +6,15 @@ import {
   AppBar,
   Typography,
   Toolbar,
-  makeStyles,
-  createStyles,
   Theme,
   IconButton,
   CircularProgress,
   Snackbar,
   Backdrop,
   Modal,
-  Button,
+  Alert,
 } from '@material-ui/core';
-import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import { makeStyles } from '@material-ui/core/styles';
 import { clipboard, NativeImage } from 'electron';
 import {
   AddAPhoto,
@@ -46,48 +44,41 @@ import {
 import SettingPage from './SettingPage';
 import ClipboardImage from '../features/images/ClipboardImage';
 
-function Alert(props: AlertProps) {
-  // eslint-disable-next-line react/jsx-props-no-spreading
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      flexGrow: 1,
-    },
-    menuButton: {
-      marginRight: theme.spacing(2),
-    },
-    title: {
-      flexGrow: 1,
-    },
-    uploadInput: {
-      display: 'none',
-    },
-    backdrop: {
-      zIndex: theme.zIndex.drawer + 1,
-      color: '#fff',
-    },
-    modal: {
-      position: 'absolute',
-      maxWidth: '70%',
-      maxHeight: '70%',
-      minWidth: '50%',
-      minHeight: '50%',
-      backgroundColor: theme.palette.background.paper,
-      border: '2px solid #000',
-      boxShadow: theme.shadows[5],
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    },
-    container: {
-      marginTop: '10px',
-      marginBottom: '10px',
-    },
-  })
-);
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
+  title: {
+    flexGrow: 1,
+  },
+  uploadInput: {
+    display: 'none',
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+  modal: {
+    position: 'absolute',
+    maxWidth: '70%',
+    maxHeight: '70%',
+    minWidth: '50%',
+    minHeight: '50%',
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+  },
+  container: {
+    marginTop: '10px',
+    marginBottom: '10px',
+  },
+}));
 
 export default function ImagePage() {
   const awsConfig = useSelector(selectAWSConfig);
@@ -201,7 +192,6 @@ export default function ImagePage() {
             <IconButton
               color="inherit"
               aria-label="next page"
-              component="span"
               disabled={O.isNone(nextPointer)}
               onClick={handleNextPageClick}
             >
@@ -210,17 +200,12 @@ export default function ImagePage() {
             <IconButton
               color="inherit"
               aria-label="refresh picture"
-              component="span"
               onClick={handleRefreshClick}
             >
               <Refresh />
             </IconButton>
             <label htmlFor="icon-button-file">
-              <IconButton
-                color="inherit"
-                aria-label="upload picture"
-                component="span"
-              >
+              <IconButton color="inherit" aria-label="upload picture">
                 <AddAPhoto />
               </IconButton>
               <input
@@ -234,7 +219,6 @@ export default function ImagePage() {
             <IconButton
               color="inherit"
               aria-label="upload copied picture"
-              component="span"
               onClick={handleOpenClipboardImage}
             >
               <FlipToFront />
@@ -242,7 +226,6 @@ export default function ImagePage() {
             <IconButton
               color="inherit"
               aria-label="open settings"
-              component="span"
               onClick={handleOpenSettingsClick}
             >
               <Settings />
@@ -259,7 +242,11 @@ export default function ImagePage() {
         autoHideDuration={6000}
         onClose={() => dispatch(clearInfo())}
       >
-        <Alert onClose={() => dispatch(clearInfo())} severity="info">
+        <Alert
+          variant="filled"
+          onClose={() => dispatch(clearInfo())}
+          severity="info"
+        >
           {O.getOrElse(() => '')(notification.info)}
         </Alert>
       </Snackbar>
@@ -269,7 +256,11 @@ export default function ImagePage() {
         autoHideDuration={6000}
         onClose={() => dispatch(clearError())}
       >
-        <Alert onClose={() => dispatch(clearError())} severity="error">
+        <Alert
+          variant="filled"
+          onClose={() => dispatch(clearError())}
+          severity="error"
+        >
           {O.getOrElse(() => '')(notification.error)}
         </Alert>
       </Snackbar>

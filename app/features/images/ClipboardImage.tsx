@@ -8,15 +8,8 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     image: {
       maxWidth: '100%',
-      maxHeight: '100%',
-    },
-    paper: {
-      position: 'absolute',
-      backgroundColor: theme.palette.background.paper,
-      boxShadow: theme.shadows[5],
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
+      maxHeight: '720px',
+      marginBottom: '10px',
     },
   })
 );
@@ -42,21 +35,26 @@ const ClipboardImage = (props: ClipboardImageProps) => {
     return <div />;
   }
   return (
-    <Box p={1}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '10px',
+      }}
+    >
       <img
         src={nativeImage.value.toDataURL()}
         alt=""
         className={classes.image}
       />
-      <Box justifyContent="center" display="flex">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => props.onUpload(nativeImage.value)}
-        >
-          Upload
-        </Button>
-      </Box>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => props.onUpload(nativeImage.value)}
+      >
+        Upload
+      </Button>
     </Box>
   );
 };

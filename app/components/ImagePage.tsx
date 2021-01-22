@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useEffect, MouseEvent, useState } from 'react';
 import * as O from 'fp-ts/Option';
+import * as A from 'fp-ts/Array';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Container,
@@ -26,6 +27,7 @@ import {
 } from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
 import useDeepCompareEffect from 'use-deep-compare-effect';
+import { pipe } from 'fp-ts/lib/function';
 import ImageBrowser from '../features/images/ImageBrowser';
 import { saveConfig } from '../features/settings/settingsSlice';
 import {
@@ -43,6 +45,7 @@ import {
 } from '../store';
 import SettingPage from './SettingPage';
 import ClipboardImage from '../features/images/ClipboardImage';
+import { FileInfo } from '../types';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -53,9 +56,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   title: {
     flexGrow: 1,
-  },
-  uploadInput: {
-    display: 'none',
   },
   backdrop: {
     zIndex: theme.zIndex.drawer + 1,
@@ -139,13 +139,22 @@ export default function ImagePage() {
   };
 
   const handleUploadFileImage = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const file = event.target.files[0];
-      if (file) {
-        const suffix = file.type.split('/')[1];
-        const fileName = `${uuidv4()}.${suffix}`;
-        dispatch(uploadImgs([{ name: fileName, content: file }]));
-      }
+    const { files } = event.target;
+    if (files) {
+      const uploadingImages = pipe(
+        A.range(0, files.length - 1),
+        A.reduce<number, FileInfo[]>([], (acc, ele) => {
+          const file = files[ele];
+          if (file) {
+            const suffix = file.type.split('/')[1];
+            const fileName = `${uuidv4()}.${suffix}`;
+            return [...acc, { name: fileName, content: file }];
+          }
+          return acc;
+        })
+      );
+
+      dispatch(uploadImgs(uploadingImages));
     }
   };
 
@@ -202,18 +211,21 @@ export default function ImagePage() {
             >
               <Refresh />
             </IconButton>
-            <label htmlFor="icon-button-file">
-              <IconButton color="inherit" aria-label="upload picture">
-                <AddAPhoto />
-              </IconButton>
+            <IconButton
+              color="inherit"
+              aria-label="upload picture"
+              component="label"
+            >
+              <AddAPhoto />
               <input
                 accept="image/*"
-                className={classes.uploadInput}
+                hidden
                 id="icon-button-file"
                 type="file"
+                multiple
                 onChange={handleUploadFileImage}
               />
-            </label>
+            </IconButton>
             <IconButton
               color="inherit"
               aria-label="upload copied picture"

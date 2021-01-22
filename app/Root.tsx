@@ -5,12 +5,13 @@ import { hot } from 'react-hot-loader/root';
 import { History } from 'history';
 import { Switch, Route } from 'react-router';
 import { useDispatch } from 'react-redux';
+import { StylesProvider } from '@material-ui/core';
 import routes from './constants/routes.json';
 import { loadConfig } from './features/settings/settingsSlice';
 
 // Lazily load routes and code split with webpack
-const LazyImagePage = React.lazy(() =>
-  import(/* webpackChunkName: "ImagePage" */ './components/ImagePage')
+const LazyImagePage = React.lazy(
+  () => import(/* webpackChunkName: "ImagePage" */ './components/ImagePage')
 );
 
 const ImagePage = (props: Record<string, any>) => (
@@ -30,11 +31,13 @@ const Root = ({ history }: Props) => {
   });
 
   return (
-    <ConnectedRouter history={history}>
-      <Switch>
-        <Route path={routes.HOME} component={ImagePage} />
-      </Switch>
-    </ConnectedRouter>
+    <StylesProvider injectFirst>
+      <ConnectedRouter history={history}>
+        <Switch>
+          <Route path={routes.HOME} component={ImagePage} />
+        </Switch>
+      </ConnectedRouter>
+    </StylesProvider>
   );
 };
 

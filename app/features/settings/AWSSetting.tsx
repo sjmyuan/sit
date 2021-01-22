@@ -24,12 +24,17 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       '& .MuiTextField-root': {
         margin: theme.spacing(1),
-        width: '25ch',
+        minWidth: 194,
       },
+
+      maxWidth: '100%',
+      display: 'flex',
+      flexWrap: 'wrap',
+      flexDirection: 'row',
     },
     formControl: {
       margin: theme.spacing(1),
-      minWidth: 120,
+      minWidth: 194,
     },
   })
 );

@@ -158,12 +158,10 @@ export default function ImagePage() {
     }
   };
 
-  const handleUploadClipboardImage = (nativeImage: NativeImage) => {
+  const handleUploadClipboardImage = (image: Blob) => {
     setClipboardImageSwitch(false);
     const fileName = `${uuidv4()}.png`;
-    dispatch(
-      uploadImgs([{ name: fileName, content: new Blob([nativeImage.toPNG()]) }])
-    );
+    dispatch(uploadImgs([{ name: fileName, content: image }]));
   };
 
   const handleRefreshClick = () => {

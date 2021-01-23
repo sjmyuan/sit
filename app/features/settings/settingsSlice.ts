@@ -6,6 +6,7 @@ import {
 import * as O from 'fp-ts/Option';
 import { pipe } from 'fp-ts/lib/function';
 import { saveToStorage, getFromStorage } from '../../utils/localStorage';
+import { Resolution } from '../../types';
 
 export interface SettingsState {
   accessId: O.Option<string>;
@@ -13,7 +14,7 @@ export interface SettingsState {
   bucket: O.Option<string>;
   region: O.Option<string>;
   pageSize: number;
-  resolution: number;
+  resolution: Resolution;
   cdn: O.Option<string>;
 }
 
@@ -28,7 +29,7 @@ const settingsSlice = createSlice<
     bucket: O.none,
     region: O.none,
     pageSize: 10,
-    resolution: 480,
+    resolution: { width: 640, height: 480 },
     cdn: O.none,
   },
   reducers: {
@@ -47,7 +48,7 @@ const settingsSlice = createSlice<
     updatePageSize: (state, action: PayloadAction<number>) => {
       state.pageSize = action.payload;
     },
-    updateResolution: (state, action: PayloadAction<number>) => {
+    updateResolution: (state, action: PayloadAction<Resolution>) => {
       state.resolution = action.payload;
     },
     updateCDN: (state, action: PayloadAction<O.Option<string>>) => {
@@ -90,8 +91,8 @@ const settingsSlice = createSlice<
         O.fromEither(getFromStorage<number>('page_size'))
       );
 
-      state.resolution = O.getOrElse(() => 480)(
-        O.fromEither(getFromStorage<number>('resolution'))
+      state.resolution = O.getOrElse(() => ({ width: 640, height: 480 }))(
+        O.fromEither(getFromStorage<Resolution>('resolution'))
       );
     },
   },

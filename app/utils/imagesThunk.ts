@@ -12,6 +12,7 @@ import {
   A,
   E,
   S3ObjectInfo,
+  Resolution,
 } from '../types';
 import { s3Client, listObjects, putObjects, deleteObjects } from './aws';
 
@@ -22,7 +23,7 @@ type RequiedState = {
     bucket: O.Option<string>;
     region: O.Option<string>;
     pageSize: number;
-    resolution: number;
+    resolution: Resolution;
     cdn: O.Option<string>;
   };
   images: {
@@ -140,7 +141,10 @@ export const uploadImgs = createAsyncThunk(
             TE.chain<unknown, jimp, Blob>((img) => {
               return TE.fromTask(() =>
                 img
-                  .cover(640, 480)
+                  .contain(
+                    x.settings.resolution.width,
+                    x.settings.resolution.height
+                  )
                   .getBufferAsync(jimp.MIME_PNG)
                   .then((buff) => new Blob([buff]))
               );

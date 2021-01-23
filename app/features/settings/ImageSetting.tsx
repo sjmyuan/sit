@@ -1,6 +1,7 @@
 import React from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux';
+import * as A from 'fp-ts/Array';
 import {
   FormControl,
   InputLabel,
@@ -12,21 +13,33 @@ import * as O from 'fp-ts/Option';
 import { pipe, constant, identity } from 'fp-ts/lib/function';
 import { selectSettings } from '../../store';
 import { updateResolution, updatePageSize, updateCDN } from './settingsSlice';
+import { Resolution } from '../../types';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       '& .MuiTextField-root': {
         margin: theme.spacing(1),
-        width: '25ch',
+        minWidth: 194,
       },
+      maxWidth: '100%',
+      display: 'flex',
+      flexWrap: 'wrap',
+      flexDirection: 'row',
     },
     formControl: {
       margin: theme.spacing(1),
-      minWidth: 120,
+      minWidth: 194,
     },
   })
 );
+
+const availableResolutions: Resolution[] = [
+  { width: 480, height: 320 },
+  { width: 640, height: 480 },
+  { width: 1280, height: 720 },
+  { width: 1920, height: 1080 },
+];
 
 const ImageSetting = () => {
   const classes = useStyles();
@@ -80,14 +93,23 @@ const ImageSetting = () => {
           labelId="resolution"
           id="resolution"
           name="resolution"
-          value={resolution}
+          value={O.getOrElse(() => 0)(
+            A.findIndex<Resolution>(
+              ({ width, height }) =>
+                width === resolution.width && height === resolution.height
+            )(availableResolutions)
+          )}
           onChange={(event) =>
-            dispatch(updateResolution(event.target.value as number))
+            dispatch(
+              updateResolution(
+                availableResolutions[event.target.value as number]
+              )
+            )
           }
         >
-          {[480, 720, 1080].map((r) => (
+          {A.range(0, availableResolutions.length - 1).map((r) => (
             <MenuItem value={r} key={`resolution-${r}`}>
-              {r}
+              {`${availableResolutions[r].width} x ${availableResolutions[r].height}`}
             </MenuItem>
           ))}
         </Select>

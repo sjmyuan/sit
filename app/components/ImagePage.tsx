@@ -1,22 +1,21 @@
 import React, { ChangeEvent, useEffect, MouseEvent, useState } from 'react';
 import * as O from 'fp-ts/Option';
+import * as A from 'fp-ts/Array';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Container,
   AppBar,
   Typography,
   Toolbar,
-  makeStyles,
-  createStyles,
   Theme,
   IconButton,
   CircularProgress,
   Snackbar,
   Backdrop,
   Modal,
-  Button,
+  Alert,
 } from '@material-ui/core';
-import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import { makeStyles } from '@material-ui/core/styles';
 import { clipboard, NativeImage } from 'electron';
 import {
   AddAPhoto,
@@ -28,6 +27,7 @@ import {
 } from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
 import useDeepCompareEffect from 'use-deep-compare-effect';
+import { pipe } from 'fp-ts/lib/function';
 import ImageBrowser from '../features/images/ImageBrowser';
 import { saveConfig } from '../features/settings/settingsSlice';
 import {
@@ -45,49 +45,38 @@ import {
 } from '../store';
 import SettingPage from './SettingPage';
 import ClipboardImage from '../features/images/ClipboardImage';
+import { FileInfo } from '../types';
 
-function Alert(props: AlertProps) {
-  // eslint-disable-next-line react/jsx-props-no-spreading
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      flexGrow: 1,
-    },
-    menuButton: {
-      marginRight: theme.spacing(2),
-    },
-    title: {
-      flexGrow: 1,
-    },
-    uploadInput: {
-      display: 'none',
-    },
-    backdrop: {
-      zIndex: theme.zIndex.drawer + 1,
-      color: '#fff',
-    },
-    modal: {
-      position: 'absolute',
-      maxWidth: '70%',
-      maxHeight: '70%',
-      minWidth: '50%',
-      minHeight: '50%',
-      backgroundColor: theme.palette.background.paper,
-      border: '2px solid #000',
-      boxShadow: theme.shadows[5],
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    },
-    container: {
-      marginTop: '10px',
-      marginBottom: '10px',
-    },
-  })
-);
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
+  title: {
+    flexGrow: 1,
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+  modal: {
+    position: 'absolute',
+    maxWidth: '100%',
+    maxHeight: '100%',
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+  },
+  container: {
+    marginTop: '10px',
+    marginBottom: '10px',
+  },
+}));
 
 export default function ImagePage() {
   const awsConfig = useSelector(selectAWSConfig);
@@ -150,22 +139,29 @@ export default function ImagePage() {
   };
 
   const handleUploadFileImage = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const file = event.target.files[0];
-      if (file) {
-        const suffix = file.type.split('/')[1];
-        const fileName = `${uuidv4()}.${suffix}`;
-        dispatch(uploadImgs([{ name: fileName, content: file }]));
-      }
+    const { files } = event.target;
+    if (files) {
+      const uploadingImages = pipe(
+        A.range(0, files.length - 1),
+        A.reduce<number, FileInfo[]>([], (acc, ele) => {
+          const file = files[ele];
+          if (file) {
+            const suffix = file.type.split('/')[1];
+            const fileName = `${uuidv4()}.${suffix}`;
+            return [...acc, { name: fileName, content: file }];
+          }
+          return acc;
+        })
+      );
+
+      dispatch(uploadImgs(uploadingImages));
     }
   };
 
-  const handleUploadClipboardImage = (nativeImage: NativeImage) => {
+  const handleUploadClipboardImage = (image: Blob) => {
     setClipboardImageSwitch(false);
     const fileName = `${uuidv4()}.png`;
-    dispatch(
-      uploadImgs([{ name: fileName, content: new Blob([nativeImage.toPNG()]) }])
-    );
+    dispatch(uploadImgs([{ name: fileName, content: image }]));
   };
 
   const handleRefreshClick = () => {
@@ -201,7 +197,6 @@ export default function ImagePage() {
             <IconButton
               color="inherit"
               aria-label="next page"
-              component="span"
               disabled={O.isNone(nextPointer)}
               onClick={handleNextPageClick}
             >
@@ -210,31 +205,28 @@ export default function ImagePage() {
             <IconButton
               color="inherit"
               aria-label="refresh picture"
-              component="span"
               onClick={handleRefreshClick}
             >
               <Refresh />
             </IconButton>
-            <label htmlFor="icon-button-file">
-              <IconButton
-                color="inherit"
-                aria-label="upload picture"
-                component="span"
-              >
-                <AddAPhoto />
-              </IconButton>
+            <IconButton
+              color="inherit"
+              aria-label="upload picture"
+              component="label"
+            >
+              <AddAPhoto />
               <input
                 accept="image/*"
-                className={classes.uploadInput}
+                hidden
                 id="icon-button-file"
                 type="file"
+                multiple
                 onChange={handleUploadFileImage}
               />
-            </label>
+            </IconButton>
             <IconButton
               color="inherit"
               aria-label="upload copied picture"
-              component="span"
               onClick={handleOpenClipboardImage}
             >
               <FlipToFront />
@@ -242,7 +234,6 @@ export default function ImagePage() {
             <IconButton
               color="inherit"
               aria-label="open settings"
-              component="span"
               onClick={handleOpenSettingsClick}
             >
               <Settings />
@@ -259,7 +250,11 @@ export default function ImagePage() {
         autoHideDuration={6000}
         onClose={() => dispatch(clearInfo())}
       >
-        <Alert onClose={() => dispatch(clearInfo())} severity="info">
+        <Alert
+          variant="filled"
+          onClose={() => dispatch(clearInfo())}
+          severity="info"
+        >
           {O.getOrElse(() => '')(notification.info)}
         </Alert>
       </Snackbar>
@@ -269,7 +264,11 @@ export default function ImagePage() {
         autoHideDuration={6000}
         onClose={() => dispatch(clearError())}
       >
-        <Alert onClose={() => dispatch(clearError())} severity="error">
+        <Alert
+          variant="filled"
+          onClose={() => dispatch(clearError())}
+          severity="error"
+        >
           {O.getOrElse(() => '')(notification.error)}
         </Alert>
       </Snackbar>

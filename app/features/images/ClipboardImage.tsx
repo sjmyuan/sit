@@ -3,60 +3,71 @@ import * as O from 'fp-ts/Option';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { clipboard, NativeImage } from 'electron';
 import { Box, Button } from '@material-ui/core';
+import Jimp from 'jimp';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectSettings } from '../../store';
+import { setError } from '../../utils/infoSlice';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     image: {
       maxWidth: '100%',
       maxHeight: '100%',
-    },
-    paper: {
-      position: 'absolute',
-      backgroundColor: theme.palette.background.paper,
-      boxShadow: theme.shadows[5],
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
+      marginBottom: '10px',
     },
   })
 );
 
 type ClipboardImageProps = {
-  onUpload: (image: NativeImage) => void;
+  onUpload: (image: Blob) => void;
 };
 
 const ClipboardImage = (props: ClipboardImageProps) => {
   const classes = useStyles();
-  const [nativeImage, setNativeImage] = useState<O.Option<NativeImage>>(O.none);
+  const settings = useSelector(selectSettings);
+  const dispatch = useDispatch();
+  const [processedImage, setProcessedImage] = useState<O.Option<Blob>>(O.none);
 
   useEffect(() => {
     const image = clipboard.readImage('clipboard');
     if (!image.isEmpty()) {
-      setNativeImage(O.some(image));
+      Jimp.read(image.toPNG())
+        .then((jimp) =>
+          jimp
+            .contain(settings.resolution.width, settings.resolution.height)
+            .getBufferAsync(Jimp.MIME_PNG)
+        )
+        .then((buff) => setProcessedImage(O.some(new Blob([buff]))))
+        .catch(() => dispatch(setError('Failed to process image')));
     } else {
-      setNativeImage(O.none);
+      setProcessedImage(O.none);
     }
-  }, []);
+  }, [settings.resolution]);
 
-  if (O.isNone(nativeImage)) {
+  if (O.isNone(processedImage)) {
     return <div />;
   }
   return (
-    <Box p={1}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '10px',
+      }}
+    >
       <img
-        src={nativeImage.value.toDataURL()}
+        src={URL.createObjectURL(processedImage.value)}
         alt=""
         className={classes.image}
       />
-      <Box justifyContent="center" display="flex">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => props.onUpload(nativeImage.value)}
-        >
-          Upload
-        </Button>
-      </Box>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => props.onUpload(processedImage.value)}
+      >
+        Upload
+      </Button>
     </Box>
   );
 };

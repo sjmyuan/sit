@@ -30,3 +30,8 @@ export interface AWSConfig {
   bucket: string;
   region: string;
 }
+
+export type Resolution = {
+  width: number;
+  height: number;
+};

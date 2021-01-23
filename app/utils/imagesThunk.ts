@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { pipe } from 'fp-ts/lib/function';
-import reduce from 'image-blob-reduce';
+import jimp from 'jimp';
 import { sequenceS } from 'fp-ts/Apply';
 import {
   O,
@@ -12,6 +12,7 @@ import {
   A,
   E,
   S3ObjectInfo,
+  Resolution,
 } from '../types';
 import { s3Client, listObjects, putObjects, deleteObjects } from './aws';
 
@@ -22,7 +23,7 @@ type RequiedState = {
     bucket: O.Option<string>;
     region: O.Option<string>;
     pageSize: number;
-    resolution: number;
+    resolution: Resolution;
     cdn: O.Option<string>;
   };
   images: {
@@ -61,8 +62,6 @@ const validateState = (state: any) => {
     )
   );
 };
-
-const imgReduce = reduce();
 
 export const fetchNextPageImages = createAsyncThunk(
   'images/fetchNextpage',
@@ -136,9 +135,20 @@ export const uploadImgs = createAsyncThunk(
           FileInfo[]
         > = A.array.traverse(TE.taskEither)(images, ({ name, content }) => {
           return pipe(
-            TE.fromTask<unknown, Blob>(() =>
-              imgReduce.toBlob(content, { max: x.settings.resolution })
+            TE.fromTask<unknown, jimp>(() =>
+              content.arrayBuffer().then((ab) => jimp.read(Buffer.from(ab)))
             ),
+            TE.chain<unknown, jimp, Blob>((img) => {
+              return TE.fromTask(() =>
+                img
+                  .contain(
+                    x.settings.resolution.width,
+                    x.settings.resolution.height
+                  )
+                  .getBufferAsync(jimp.MIME_PNG)
+                  .then((buff) => new Blob([buff]))
+              );
+            }),
             TE.mapLeft(E.toError),
             TE.map<Blob, FileInfo>((blob) => ({ name, content: blob }))
           );

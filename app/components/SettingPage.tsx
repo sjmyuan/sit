@@ -43,7 +43,21 @@ const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.paper,
-    width: '100%',
+    display: 'flex',
+    maxHeight: '100%',
+  },
+  tabs: {
+    borderRight: `1px solid ${theme.palette.divider}`,
+    flexGrow: 0,
+    flexShrink: 0,
+  },
+  tab: {
+    flexGrow: 1,
+    margin: 8,
+    minHeight: 300,
+    maxHeight: 400,
+    minWidth: 400,
+    overflowY: 'auto',
   },
 }));
 
@@ -57,34 +71,35 @@ const SettingPage = () => {
 
   return (
     <div className={classes.root}>
-      <AppBar position="static" color="default">
-        <Tabs
-          variant="scrollable"
-          indicatorColor="primary"
-          textColor="primary"
-          value={value}
-          onChange={handleChange}
-          aria-label="Setting Page"
-          className={classes.tabs}
-        >
-          <Tab
-            label="AWS"
-            id="vertical-tab-0"
-            aria-controls="vertical-tabpanel-0"
-          />
-          <Tab
-            label="Image"
-            id="vertical-tab-1"
-            aria-controls="vertical-tabpanel-1"
-          />
-        </Tabs>
-      </AppBar>
-      <TabPanel value={value} index={0}>
-        <AWSSetting />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <ImageSetting />
-      </TabPanel>
+      <Tabs
+        orientation="vertical"
+        variant="scrollable"
+        indicatorColor="primary"
+        textColor="primary"
+        value={value}
+        onChange={handleChange}
+        aria-label="Setting Page"
+        className={classes.tabs}
+      >
+        <Tab
+          label="AWS"
+          id="vertical-tab-0"
+          aria-controls="vertical-tabpanel-0"
+        />
+        <Tab
+          label="Image"
+          id="vertical-tab-1"
+          aria-controls="vertical-tabpanel-1"
+        />
+      </Tabs>
+      <Box className={classes.tab}>
+        <TabPanel value={value} index={0}>
+          <AWSSetting />
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <ImageSetting />
+        </TabPanel>
+      </Box>
     </div>
   );
 };

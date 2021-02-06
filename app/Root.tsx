@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { StylesProvider } from '@material-ui/core';
 import routes from './constants/routes.json';
 import { loadConfig } from './features/settings/settingsSlice';
+import ScreenCapture from './components/ScreenCapture';
 
 // Lazily load routes and code split with webpack
 const LazyImagePage = React.lazy(
@@ -34,7 +35,7 @@ const Root = ({ history }: Props) => {
     <StylesProvider injectFirst>
       <ConnectedRouter history={history}>
         <Switch>
-          <Route path={routes.HOME} component={ImagePage} />
+          <Route path={routes.HOME} component={ScreenCapture} />
         </Switch>
       </ConnectedRouter>
     </StylesProvider>

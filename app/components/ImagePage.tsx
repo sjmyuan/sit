@@ -15,8 +15,9 @@ import {
   Modal,
   Alert,
 } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
-import { clipboard, NativeImage } from 'electron';
+import { clipboard } from 'electron';
 import {
   AddAPhoto,
   Refresh,
@@ -24,6 +25,7 @@ import {
   ChevronRight,
   FlipToFront,
   Settings,
+  Crop,
 } from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
 import useDeepCompareEffect from 'use-deep-compare-effect';
@@ -46,6 +48,7 @@ import {
 import SettingPage from './SettingPage';
 import ClipboardImage from '../features/images/ClipboardImage';
 import { FileInfo } from '../types';
+import routes from '../constants/routes.json';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -87,6 +90,7 @@ export default function ImagePage() {
   const { historyPointer, nextPointer } = images;
   const dispatch = useDispatch();
   const classes = useStyles();
+  const history = useHistory();
 
   const [settingsSwitch, setSettingsSwitch] = useState<boolean>(false);
   const [clipboardImageSwitch, setClipboardImageSwitch] = useState<boolean>(
@@ -237,6 +241,13 @@ export default function ImagePage() {
               onClick={handleOpenSettingsClick}
             >
               <Settings />
+            </IconButton>
+            <IconButton
+              color="inherit"
+              aria-label="screen capture"
+              onClick={() => history.push(routes.SCREEN_CAPTURE)}
+            >
+              <Crop />
             </IconButton>
           </div>
         </Toolbar>

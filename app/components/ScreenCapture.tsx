@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { remote, desktopCapturer } from 'electron';
+import { remote, desktopCapturer, clipboard, nativeImage } from 'electron';
 import { Box } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import * as O from 'fp-ts/Option';
+import jimp from 'jimp';
 
 const getVideo = async () => {
   const sources = await desktopCapturer.getSources({
@@ -40,9 +41,9 @@ const ScreenCapture = () => {
   useEffect(() => {
     electronWindow.setWindowButtonVisibility(false);
     electronWindow.setOpacity(1);
-    // getVideo()
-    // .then((src) => setVideoSrc(O.some(src)))
-    // .catch((e) => console.log(e));
+    getVideo()
+      .then((src) => setVideoSrc(O.some(src)))
+      .catch((e) => console.log(e));
   }, []);
 
   useEffect(() => {
@@ -61,6 +62,36 @@ const ScreenCapture = () => {
     };
   }, []);
 
+  const takeShot = async (p1: Point, p2: Point, stream: MediaStream) => {
+    const left = Math.min(p1.x, p2.x);
+    const top = Math.min(p1.y, p2.y);
+    const right = Math.max(p1.x, p2.x);
+    const bottom = Math.max(p1.y, p2.y);
+
+    const track = stream.getVideoTracks()[0];
+    const imageCapture = new ImageCapture(track);
+    const bitmap = await imageCapture.grabFrame();
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const context = canvas.getContext('2d');
+    if (context) {
+      context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+      const imageBlob = await new Promise((resolve, reject) =>
+        canvas.toBlob((blob) =>
+          blob
+            ? resolve(blob)
+            : reject(new Error('Can not get blog from canvas'))
+        )
+      );
+      const arrayBuffer = await (imageBlob as Blob).arrayBuffer();
+      const Jimp = await jimp.read(Buffer.from(arrayBuffer));
+      Jimp.crop(left, top, right - left, bottom - top);
+      const buffer = await Jimp.getBufferAsync(jimp.MIME_PNG);
+      clipboard.writeImage(nativeImage.createFromBuffer(buffer));
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -78,7 +109,12 @@ const ScreenCapture = () => {
       onMouseDown={({ clientX, clientY }) =>
         setStartPoint(O.some({ x: clientX, y: clientY }))
       }
-      onMouseUp={() => setStartPoint(O.none)}
+      onMouseUp={() => {
+        if (O.isSome(videoSrc) && O.isSome(startPoint)) {
+          takeShot(startPoint.value, mousePoint, videoSrc.value);
+        }
+        setStartPoint(O.none);
+      }}
     >
       {O.isSome(startPoint) ? (
         <Box>
@@ -147,6 +183,16 @@ const ScreenCapture = () => {
           />
         </Box>
       )}
+
+      <video
+        muted
+        hidden
+        ref={(ref) => {
+          if (ref && O.isSome(videoSrc)) {
+            ref.srcObject = videoSrc.value;
+          }
+        }}
+      />
     </Box>
   );
 };

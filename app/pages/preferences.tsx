@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const SettingPage = () => {
+const PreferencesPage = (): React.ReactElement => {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
 
@@ -104,4 +104,4 @@ const SettingPage = () => {
   );
 };
 
-export default SettingPage;
+export default PreferencesPage;

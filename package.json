@@ -292,6 +292,7 @@
     "electron-log": "^4.2.4",
     "electron-next": "^3.1.5",
     "electron-updater": "^4.3.4",
+    "electron-util": "^0.14.2",
     "fp-ts": "^2.8.6",
     "history": "^4.7.2",
     "io-ts": "^2.2.13",

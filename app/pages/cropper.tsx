@@ -31,7 +31,7 @@ type Point = {
   y: number;
 };
 
-const ScreenCapture = () => {
+const CropperPage = (): React.ReactElement => {
   const electronWindow = remote.getCurrentWindow();
   const history = useHistory();
   const [videoSrc, setVideoSrc] = useState<O.Option<MediaStream>>(O.none);
@@ -197,4 +197,4 @@ const ScreenCapture = () => {
   );
 };
 
-export default ScreenCapture;
+export default CropperPage;

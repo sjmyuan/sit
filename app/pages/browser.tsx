@@ -45,7 +45,7 @@ import {
   selectImages,
   selectSettings,
 } from '../store';
-import SettingPage from './SettingPage';
+import SettingPage from './preferences';
 import ClipboardImage from '../features/images/ClipboardImage';
 import { FileInfo } from '../types';
 import routes from '../constants/routes.json';
@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export default function ImagePage() {
+const BrowserPage = (): React.ReactElement => {
   const awsConfig = useSelector(selectAWSConfig);
   const settings = useSelector(selectSettings);
   const notification = useSelector(selectInformation);
@@ -308,4 +308,6 @@ export default function ImagePage() {
       </Modal>
     </div>
   );
-}
+};
+
+export default BrowserPage;

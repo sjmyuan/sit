@@ -1,19 +1,15 @@
-import path from 'path';
-
-import { app, BrowserWindow, Display } from 'electron';
-import { is } from 'electron-util';
+import { screen, BrowserWindow, Display } from 'electron';
 import { loadRoute } from './util/routes';
-import MenuBuilder from '../app/menu';
 
 let cropperWindow: BrowserWindow | null = null;
 
-const openCropperWindow = async (
+const openCropper = (
   display: Display,
-  activeDisplayId: int
-): Promise<void> => {
+  activeDisplayId: number
+): BrowserWindow => {
   const { id, bounds } = display;
   const { x, y, width, height } = bounds;
-  cropperWindow = new BrowserWindow({
+  const cropper = new BrowserWindow({
     x,
     y,
     width,
@@ -30,16 +26,13 @@ const openCropperWindow = async (
     },
   });
 
-  loadRoute(cropperWindow, 'cropper');
+  loadRoute(cropper, 'cropper');
 
-  cropperWindow.setAlwaysOnTop(true, 'screen-saver', 1);
+  cropper.setAlwaysOnTop(true, 'screen-saver', 1);
 
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
-  cropperWindow.webContents.on('did-finish-load', () => {
-    if (!cropperWindow) {
-      throw new Error('"mainWindow" is not defined');
-    }
+  cropper.webContents.on('did-finish-load', () => {
     const isActive = activeDisplayId === id;
     const displayInfo = {
       isActive,
@@ -49,15 +42,29 @@ const openCropperWindow = async (
       width,
       height,
     };
-    cropperWindow.webContents.send('display', displayInfo);
+    cropper.webContents.send('display', displayInfo);
   });
 
-  cropperWindow.on('closed', () => {
-    cropperWindow = null;
+  cropper.on('closed', () => {
+    cropper.destroy();
   });
 
-  const menuBuilder = new MenuBuilder(cropperWindow);
-  menuBuilder.buildMenu();
+  return cropper;
 };
 
-export default { openBrowserWindow: openCropperWindow };
+const openCropperWindow = async (): Promise<void> => {
+  if (cropperWindow) cropperWindow.destroy();
+
+  const activeDisplay = screen.getDisplayNearestPoint(
+    screen.getCursorScreenPoint()
+  );
+
+  cropperWindow = openCropper(activeDisplay, activeDisplay.id);
+
+  cropperWindow.focus();
+};
+
+const closeCropperWindow = (): void => {
+  if (cropperWindow) cropperWindow.destroy();
+};
+export default { openCropperWindow, closeCropperWindow };

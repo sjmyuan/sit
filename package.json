@@ -41,8 +41,8 @@
     },
     "files": [
       "**/*",
-      "!app",
-      "app/out"
+      "!renderer",
+      "renderer/out"
     ],
     "dmg": {
       "contents": [

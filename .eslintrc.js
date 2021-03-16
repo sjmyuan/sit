@@ -12,6 +12,12 @@ module.exports = {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
     '@typescript-eslint/no-var-requires': 'off',
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ],
   },
   parser: '@typescript-eslint/parser', // Specifies the ESLint parser
   parserOptions: {

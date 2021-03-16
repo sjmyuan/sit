@@ -32,14 +32,17 @@
   },
   "build": {
     "productName": "Sit",
-    "appId": "org.develar.sit",
+    "appId": "com.shangjiaming.sit",
+    "protocols": {
+      "name": "sit",
+      "schemes": [
+        "sit"
+      ]
+    },
     "files": [
-      "dist/",
-      "node_modules/",
-      "app.html",
-      "main.prod.js",
-      "main.prod.js.map",
-      "package.json"
+      "**/*",
+      "!app",
+      "app/out"
     ],
     "dmg": {
       "contents": [

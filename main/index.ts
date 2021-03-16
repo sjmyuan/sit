@@ -1,10 +1,10 @@
-import { app, Menu } from 'electron';
+import { app } from 'electron';
 import { is, enforceMacOSAppLocation } from 'electron-util';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import prepareNext from 'electron-next';
-import { initializeAppMenu } from './menu';
 import { initializeTray } from './tray';
+import { openBrowserWindow } from './browser';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
@@ -37,13 +37,12 @@ const checkForUpdates = async (): Promise<void> => {
   await prepareNext('./renderer');
 
   initializeTray();
-  initializeAppMenu(null);
 
-  if (!app.isDefaultProtocolClient('kap')) {
-    app.setAsDefaultProtocolClient('kap');
+  if (!app.isDefaultProtocolClient('sit')) {
+    app.setAsDefaultProtocolClient('sit');
   }
 
-  openBrowserWindow();
+  openBrowserWindow(false);
 
   checkForUpdates();
 })();

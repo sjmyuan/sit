@@ -3,11 +3,12 @@ import path from 'path';
 import { app, BrowserWindow } from 'electron';
 import { is } from 'electron-util';
 import { loadRoute } from './util/routes';
-import MenuBuilder from '../app/menu';
+import { initializeAppMenu } from './menu';
 
 let mainWindow: BrowserWindow | null = null;
 
-const openBrowserWindow = async (minimize: boolean): Promise<void> => {
+// eslint-disable-next-line import/prefer-default-export
+export const openBrowserWindow = async (minimize: boolean): Promise<void> => {
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'resources')
     : path.join(__dirname, '../resources');
@@ -47,8 +48,5 @@ const openBrowserWindow = async (minimize: boolean): Promise<void> => {
     mainWindow = null;
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
+  initializeAppMenu(mainWindow);
 };
-
-export default { openBrowserWindow };

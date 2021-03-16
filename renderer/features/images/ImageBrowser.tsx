@@ -3,7 +3,6 @@ import React from 'react';
 import { clipboard } from 'electron';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import {
-  GridList,
   ImageListItem,
   ImageListItemBar,
   IconButton,

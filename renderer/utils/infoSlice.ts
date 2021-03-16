@@ -31,51 +31,51 @@ const infoSlice = createSlice<InfoState, SliceCaseReducers<InfoState>>({
       state.error = O.none;
     },
   },
-  extraReducers: {
-    [fetchNextPageImages.pending]: (state, _) => {
+  extraReducers: (builder) => {
+    builder.addCase(fetchNextPageImages.pending, (state, _) => {
       state.inProgress = true;
-    },
-    [fetchNextPageImages.fulfilled]: (state, _) => {
+    });
+    builder.addCase(fetchNextPageImages.fulfilled, (state, _) => {
       state.inProgress = false;
       state.info = O.some('Success');
-    },
-    [fetchNextPageImages.rejected]: (state, action) => {
+    });
+    builder.addCase(fetchNextPageImages.rejected, (state, action) => {
       state.inProgress = false;
       state.error = O.some(action.payload);
-    },
-    [fetchPreviousPageImages.pending]: (state, _) => {
+    });
+    builder.addCase(fetchPreviousPageImages.pending, (state, _) => {
       state.inProgress = true;
-    },
-    [fetchPreviousPageImages.fulfilled]: (state, _) => {
+    });
+    builder.addCase(fetchPreviousPageImages.fulfilled, (state, _) => {
       state.inProgress = false;
       state.info = O.some('Success');
-    },
-    [fetchPreviousPageImages.rejected]: (state, action) => {
+    });
+    builder.addCase(fetchPreviousPageImages.rejected, (state, action) => {
       state.inProgress = false;
       state.error = O.some(action.payload);
-    },
-    [uploadImgs.pending]: (state, _) => {
+    });
+    builder.addCase(uploadImgs.pending, (state, _) => {
       state.inProgress = true;
-    },
-    [uploadImgs.fulfilled]: (state, _) => {
+    });
+    builder.addCase(uploadImgs.fulfilled, (state, _) => {
       state.inProgress = false;
       state.info = O.some('Success');
-    },
-    [uploadImgs.rejected]: (state, action) => {
+    });
+    builder.addCase(uploadImgs.rejected, (state, action) => {
       state.inProgress = false;
       state.error = O.some(action.payload);
-    },
-    [deleteImgs.pending]: (state, _) => {
+    });
+    builder.addCase(deleteImgs.pending, (state, _) => {
       state.inProgress = true;
-    },
-    [deleteImgs.fulfilled]: (state, _) => {
+    });
+    builder.addCase(deleteImgs.fulfilled, (state, _) => {
       state.inProgress = false;
       state.info = O.some('Success');
-    },
-    [deleteImgs.rejected]: (state, action) => {
+    });
+    builder.addCase(deleteImgs.rejected, (state, action) => {
       state.inProgress = false;
       state.error = O.some(action.payload);
-    },
+    });
   },
 });
 

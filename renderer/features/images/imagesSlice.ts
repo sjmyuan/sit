@@ -29,24 +29,24 @@ const imagesSlice = createSlice<ImagesState, SliceCaseReducers<ImagesState>>({
       state.nextPointer = O.some('');
     },
   },
-  extraReducers: {
-    [fetchNextPageImages.fulfilled]: (state, action) => {
+  extraReducers: (builder) => {
+    builder.addCase(fetchNextPageImages.fulfilled, (state, action) => {
       const info = action.payload as S3ObjectPage;
       state.images = info.objects;
       state.historyPointer.push(state.nextPointer);
       state.nextPointer = info.pointer;
-    },
-    [fetchPreviousPageImages.fulfilled]: (state, action) => {
+    });
+    builder.addCase(fetchPreviousPageImages.fulfilled, (state, action) => {
       const info = action.payload as S3ObjectPage;
       state.images = info.objects;
       state.historyPointer.pop();
       state.nextPointer = info.pointer;
-    },
-    [uploadImgs.fulfilled]: (state, action) => {
+    });
+    builder.addCase(uploadImgs.fulfilled, (state, action) => {
       const info = action.payload as S3ObjectInfo[];
       state.images = [...info, ...state.images];
-    },
-    [deleteImgs.fulfilled]: (state, action) => {
+    });
+    builder.addCase(deleteImgs.fulfilled, (state, action) => {
       const keys = action.payload as string[];
       state.images = A.reduce([], (acc: S3ObjectInfo[], ele: S3ObjectInfo) => {
         const isDeleted = pipe(
@@ -56,7 +56,7 @@ const imagesSlice = createSlice<ImagesState, SliceCaseReducers<ImagesState>>({
         );
         return isDeleted ? acc : [...acc, ele];
       })(state.images);
-    },
+    });
   },
 });
 

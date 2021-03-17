@@ -32,49 +32,69 @@ const infoSlice = createSlice<InfoState, SliceCaseReducers<InfoState>>({
     },
   },
   extraReducers: (builder) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     builder.addCase(fetchNextPageImages.pending, (state, _) => {
       state.inProgress = true;
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     builder.addCase(fetchNextPageImages.fulfilled, (state, _) => {
       state.inProgress = false;
       state.info = O.some('Success');
     });
-    builder.addCase(fetchNextPageImages.rejected, (state, action) => {
-      state.inProgress = false;
-      state.error = O.some(action.payload);
+    builder.addCase(fetchNextPageImages.rejected, (_, action) => {
+      return {
+        inProgress: false,
+        error: O.some(action.payload),
+        info: O.none,
+      } as InfoState;
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     builder.addCase(fetchPreviousPageImages.pending, (state, _) => {
       state.inProgress = true;
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     builder.addCase(fetchPreviousPageImages.fulfilled, (state, _) => {
       state.inProgress = false;
       state.info = O.some('Success');
     });
-    builder.addCase(fetchPreviousPageImages.rejected, (state, action) => {
-      state.inProgress = false;
-      state.error = O.some(action.payload);
+    builder.addCase(fetchPreviousPageImages.rejected, (_, action) => {
+      return {
+        inProgress: false,
+        error: O.some(action.payload),
+        info: O.none,
+      } as InfoState;
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     builder.addCase(uploadImgs.pending, (state, _) => {
       state.inProgress = true;
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     builder.addCase(uploadImgs.fulfilled, (state, _) => {
       state.inProgress = false;
       state.info = O.some('Success');
     });
-    builder.addCase(uploadImgs.rejected, (state, action) => {
-      state.inProgress = false;
-      state.error = O.some(action.payload);
+    builder.addCase(uploadImgs.rejected, (_, action) => {
+      return {
+        inProgress: false,
+        error: O.some(action.payload),
+        info: O.none,
+      } as InfoState;
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     builder.addCase(deleteImgs.pending, (state, _) => {
       state.inProgress = true;
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     builder.addCase(deleteImgs.fulfilled, (state, _) => {
       state.inProgress = false;
       state.info = O.some('Success');
     });
-    builder.addCase(deleteImgs.rejected, (state, action) => {
-      state.inProgress = false;
-      state.error = O.some(action.payload);
+    builder.addCase(deleteImgs.rejected, (_, action) => {
+      return {
+        inProgress: false,
+        error: O.some(action.payload),
+        info: O.none,
+      } as InfoState;
     });
   },
 });

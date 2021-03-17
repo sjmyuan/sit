@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, MouseEvent, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import * as O from 'fp-ts/Option';
 import * as A from 'fp-ts/Array';
 import { useSelector, useDispatch } from 'react-redux';
@@ -99,7 +99,7 @@ const BrowserPage = (): React.ReactElement => {
 
   useDeepCompareEffect(() => {
     if (O.isSome(awsConfig)) {
-      dispatch(resetPointer());
+      dispatch(resetPointer(null));
       dispatch(fetchNextPageImages());
     } else {
       setSettingsSwitch(true);
@@ -135,7 +135,7 @@ const BrowserPage = (): React.ReactElement => {
 
   const handleCloseSettings = () => {
     setSettingsSwitch(false);
-    dispatch(saveConfig());
+    dispatch(saveConfig(null));
   };
 
   const handleOpenSettingsClick = () => {
@@ -169,7 +169,7 @@ const BrowserPage = (): React.ReactElement => {
   };
 
   const handleRefreshClick = () => {
-    dispatch(resetPointer());
+    dispatch(resetPointer(null));
     dispatch(fetchNextPageImages());
   };
 
@@ -259,11 +259,11 @@ const BrowserPage = (): React.ReactElement => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}
         autoHideDuration={6000}
-        onClose={() => dispatch(clearInfo())}
+        onClose={() => dispatch(clearInfo(null))}
       >
         <Alert
           variant="filled"
-          onClose={() => dispatch(clearInfo())}
+          onClose={() => dispatch(clearInfo(null))}
           severity="info"
         >
           {O.getOrElse(() => '')(notification.info)}
@@ -273,11 +273,11 @@ const BrowserPage = (): React.ReactElement => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.error)}
         autoHideDuration={6000}
-        onClose={() => dispatch(clearError())}
+        onClose={() => dispatch(clearError(null))}
       >
         <Alert
           variant="filled"
-          onClose={() => dispatch(clearError())}
+          onClose={() => dispatch(clearError(null))}
           severity="error"
         >
           {O.getOrElse(() => '')(notification.error)}

@@ -1,6 +1,6 @@
 import { sequenceS } from 'fp-ts/Apply';
 import { S3 } from 'aws-sdk';
-import { pipe, identity, constVoid } from 'fp-ts/lib/function';
+import { pipe, constVoid } from 'fp-ts/lib/function';
 import * as Ord from 'fp-ts/Ord';
 import {
   AWSConfig,
@@ -14,7 +14,7 @@ import {
   S3ObjectInfo,
 } from '../types';
 
-export const s3Client = (config: AWSConfig) => {
+export const s3Client = (config: AWSConfig): S3 => {
   const { accessId, secretAccessKey, region } = config;
   return new S3({
     accessKeyId: accessId,
@@ -51,7 +51,7 @@ export const putObject = (s3: S3, bucket: string, cdn: O.Option<string>) => (
           .promise(),
       E.toError
     ),
-    TE.chain((_) =>
+    TE.chain(() =>
       O.isSome(cdn)
         ? TE.of(`${cdn.value}${key}`)
         : getSignedUrl(s3, bucket)(key)

@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-wrap-multilines */
 import React from 'react';
 import { clipboard } from 'electron';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 import {
   ImageListItem,
   ImageListItemBar,
@@ -16,7 +16,7 @@ import { selectImages } from '../../store';
 import { setInfo } from '../../utils/infoSlice';
 import { deleteImgs } from '../../utils/imagesThunk';
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     root: {
       overflow: 'hidden',
@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const ImageBrowser = () => {
+const ImageBrowser = (): React.ReactElement => {
   const classes = useStyles();
   const images = useSelector(selectImages);
   const dispatch = useDispatch();

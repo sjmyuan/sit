@@ -6,7 +6,6 @@ import {
   Tab,
   Box,
   Typography,
-  AppBar,
 } from '@material-ui/core';
 import AWSSetting from '../features/settings/AWSSetting';
 import ImageSetting from '../features/settings/ImageSetting';
@@ -31,7 +30,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box p={3}>
+        <Box>
           <Typography component="span">{children}</Typography>
         </Box>
       )}
@@ -65,7 +64,7 @@ const PreferencesPage = (): React.ReactElement => {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
 
-  const handleChange = (event: unknown, newValue: number) => {
+  const handleChange = (_event: unknown, newValue: number) => {
     setValue(newValue);
   };
 

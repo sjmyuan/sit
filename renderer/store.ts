@@ -4,9 +4,7 @@ import { routerMiddleware } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
 import * as O from 'fp-ts/Option';
-import { pipe } from 'fp-ts/function';
 import { sequenceS } from 'fp-ts/Apply';
-import * as Storage from './utils/localStorage';
 import createRootReducer from './rootReducer';
 
 export const history = createHashHistory();

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { clipboard, NativeImage } from 'electron';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
+import { clipboard } from 'electron';
 import { Box, Button } from '@material-ui/core';
 import Jimp from 'jimp';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectSettings } from '../../store';
 import { setError } from '../../utils/infoSlice';
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     image: {
       maxWidth: '100%',
@@ -22,7 +22,7 @@ type ClipboardImageProps = {
   onUpload: (image: Blob) => void;
 };
 
-const ClipboardImage = (props: ClipboardImageProps) => {
+const ClipboardImage = (props: ClipboardImageProps): React.ReactElement => {
   const classes = useStyles();
   const settings = useSelector(selectSettings);
   const dispatch = useDispatch();

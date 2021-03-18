@@ -1,14 +1,12 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { configureStore, getDefaultMiddleware, Action } from '@reduxjs/toolkit';
-import { createHashHistory } from 'history';
-import { routerMiddleware } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
 import * as O from 'fp-ts/Option';
 import { sequenceS } from 'fp-ts/Apply';
 import createRootReducer from './rootReducer';
 
-export const history = createHashHistory();
-const rootReducer = createRootReducer(history);
+const rootReducer = createRootReducer();
 export type RootState = ReturnType<typeof rootReducer>;
 
 export const selectImages = (state: RootState) => state.images;
@@ -38,8 +36,7 @@ export const selectSettings = (state: RootState) => {
   return state.settings;
 };
 
-const router = routerMiddleware(history);
-const middleware = [...getDefaultMiddleware(), router];
+const middleware = [...getDefaultMiddleware()];
 
 const excludeLoggerEnvs = ['test', 'production'];
 const shouldIncludeLogger = !excludeLoggerEnvs.includes(

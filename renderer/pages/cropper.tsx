@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { remote, desktopCapturer, clipboard, nativeImage } from 'electron';
 import { Box } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import * as O from 'fp-ts/Option';
 import jimp from 'jimp';
 
@@ -33,7 +32,6 @@ type Point = {
 
 const CropperPage = (): React.ReactElement => {
   const electronWindow = remote.getCurrentWindow();
-  const history = useHistory();
   const [videoSrc, setVideoSrc] = useState<O.Option<MediaStream>>(O.none);
   const [startPoint, setStartPoint] = useState<O.Option<Point>>(O.none);
   const [mousePoint, setMousePoint] = useState<Point>({ x: 0, y: 0 });
@@ -53,7 +51,6 @@ const CropperPage = (): React.ReactElement => {
       if (keyCode === 27) {
         electronWindow.setWindowButtonVisibility(true);
         electronWindow.setOpacity(1);
-        history.goBack();
       }
     };
     window.addEventListener('keyup', handleUserKeyUp);

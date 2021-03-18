@@ -15,7 +15,6 @@ import {
   Modal,
   Alert,
 } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { clipboard } from 'electron';
 import {
@@ -48,7 +47,6 @@ import {
 import SettingPage from './preferences';
 import ClipboardImage from '../features/images/ClipboardImage';
 import { FileInfo } from '../types';
-import routes from '../constants/routes.json';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -90,7 +88,6 @@ const BrowserPage = (): React.ReactElement => {
   const { historyPointer, nextPointer } = images;
   const dispatch = useDispatch();
   const classes = useStyles();
-  const history = useHistory();
 
   const [settingsSwitch, setSettingsSwitch] = useState<boolean>(false);
   const [clipboardImageSwitch, setClipboardImageSwitch] = useState<boolean>(
@@ -245,7 +242,7 @@ const BrowserPage = (): React.ReactElement => {
             <IconButton
               color="inherit"
               aria-label="screen capture"
-              onClick={() => history.push(routes.SCREEN_CAPTURE)}
+              onClick={() => {}}
             >
               <Crop />
             </IconButton>

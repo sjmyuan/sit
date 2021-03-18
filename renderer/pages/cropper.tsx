@@ -31,12 +31,12 @@ type Point = {
 };
 
 const CropperPage = (): React.ReactElement => {
-  const electronWindow = remote.getCurrentWindow();
   const [videoSrc, setVideoSrc] = useState<O.Option<MediaStream>>(O.none);
   const [startPoint, setStartPoint] = useState<O.Option<Point>>(O.none);
   const [mousePoint, setMousePoint] = useState<Point>({ x: 0, y: 0 });
 
   useEffect(() => {
+    const electronWindow = remote.getCurrentWindow();
     electronWindow.setWindowButtonVisibility(false);
     electronWindow.setOpacity(1);
     getVideo()
@@ -45,6 +45,7 @@ const CropperPage = (): React.ReactElement => {
   }, []);
 
   useEffect(() => {
+    const electronWindow = remote.getCurrentWindow();
     const handleUserKeyUp = (event: { ctrlKey: boolean; keyCode: number }) => {
       const { keyCode } = event;
 

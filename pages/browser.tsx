@@ -29,24 +29,28 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 import { pipe } from 'fp-ts/lib/function';
-import ImageBrowser from '../features/images/ImageBrowser';
-import { saveConfig } from '../features/settings/settingsSlice';
+import ImageBrowser from '../renderer/features/images/ImageBrowser';
+import { saveConfig } from '../renderer/features/settings/settingsSlice';
 import {
   uploadImgs,
   fetchPreviousPageImages,
   fetchNextPageImages,
-} from '../utils/imagesThunk';
-import { clearInfo, clearError, setError } from '../utils/infoSlice';
-import { resetPointer } from '../features/images/imagesSlice';
+} from '../renderer/utils/imagesThunk';
+import {
+  clearInfo,
+  clearError,
+  setError,
+} from '../renderer/utils/infoSlice';
+import { resetPointer } from '../renderer/features/images/imagesSlice';
 import {
   selectInformation,
   selectAWSConfig,
   selectImages,
   selectSettings,
-} from '../store';
+} from '../renderer/store';
 import SettingPage from './preferences';
-import ClipboardImage from '../features/images/ClipboardImage';
-import { FileInfo } from '../types';
+import ClipboardImage from '../renderer/features/images/ClipboardImage';
+import { FileInfo } from '../renderer/types';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {

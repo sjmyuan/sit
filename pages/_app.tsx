@@ -5,8 +5,8 @@ import { AppProps } from 'next/app';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { Provider } from 'react-redux';
 import { StylesProvider } from '@material-ui/core';
-import { configuredStore } from '../store';
-import '../app.global.css';
+import { configuredStore } from '../renderer/store';
+import '../renderer/app.global.css';
 
 const store = configuredStore();
 

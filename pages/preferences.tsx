@@ -7,8 +7,8 @@ import {
   Box,
   Typography,
 } from '@material-ui/core';
-import AWSSetting from '../features/settings/AWSSetting';
-import ImageSetting from '../features/settings/ImageSetting';
+import AWSSetting from '../renderer/features/settings/AWSSetting';
+import ImageSetting from '../renderer/features/settings/ImageSetting';
 
 interface TabPanelProps {
   // eslint-disable-next-line react/require-default-props

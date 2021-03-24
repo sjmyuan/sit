@@ -3,7 +3,7 @@
     "target": "ES2018",
     "module": "CommonJS",
     "lib": ["dom", "esnext"],
-    "outDir": "dist",
+    "outDir": "out",
     "declaration": false,
     "declarationMap": false,
     "noEmit": false,
@@ -25,5 +25,5 @@
     "isolatedModules": true
   },
   "exclude": ["test", "release", "dist", "out", "dll"],
-  "include": ["next-env.d.ts", "common.d.ts", "**/*.ts", "**/*.tsx"]
+  "include": ["common.d.ts", "main/**/*.ts"]
 }

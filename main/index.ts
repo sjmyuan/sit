@@ -28,7 +28,6 @@ const checkForUpdates = async (): Promise<void> => {
 (async () => {
   await app.whenReady();
 
-  app.dock.hide();
   app.setAboutPanelOptions({ copyright: 'Copyright © Sjmyuan' });
 
   // Ensure the app is in the Applications folder

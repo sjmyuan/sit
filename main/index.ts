@@ -34,7 +34,13 @@ const checkForUpdates = async (): Promise<void> => {
   // Ensure the app is in the Applications folder
   enforceMacOSAppLocation();
 
-  await prepareNext('./renderer');
+  if (is.development) {
+    console.log('dev........');
+    await prepareNext('./');
+  } else {
+    console.log('prod........');
+    await prepareNext('./renderer');
+  }
 
   initializeTray();
 

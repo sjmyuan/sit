@@ -3,7 +3,7 @@
     "target": "ES2018",
     "module": "CommonJS",
     "lib": ["dom", "esnext"],
-    "outDir": "out",
+    "outDir": "dist/main",
     "declaration": false,
     "declarationMap": false,
     "noEmit": false,

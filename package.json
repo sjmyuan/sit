@@ -3,9 +3,10 @@
   "productName": "Sit",
   "version": "0.0.4",
   "description": "Simple image tool, support AWS S3",
+  "main": "dist/main/index.js",
   "scripts": {
-    "start": "yarn && electron .",
-    "build": "next build && next export && tsc -b ",
+    "start": "npm run build && electron .",
+    "build": "yarn && next build && next export -o dist/renderer && tsc -b ",
     "dist": "npm run build && electron-builder",
     "pack": "npm run build && electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
@@ -40,9 +41,7 @@
       ]
     },
     "files": [
-      "**/*",
-      "!renderer",
-      "renderer/out"
+      "dist"
     ],
     "dmg": {
       "contents": [

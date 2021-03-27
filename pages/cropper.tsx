@@ -30,28 +30,32 @@ type Point = {
   y: number;
 };
 
+const overlayOpacity = 0.5;
+const overlayColor = 'gray';
+
 const CropperPage = (): React.ReactElement => {
   const [videoSrc, setVideoSrc] = useState<O.Option<MediaStream>>(O.none);
   const [startPoint, setStartPoint] = useState<O.Option<Point>>(O.none);
   const [mousePoint, setMousePoint] = useState<Point>({ x: 0, y: 0 });
 
   useEffect(() => {
-    const electronWindow = remote.getCurrentWindow();
-    electronWindow.setWindowButtonVisibility(false);
-    electronWindow.setOpacity(1);
+    //const electronWindow = remote.getCurrentWindow();
+    //electronWindow.setWindowButtonVisibility(false);
+    //electronWindow.setOpacity(1);
     getVideo()
       .then((src) => setVideoSrc(O.some(src)))
       .catch((e) => console.log(e));
   }, []);
 
   useEffect(() => {
-    const electronWindow = remote.getCurrentWindow();
+    //const electronWindow = remote.getCurrentWindow();
     const handleUserKeyUp = (event: { ctrlKey: boolean; keyCode: number }) => {
       const { keyCode } = event;
 
       if (keyCode === 27) {
-        electronWindow.setWindowButtonVisibility(true);
-        electronWindow.setOpacity(1);
+        remote.getCurrentWindow().close();
+        //electronWindow.setWindowButtonVisibility(true);
+        //electronWindow.setOpacity(1);
       }
     };
     window.addEventListener('keyup', handleUserKeyUp);
@@ -98,8 +102,7 @@ const CropperPage = (): React.ReactElement => {
         bottom: 0,
         left: 0,
         right: 0,
-        opacity: '1',
-        backgroundColor: 'white',
+        backgroundColor: 'transparent',
       }}
       onMouseMove={({ clientX, clientY }) =>
         setMousePoint({ x: clientX, y: clientY })
@@ -123,7 +126,8 @@ const CropperPage = (): React.ReactElement => {
               bottom: 0,
               left: 0,
               width: Math.min(mousePoint.x, startPoint.value.x),
-              backgroundColor: 'gray',
+              backgroundColor: overlayColor,
+              opacity: overlayOpacity,
             }}
           />
           <Box // right
@@ -133,7 +137,8 @@ const CropperPage = (): React.ReactElement => {
               bottom: 0,
               left: Math.max(mousePoint.x, startPoint.value.x),
               right: 0,
-              backgroundColor: 'gray',
+              backgroundColor: overlayColor,
+              opacity: overlayOpacity,
             }}
           />
           <Box // top
@@ -143,7 +148,8 @@ const CropperPage = (): React.ReactElement => {
               right: 0,
               top: 0,
               height: Math.min(mousePoint.y, startPoint.value.y),
-              backgroundColor: 'gray',
+              backgroundColor: overlayColor,
+              opacity: overlayOpacity,
             }}
           />
           <Box // bottom
@@ -153,12 +159,20 @@ const CropperPage = (): React.ReactElement => {
               right: 0,
               top: Math.max(mousePoint.y, startPoint.value.y),
               bottom: 0,
-              backgroundColor: 'gray',
+              backgroundColor: overlayColor,
+              opacity: overlayOpacity,
             }}
           />
         </Box>
       ) : (
-        <Box>
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: overlayColor,
+            opacity: overlayOpacity,
+          }}
+        >
           <Box // vertical
             sx={{
               position: 'fixed',
@@ -166,7 +180,7 @@ const CropperPage = (): React.ReactElement => {
               top: 0,
               bottom: 0,
               left: mousePoint.x,
-              borderLeft: '1px dotted grey',
+              borderLeft: '1px dotted white',
             }}
           />
           <Box // horizontal
@@ -176,7 +190,7 @@ const CropperPage = (): React.ReactElement => {
               left: 0,
               right: 0,
               top: mousePoint.y,
-              borderTop: '1px dotted grey',
+              borderTop: '1px dotted white',
             }}
           />
         </Box>

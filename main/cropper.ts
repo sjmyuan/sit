@@ -20,7 +20,7 @@ const openCropper = (
     movable: false,
     frame: false,
     transparent: true,
-    show: false,
+    show: true,
     webPreferences: {
       nodeIntegration: true,
     },
@@ -67,4 +67,4 @@ const openCropperWindow = async (): Promise<void> => {
 const closeCropperWindow = (): void => {
   if (cropperWindow) cropperWindow.destroy();
 };
-export default { openCropperWindow, closeCropperWindow };
+export { openCropperWindow, closeCropperWindow };

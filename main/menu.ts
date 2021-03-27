@@ -6,6 +6,8 @@ import {
   MenuItemConstructorOptions,
 } from 'electron';
 
+import { openCropperWindow } from './cropper';
+
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
   submenu?: DarwinMenuItemConstructorOptions[] | Menu;
@@ -257,6 +259,9 @@ export const getTrayMenu = (): Menu => {
   const template = [
     {
       label: 'Screen Shot',
+      click: async () => {
+        await openCropperWindow();
+      },
     },
   ];
   return Menu.buildFromTemplate(template);

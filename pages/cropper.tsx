@@ -122,8 +122,8 @@ const CropperPage = (): React.ReactElement => {
           <Box // left
             sx={{
               position: 'fixed',
-              top: 0,
-              bottom: 0,
+              top: Math.min(mousePoint.y, startPoint.value.y),
+              height: Math.abs(mousePoint.y - startPoint.value.y),
               left: 0,
               width: Math.min(mousePoint.x, startPoint.value.x),
               backgroundColor: overlayColor,
@@ -133,8 +133,8 @@ const CropperPage = (): React.ReactElement => {
           <Box // right
             sx={{
               position: 'fixed',
-              top: 0,
-              bottom: 0,
+              top: Math.min(mousePoint.y, startPoint.value.y),
+              height: Math.abs(mousePoint.y - startPoint.value.y),
               left: Math.max(mousePoint.x, startPoint.value.x),
               right: 0,
               backgroundColor: overlayColor,

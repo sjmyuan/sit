@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { remote, desktopCapturer, clipboard, nativeImage } from 'electron';
+import {
+  remote,
+  desktopCapturer,
+  clipboard,
+  nativeImage,
+  ipcRenderer,
+} from 'electron';
 import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
 import jimp from 'jimp';
@@ -39,23 +45,17 @@ const CropperPage = (): React.ReactElement => {
   const [mousePoint, setMousePoint] = useState<Point>({ x: 0, y: 0 });
 
   useEffect(() => {
-    //const electronWindow = remote.getCurrentWindow();
-    //electronWindow.setWindowButtonVisibility(false);
-    //electronWindow.setOpacity(1);
     getVideo()
       .then((src) => setVideoSrc(O.some(src)))
       .catch((e) => console.log(e));
   }, []);
 
   useEffect(() => {
-    //const electronWindow = remote.getCurrentWindow();
     const handleUserKeyUp = (event: { ctrlKey: boolean; keyCode: number }) => {
       const { keyCode } = event;
 
       if (keyCode === 27) {
         remote.getCurrentWindow().close();
-        //electronWindow.setWindowButtonVisibility(true);
-        //electronWindow.setOpacity(1);
       }
     };
     window.addEventListener('keyup', handleUserKeyUp);
@@ -91,6 +91,8 @@ const CropperPage = (): React.ReactElement => {
       Jimp.crop(left, top, right - left, bottom - top);
       const buffer = await Jimp.getBufferAsync(jimp.MIME_PNG);
       clipboard.writeImage(nativeImage.createFromBuffer(buffer));
+
+      ipcRenderer.send('took-screen-shot');
     }
   };
 

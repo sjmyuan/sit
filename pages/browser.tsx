@@ -16,7 +16,7 @@ import {
   Alert,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { clipboard } from 'electron';
+import { ipcRenderer, clipboard } from 'electron';
 import {
   AddAPhoto,
   Refresh,
@@ -36,11 +36,7 @@ import {
   fetchPreviousPageImages,
   fetchNextPageImages,
 } from '../renderer/utils/imagesThunk';
-import {
-  clearInfo,
-  clearError,
-  setError,
-} from '../renderer/utils/infoSlice';
+import { clearInfo, clearError, setError } from '../renderer/utils/infoSlice';
 import { resetPointer } from '../renderer/features/images/imagesSlice';
 import {
   selectInformation,
@@ -129,6 +125,11 @@ const BrowserPage = (): React.ReactElement => {
       }
     };
     window.addEventListener('keyup', handleUserKeyUp);
+
+    ipcRenderer.on('took-screen-shot', () => {
+      handleOpenClipboardImage();
+    });
+
     return () => {
       window.removeEventListener('keyup', handleUserKeyUp);
     };

@@ -1,9 +1,10 @@
 import path from 'path';
 
-import { app, BrowserWindow } from 'electron';
+import { ipcMain, app, BrowserWindow } from 'electron';
 import { is } from 'electron-util';
 import { loadRoute } from './util/routes';
 import { initializeAppMenu } from './menu';
+import { closeCropperWindow } from './cropper';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -48,5 +49,18 @@ export const openBrowserWindow = async (minimize: boolean): Promise<void> => {
     mainWindow = null;
   });
 
+  ipcMain.on('took-screen-shot', () => {
+    closeCropperWindow();
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+      mainWindow.webContents.send('took-screen-shot');
+    }
+  });
+
   initializeAppMenu(mainWindow);
+};
+
+export const hideBrowserWindow = (): void => {
+  if (mainWindow) mainWindow.hide();
 };

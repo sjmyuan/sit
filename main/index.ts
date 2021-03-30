@@ -4,7 +4,7 @@ import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import prepareNext from 'electron-next';
 import { initializeTray } from './tray';
-import { openBrowserWindow } from './browser';
+import { openEditorWindow } from './editor';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
@@ -47,7 +47,8 @@ const checkForUpdates = async (): Promise<void> => {
     app.setAsDefaultProtocolClient('sit');
   }
 
-  openBrowserWindow(false);
+  //openBrowserWindow(false);
+  openEditorWindow(false);
 
   checkForUpdates();
 })();

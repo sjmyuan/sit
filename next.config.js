@@ -9,6 +9,7 @@ exports.webpack = (config) =>
 
 exports.exportPathMap = () => ({
   '/cropper': { page: '/cropper' },
+  '/editor': { page: '/editor' },
   '/preferences': { page: '/preferences' },
   '/browser': { page: '/browser' },
 });

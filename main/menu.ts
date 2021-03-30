@@ -5,6 +5,7 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
+import { is } from 'electron-util';
 
 import { openCropperWindow } from './cropper';
 import { hideBrowserWindow } from './browser';
@@ -101,6 +102,12 @@ const buildDarwinTemplate = (
           mainWindow.webContents.toggleDevTools();
         },
       },
+      {
+        label: 'Refresh page',
+        click: () => {
+          mainWindow.reload();
+        },
+      },
     ],
   };
   const subMenuViewProd: MenuItemConstructorOptions = {
@@ -148,8 +155,7 @@ const buildDarwinTemplate = (
     ],
   };
 
-  const subMenuView =
-    process.env.NODE_ENV === 'development' ? subMenuViewDev : subMenuViewProd;
+  const subMenuView = is.development ? subMenuViewDev : subMenuViewProd;
 
   return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
 };

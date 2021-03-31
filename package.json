@@ -258,6 +258,7 @@
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19",
     "styled-components": "^5.2.1",
+    "unstated-next": "^1.1.0",
     "use-deep-compare-effect": "^1.6.1",
     "uuid": "^8.3.2"
   },

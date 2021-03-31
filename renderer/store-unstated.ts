@@ -26,12 +26,9 @@ function useRects(initialState: Rect[] = []) {
       getLast(),
       O.map((rect) => ({
         id: rect.id,
-        origin: {
-          x: Math.min(rect.origin.x, bottomRight.x),
-          y: Math.min(rect.origin.y, bottomRight.y),
-        },
-        width: Math.abs(rect.origin.x - bottomRight.x),
-        height: Math.abs(rect.origin.y - bottomRight.y),
+        origin: rect.origin,
+        width: bottomRight.x - rect.origin.x,
+        height: bottomRight.y - rect.origin.y,
       })),
       O.fold(
         () => constVoid(),

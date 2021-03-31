@@ -74,21 +74,12 @@ const EditorPage = (): React.ReactElement => {
             return (
               <React.Fragment>
                 <Rect
-                  x={rect.origin.x}
-                  y={rect.origin.y}
-                  width={rect.width}
-                  height={rect.height}
-                  globalCompositeOperation="destination-out"
-                  fill="black"
-                  listening={false}
-                />
-                <Rect
                   key={`rect-${rect.id}`}
                   x={rect.origin.x}
                   y={rect.origin.y}
                   width={rect.width}
                   height={rect.height}
-                  strokeWidth={2}
+                  strokeWidth={4}
                   stroke="red"
                   fill="transparent"
                 />

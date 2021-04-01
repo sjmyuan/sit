@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
 import { Box, makeStyles } from '@material-ui/core';
-import { Stage, Layer, Rect, Image } from 'react-konva';
+import { Stage, Layer, Rect, Image, Transformer } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { RectsContainer } from '../renderer/store-unstated';
+import Rectangle from '../renderer/features/canvas/Rectangle';
+import TransformerComponent from '../renderer/features/canvas/TransformerComponent';
 
 const useStyles = makeStyles(() => ({
   konva: {
@@ -33,6 +35,8 @@ const EditorPage = (): React.ReactElement => {
     O.Option<HTMLImageElement>
   >(O.none);
 
+  const [selectedRect, setSelectedRect] = useState<string>('');
+
   useEffect(() => {
     const image = new window.Image();
     image.src =
@@ -52,6 +56,7 @@ const EditorPage = (): React.ReactElement => {
           width={backgroundImg.value.width}
           height={backgroundImg.value.height}
           onMouseDown={(e) => {
+            setSelectedRect('');
             const stage = e.target.getStage();
             if (stage && !isDrawing) {
               toggleDrawing(true);
@@ -93,18 +98,19 @@ const EditorPage = (): React.ReactElement => {
           <Layer>
             {rects.rects.map((rect) => {
               return (
-                <Rect
+                <Rectangle
                   key={`rect-${rect.id}`}
-                  x={rect.origin.x}
-                  y={rect.origin.y}
-                  width={rect.width}
-                  height={rect.height}
-                  strokeWidth={4}
-                  stroke="red"
-                  fill="transparent"
+                  rect={rect}
+                  onSelected={(name) => setSelectedRect(name)}
+                  onTransform={(transformedRect) =>
+                    rects.update(transformedRect)
+                  }
                 />
               );
             })}
+          </Layer>
+          <Layer>
+            <TransformerComponent selectedShapeName={selectedRect} />
           </Layer>
         </Stage>
       ) : (

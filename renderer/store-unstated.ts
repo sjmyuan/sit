@@ -4,12 +4,12 @@ import * as O from 'fp-ts/Option';
 import { createContainer } from 'unstated-next';
 import { pipe, constVoid } from 'fp-ts/lib/function';
 
-type Point = {
+export type Point = {
   x: number;
   y: number;
 };
 
-type Rect = {
+export type Rect = {
   id: number;
   origin: Point;
   width: number;
@@ -36,10 +36,17 @@ function useRects(initialState: Rect[] = []) {
       )
     );
   };
+  const update = (rect: Rect) => {
+    pipe(
+      rects,
+      A.filter((x) => x.id !== rect.id),
+      (x) => [...x, rect]
+    );
+  };
 
   const clearEmpty = () => rects.filter((x) => x.width > 0 && x.height > 0);
 
-  return { rects, add, remove, getLast, updateLast, clearEmpty };
+  return { rects, add, remove, getLast, updateLast, clearEmpty, update };
 }
 
 export const RectsContainer = createContainer(useRects);

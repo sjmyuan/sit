@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as O from 'fp-ts/Option';
 import { Box, makeStyles } from '@material-ui/core';
-import { Stage, Layer, Rect, Image, Transformer } from 'react-konva';
+import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { RectsContainer } from '../renderer/store-unstated';
 import Rectangle from '../renderer/features/canvas/Rectangle';
@@ -55,21 +55,13 @@ const EditorPage = (): React.ReactElement => {
           className={classes.konva}
           width={backgroundImg.value.width}
           height={backgroundImg.value.height}
-          onMouseDown={(e) => {
-            setSelectedRect('');
-            const stage = e.target.getStage();
-            if (stage && !isDrawing) {
-              toggleDrawing(true);
-              const point = getRelativePointerPosition(stage);
-              const rect = {
-                id: rects.rects.length + 1,
-                origin: point,
-                width: 0,
-                height: 0,
-              };
-              rects.add(rect);
-              console.log(rects.rects);
+          onMouseUp={() => {
+            if (!isDrawing) {
+              return;
             }
+            console.log(rects.rects);
+            toggleDrawing(false);
+            rects.clearEmpty();
           }}
           onMouseMove={(e) => {
             const stage = e.target.getStage();
@@ -77,17 +69,26 @@ const EditorPage = (): React.ReactElement => {
               rects.updateLast(getRelativePointerPosition(e.target.getStage()));
             }
           }}
-          onMouseUp={() => {
-            if (!isDrawing) {
-              return;
-            }
-            console.log(rects.rects);
-            rects.clearEmpty();
-            toggleDrawing(false);
-          }}
         >
           <Layer>
             <Image
+              onMouseDown={(e) => {
+                setSelectedRect('');
+                const stage = e.target.getStage();
+                console.log(e.target);
+                if (stage && !isDrawing) {
+                  toggleDrawing(true);
+                  const point = getRelativePointerPosition(stage);
+                  const rect = {
+                    id: rects.rects.length + 1,
+                    origin: point,
+                    width: 0,
+                    height: 0,
+                  };
+                  rects.add(rect);
+                  console.log(rects.rects);
+                }
+              }}
               x={0}
               y={0}
               width={backgroundImg.value.width}

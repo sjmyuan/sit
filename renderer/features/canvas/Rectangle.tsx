@@ -25,6 +25,10 @@ const Rectangle = (props: RectangleProps) => {
       height: rect.height() * rect.scaleY(),
     });
   };
+  const handleMouseDown = (e: KonvaEventObject<any>) => {
+    e.currentTarget.preventDefault();
+    props.onSelected(name);
+  };
   return (
     <ReactKonvaRect
       x={props.rect.origin.x}
@@ -42,7 +46,8 @@ const Rectangle = (props: RectangleProps) => {
       // save state on dragend or transformend
       onDragEnd={handleChange}
       onTransformEnd={handleChange}
-      onClick={() => props.onSelected(name)}
+      onMouseDown={handleMouseDown}
+      onMouseUp={() => console.log('rect mouse up......')}
       draggable
     />
   );

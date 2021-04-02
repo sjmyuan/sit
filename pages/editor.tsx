@@ -48,6 +48,7 @@ const EditorPage = (): React.ReactElement => {
       sx={{
         p: 2,
         border: '1px solid red',
+        backgroundColor: 'rgb(116,116,116)',
       }}
     >
       {O.isSome(backgroundImg) ? (

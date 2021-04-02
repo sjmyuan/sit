@@ -49,6 +49,11 @@ const EditorPage = (): React.ReactElement => {
         p: 2,
         border: '1px solid red',
         backgroundColor: 'rgb(116,116,116)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
       }}
     >
       {O.isSome(backgroundImg) ? (

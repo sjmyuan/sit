@@ -43,6 +43,7 @@ const Rectangle = (props: RectangleProps) => {
       scaleX={1}
       scaleY={1}
       name={name}
+      strokeScaleEnabled={false}
       // save state on dragend or transformend
       onDragEnd={handleChange}
       onTransformEnd={handleChange}

@@ -1,6 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
-import { Box, makeStyles } from '@material-ui/core';
+import {
+  Box,
+  makeStyles,
+  AppBar,
+  Toolbar,
+  IconButton,
+} from '@material-ui/core';
+import { BorderAll, TextFields, ControlCamera } from '@material-ui/icons';
 import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { RectsContainer } from '../renderer/store-unstated';
@@ -15,6 +22,7 @@ const useStyles = makeStyles(() => ({
     alignItems: 'center',
   },
 }));
+
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
   const transform = node.getAbsoluteTransform().copy();
@@ -46,83 +54,114 @@ const EditorPage = (): React.ReactElement => {
   return (
     <Box
       sx={{
-        p: 2,
-        border: '1px solid red',
-        backgroundColor: 'rgb(116,116,116)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
         width: '100%',
         height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {O.isSome(backgroundImg) ? (
-        <Stage
-          className={classes.konva}
-          width={backgroundImg.value.width}
-          height={backgroundImg.value.height}
-          onMouseUp={() => {
-            if (!isDrawing) {
-              return;
-            }
-            console.log(rects.rects);
-            toggleDrawing(false);
-            rects.clearEmpty();
-          }}
-          onMouseMove={(e) => {
-            const stage = e.target.getStage();
-            if (isDrawing && stage) {
-              rects.updateLast(getRelativePointerPosition(e.target.getStage()));
-            }
-          }}
-        >
-          <Layer>
-            <Image
-              onMouseDown={(e) => {
-                setSelectedRect('');
-                const stage = e.target.getStage();
-                console.log(e.target);
-                if (stage && !isDrawing) {
-                  toggleDrawing(true);
-                  const point = getRelativePointerPosition(stage);
-                  const rect = {
-                    id: rects.rects.length + 1,
-                    origin: point,
-                    width: 0,
-                    height: 0,
-                  };
-                  rects.add(rect);
-                  console.log(rects.rects);
-                }
-              }}
-              x={0}
-              y={0}
-              width={backgroundImg.value.width}
-              height={backgroundImg.value.height}
-              image={O.toUndefined(backgroundImg)}
-            />
-          </Layer>
-          <Layer>
-            {rects.rects.map((rect) => {
-              return (
-                <Rectangle
-                  key={`rect-${rect.id}`}
-                  rect={rect}
-                  onSelected={(name) => setSelectedRect(name)}
-                  onTransform={(transformedRect) =>
-                    rects.update(transformedRect)
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="select shape"
+            component="span"
+          >
+            <ControlCamera />
+          </IconButton>
+          <IconButton
+            color="inherit"
+            aria-label="draw rectangle"
+            component="span"
+          >
+            <BorderAll />
+          </IconButton>
+          <IconButton color="inherit" aria-label="add text">
+            <TextFields />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+      <Box
+        sx={{
+          p: 2,
+          border: '1px solid red',
+          backgroundColor: 'rgb(116,116,116)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexGrow: 1,
+        }}
+      >
+        {O.isSome(backgroundImg) ? (
+          <Stage
+            className={classes.konva}
+            width={backgroundImg.value.width}
+            height={backgroundImg.value.height}
+            onMouseUp={() => {
+              if (!isDrawing) {
+                return;
+              }
+              console.log(rects.rects);
+              toggleDrawing(false);
+              rects.clearEmpty();
+            }}
+            onMouseMove={(e) => {
+              const stage = e.target.getStage();
+              if (isDrawing && stage) {
+                rects.updateLast(
+                  getRelativePointerPosition(e.target.getStage())
+                );
+              }
+            }}
+          >
+            <Layer>
+              <Image
+                onMouseDown={(e) => {
+                  setSelectedRect('');
+                  const stage = e.target.getStage();
+                  console.log(e.target);
+                  if (stage && !isDrawing) {
+                    toggleDrawing(true);
+                    const point = getRelativePointerPosition(stage);
+                    const rect = {
+                      id: rects.rects.length + 1,
+                      origin: point,
+                      width: 0,
+                      height: 0,
+                    };
+                    rects.add(rect);
+                    console.log(rects.rects);
                   }
-                />
-              );
-            })}
-          </Layer>
-          <Layer>
-            <TransformerComponent selectedShapeName={selectedRect} />
-          </Layer>
-        </Stage>
-      ) : (
-        <Stage className={classes.konva} width={400} height={400} />
-      )}
+                }}
+                x={0}
+                y={0}
+                width={backgroundImg.value.width}
+                height={backgroundImg.value.height}
+                image={O.toUndefined(backgroundImg)}
+              />
+            </Layer>
+            <Layer>
+              {rects.rects.map((rect) => {
+                return (
+                  <Rectangle
+                    key={`rect-${rect.id}`}
+                    rect={rect}
+                    onSelected={(name) => setSelectedRect(name)}
+                    onTransform={(transformedRect) =>
+                      rects.update(transformedRect)
+                    }
+                  />
+                );
+              })}
+            </Layer>
+            <Layer>
+              <TransformerComponent selectedShapeName={selectedRect} />
+            </Layer>
+          </Stage>
+        ) : (
+          <Stage className={classes.konva} width={400} height={400} />
+        )}
+      </Box>
     </Box>
   );
 };

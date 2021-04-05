@@ -16,26 +16,69 @@ export type Rect = {
   height: number;
 };
 
-function useRects(initialState: Rect[] = []) {
-  const [rects, setRects] = useState<Rect[]>(initialState);
-  const add = (rect: Rect) => setRects([...rects, rect]);
-  const remove = (id: number) => setRects(rects.filter((x) => x.id !== id));
-  const getLast = (): O.Option<Rect> => A.last(rects);
-  const updateLast = (bottomRight: Point) => {
+export type Text = {
+  id: number;
+  origin: Point;
+  value: string;
+};
+
+export type MODE = 'RECT' | 'TEXT';
+
+function useTexts(initialState: Text[] = []) {
+  const [texts, setTexts] = useState<Text[]>(initialState);
+  const startToDraw = (point: Point) => {
+    const newText = { id: texts.length + 1, origin: point, value: '' };
+    setTexts([...texts, newText]);
+    return newText;
+  };
+
+  const update = (text: Text) => {
     pipe(
-      getLast(),
-      O.map((rect) => ({
-        id: rect.id,
-        origin: rect.origin,
-        width: bottomRight.x - rect.origin.x,
-        height: bottomRight.y - rect.origin.y,
-      })),
-      O.fold(
-        () => constVoid(),
-        (rect) => setRects([...A.dropRight(1)(rects), rect])
-      )
+      texts,
+      A.filter((x) => x.id !== text.id),
+      (x) => [...x, text]
     );
   };
+
+  return { texts, startToDraw, update };
+}
+
+function useRects(initialState: Rect[] = []) {
+  const [rects, setRects] = useState<Rect[]>(initialState);
+  const [newRect, setNewRect] = useState<O.Option<Rect>>(O.none);
+  const startToDraw = (point: Point) =>
+    setNewRect(
+      O.some({
+        id: rects.length + 1,
+        origin: point,
+        width: 0,
+        height: 0,
+      })
+    );
+  const drawing = (point: Point) =>
+    setNewRect(
+      pipe(
+        newRect,
+        O.map((rect) => ({
+          id: rect.id,
+          origin: rect.origin,
+          width: point.x - rect.origin.x,
+          height: point.y - rect.origin.y,
+        }))
+      )
+    );
+
+  const endToDraw = () => {
+    if (O.isSome(newRect)) {
+      setRects([...rects, newRect.value]);
+      setNewRect(O.none);
+    }
+  };
+
+  const getAllRects = () => {
+    return O.isSome(newRect) ? [...rects, newRect.value] : rects;
+  };
+
   const update = (rect: Rect) => {
     pipe(
       rects,
@@ -44,9 +87,64 @@ function useRects(initialState: Rect[] = []) {
     );
   };
 
-  const clearEmpty = () => rects.filter((x) => x.width > 0 && x.height > 0);
-
-  return { rects, add, remove, getLast, updateLast, clearEmpty, update };
+  return {
+    getAllRects,
+    startToDraw,
+    drawing,
+    endToDraw,
+    update,
+  };
 }
 
 export const RectsContainer = createContainer(useRects);
+
+export const TextsContainer = createContainer(useTexts);
+
+function useShapes() {
+  const rectState = RectsContainer.useContainer();
+  const textState = TextsContainer.useContainer();
+  const [currentMode, setMode] = useState<MODE>('RECT');
+  const [isDrawing, toggleDrawing] = useState<boolean>(false);
+  const [selectedShape, setSelectedShape] = useState<O.Option<string>>(O.none);
+
+  const startToDraw = (point: Point) => {
+    setSelectedShape(O.none);
+    toggleDrawing(true);
+    if (currentMode == 'RECT') {
+      console.log('start draw rect...');
+      rectState.startToDraw(point);
+    } else {
+      textState.startToDraw(point);
+    }
+  };
+
+  const drawing = (point: Point) => {
+    if (currentMode == 'RECT' && isDrawing) {
+      console.log('draing rect...');
+      rectState.drawing(point);
+    }
+  };
+
+  const endToDraw = () => {
+    toggleDrawing(false);
+    if (currentMode === 'RECT') {
+      console.log('end draw rect...');
+      rectState.endToDraw();
+    }
+  };
+
+  const onSelect = (name: string) => setSelectedShape(O.some(name));
+
+  const getSelectedShape = () => O.getOrElse(() => '')(selectedShape);
+
+  return {
+    setMode,
+    startToDraw,
+    drawing,
+    endToDraw,
+    onSelect,
+    getSelectedShape,
+  };
+}
+
+export const ShapeContainer = createContainer(useShapes);

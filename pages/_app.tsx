@@ -7,7 +7,11 @@ import { Provider } from 'react-redux';
 import { StylesProvider } from '@material-ui/core';
 import { configuredStore } from '../renderer/store';
 import '../renderer/app.global.css';
-import { RectsContainer } from '../renderer/store-unstated';
+import {
+  ShapeContainer,
+  RectsContainer,
+  TextsContainer,
+} from '../renderer/store-unstated';
 
 const store = configuredStore();
 
@@ -16,13 +20,17 @@ const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 const App = ({ Component, pageProps }: AppProps) => {
   return (
     <RectsContainer.Provider>
-      <AppContainer>
-        <Provider store={store}>
-          <StylesProvider injectFirst>
-            <Component {...pageProps} />
-          </StylesProvider>
-        </Provider>
-      </AppContainer>
+      <TextsContainer.Provider>
+        <ShapeContainer.Provider>
+          <AppContainer>
+            <Provider store={store}>
+              <StylesProvider injectFirst>
+                <Component {...pageProps} />
+              </StylesProvider>
+            </Provider>
+          </AppContainer>
+        </ShapeContainer.Provider>
+      </TextsContainer.Provider>
     </RectsContainer.Provider>
   );
 };

@@ -10,7 +10,7 @@ import {
 import { BorderAll, TextFields, ControlCamera } from '@material-ui/icons';
 import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
-import { RectsContainer } from '../renderer/store-unstated';
+import { RectsContainer, ShapeContainer } from '../renderer/store-unstated';
 import Rectangle from '../renderer/features/canvas/Rectangle';
 import TransformerComponent from '../renderer/features/canvas/TransformerComponent';
 
@@ -37,13 +37,11 @@ const getRelativePointerPosition = (node: KonvaStage) => {
 };
 const EditorPage = (): React.ReactElement => {
   const classes = useStyles();
+  const shapes = ShapeContainer.useContainer();
   const rects = RectsContainer.useContainer();
-  const [isDrawing, toggleDrawing] = useState<boolean>(false);
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
-
-  const [selectedRect, setSelectedRect] = useState<string>('');
 
   useEffect(() => {
     const image = new window.Image();
@@ -98,40 +96,18 @@ const EditorPage = (): React.ReactElement => {
             width={backgroundImg.value.width}
             height={backgroundImg.value.height}
             onMouseUp={() => {
-              if (!isDrawing) {
-                return;
-              }
-              console.log(rects.rects);
-              toggleDrawing(false);
-              rects.clearEmpty();
+              shapes.endToDraw();
             }}
             onMouseMove={(e) => {
-              const stage = e.target.getStage();
-              if (isDrawing && stage) {
-                rects.updateLast(
-                  getRelativePointerPosition(e.target.getStage())
-                );
-              }
+              shapes.drawing(getRelativePointerPosition(e.target.getStage()));
             }}
           >
             <Layer>
               <Image
                 onMouseDown={(e) => {
-                  setSelectedRect('');
-                  const stage = e.target.getStage();
-                  console.log(e.target);
-                  if (stage && !isDrawing) {
-                    toggleDrawing(true);
-                    const point = getRelativePointerPosition(stage);
-                    const rect = {
-                      id: rects.rects.length + 1,
-                      origin: point,
-                      width: 0,
-                      height: 0,
-                    };
-                    rects.add(rect);
-                    console.log(rects.rects);
-                  }
+                  shapes.startToDraw(
+                    getRelativePointerPosition(e.target.getStage())
+                  );
                 }}
                 x={0}
                 y={0}
@@ -141,12 +117,12 @@ const EditorPage = (): React.ReactElement => {
               />
             </Layer>
             <Layer>
-              {rects.rects.map((rect) => {
+              {rects.getAllRects().map((rect) => {
                 return (
                   <Rectangle
                     key={`rect-${rect.id}`}
                     rect={rect}
-                    onSelected={(name) => setSelectedRect(name)}
+                    onSelected={(name) => shapes.onSelect(name)}
                     onTransform={(transformedRect) =>
                       rects.update(transformedRect)
                     }
@@ -155,7 +131,9 @@ const EditorPage = (): React.ReactElement => {
               })}
             </Layer>
             <Layer>
-              <TransformerComponent selectedShapeName={selectedRect} />
+              <TransformerComponent
+                selectedShapeName={shapes.getSelectedShape()}
+              />
             </Layer>
           </Stage>
         ) : (

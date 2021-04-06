@@ -26,10 +26,20 @@ export type MODE = 'RECT' | 'TEXT';
 
 function useTexts(initialState: Text[] = []) {
   const [texts, setTexts] = useState<Text[]>(initialState);
+  const [editingText, setEditingText] = useState<O.Option<Text>>(O.none);
   const startToDraw = (point: Point) => {
     const newText = { id: texts.length + 1, origin: point, value: '' };
     setTexts([...texts, newText]);
+    setEditingText(O.some(newText));
     return newText;
+  };
+
+  const startToEdit = (text: Text) => {
+    setEditingText(O.some(text));
+  };
+
+  const endToEdit = () => {
+    setEditingText(O.none);
   };
 
   const update = (text: Text) => {
@@ -40,7 +50,7 @@ function useTexts(initialState: Text[] = []) {
     );
   };
 
-  return { texts, startToDraw, update };
+  return { texts, editingText, startToEdit, endToEdit, startToDraw, update };
 }
 
 function useRects(initialState: Rect[] = []) {
@@ -109,6 +119,7 @@ function useShapes() {
 
   const startToDraw = (point: Point) => {
     setSelectedShape(O.none);
+    textState.endToEdit();
     toggleDrawing(true);
     if (currentMode == 'RECT') {
       console.log('start draw rect...');

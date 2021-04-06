@@ -10,9 +10,15 @@ import {
 import { BorderAll, TextFields, ControlCamera } from '@material-ui/icons';
 import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
-import { RectsContainer, ShapeContainer } from '../renderer/store-unstated';
+import {
+  RectsContainer,
+  ShapeContainer,
+  TextsContainer,
+} from '../renderer/store-unstated';
 import Rectangle from '../renderer/features/canvas/Rectangle';
 import TransformerComponent from '../renderer/features/canvas/TransformerComponent';
+import TextComponent from '../renderer/features/canvas/TextComponent';
+import { pipe } from 'fp-ts/lib/function';
 
 const useStyles = makeStyles(() => ({
   konva: {
@@ -39,6 +45,7 @@ const EditorPage = (): React.ReactElement => {
   const classes = useStyles();
   const shapes = ShapeContainer.useContainer();
   const rects = RectsContainer.useContainer();
+  const texts = TextsContainer.useContainer();
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
@@ -126,6 +133,21 @@ const EditorPage = (): React.ReactElement => {
                     onTransform={(transformedRect) =>
                       rects.update(transformedRect)
                     }
+                  />
+                );
+              })}
+              {texts.texts.map((text) => {
+                return (
+                  <TextComponent
+                    key={`text-${text.id}`}
+                    text={text}
+                    onChange={texts.update}
+                    startToEdit={texts.startToEdit}
+                    editing={pipe(
+                      texts.editingText,
+                      O.map((x) => x.id === text.id),
+                      O.getOrElse(() => false)
+                    )}
                   />
                 );
               })}

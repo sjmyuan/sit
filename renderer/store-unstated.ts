@@ -2,7 +2,7 @@ import { useState } from 'react';
 import * as A from 'fp-ts/Array';
 import * as O from 'fp-ts/Option';
 import { createContainer } from 'unstated-next';
-import { pipe, constVoid } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/function';
 
 export type Point = {
   x: number;
@@ -36,7 +36,8 @@ function useTexts(initialState: Text[] = []) {
     pipe(
       texts,
       A.filter((x) => x.id !== text.id),
-      (x) => [...x, text]
+      (x) => [...x, text],
+      setTexts
     );
   };
 
@@ -110,14 +111,17 @@ function useShapes() {
 
   const startToDraw = (point: Point) => {
     setSelectedShape(O.none);
-    setEditingText(O.none);
     toggleDrawing(true);
     if (currentMode == 'RECT') {
       console.log('start draw rect...');
       rectState.startToDraw(point);
     } else {
-      const newText = textState.startToDraw(point);
-      setEditingText(O.some(newText));
+      if (O.isSome(editingText)) {
+        endToEdit();
+      } else {
+        const newText = textState.startToDraw(point);
+        setEditingText(O.some(newText));
+      }
     }
   };
 
@@ -146,12 +150,17 @@ function useShapes() {
       O.map((x) => ({ ...x, value: value })),
       setEditingText
     );
+
+    console.log(editingText);
   };
 
   const endToEdit = () => {
     if (O.isSome(editingText)) {
+      console.log(editingText);
       textState.update(editingText.value);
       setEditingText(O.none);
+      console.log('end to edit....');
+      console.log(textState.texts);
     }
   };
 

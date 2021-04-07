@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as O from 'fp-ts/Option';
 import {
   Box,
@@ -19,6 +19,7 @@ import Rectangle from '../renderer/features/canvas/Rectangle';
 import TransformerComponent from '../renderer/features/canvas/TransformerComponent';
 import TextComponent from '../renderer/features/canvas/TextComponent';
 import { pipe } from 'fp-ts/lib/function';
+import TextEditor from '../renderer/features/canvas/TextEditor';
 
 const useStyles = makeStyles(() => ({
   konva: {
@@ -46,6 +47,7 @@ const EditorPage = (): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
   const rects = RectsContainer.useContainer();
   const texts = TextsContainer.useContainer();
+  const stageRef = useRef<Stage>(null);
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
@@ -99,6 +101,7 @@ const EditorPage = (): React.ReactElement => {
       >
         {O.isSome(backgroundImg) ? (
           <Stage
+            ref={stageRef}
             className={classes.konva}
             width={backgroundImg.value.width}
             height={backgroundImg.value.height}
@@ -162,9 +165,19 @@ const EditorPage = (): React.ReactElement => {
             </Layer>
           </Stage>
         ) : (
-          <Stage className={classes.konva} width={400} height={400} />
+          <Stage
+            ref={stageRef}
+            className={classes.konva}
+            width={400}
+            height={400}
+          />
         )}
-        <TextEditor />
+        <TextEditor
+          getRelativePos={() => ({
+            x: stageRef.current.getStage().container().offsetLeft,
+            y: stageRef.current.getStage().container().offsetTop,
+          })}
+        />
       </Box>
     </Box>
   );

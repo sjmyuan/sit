@@ -26,20 +26,10 @@ export type MODE = 'RECT' | 'TEXT';
 
 function useTexts(initialState: Text[] = []) {
   const [texts, setTexts] = useState<Text[]>(initialState);
-  const [editingText, setEditingText] = useState<O.Option<Text>>(O.none);
   const startToDraw = (point: Point) => {
     const newText = { id: texts.length + 1, origin: point, value: '' };
     setTexts([...texts, newText]);
-    setEditingText(O.some(newText));
     return newText;
-  };
-
-  const startToEdit = (text: Text) => {
-    setEditingText(O.some(text));
-  };
-
-  const endToEdit = () => {
-    setEditingText(O.none);
   };
 
   const update = (text: Text) => {
@@ -50,7 +40,7 @@ function useTexts(initialState: Text[] = []) {
     );
   };
 
-  return { texts, editingText, startToEdit, endToEdit, startToDraw, update };
+  return { texts, startToDraw, update };
 }
 
 function useRects(initialState: Rect[] = []) {
@@ -113,19 +103,21 @@ export const TextsContainer = createContainer(useTexts);
 function useShapes() {
   const rectState = RectsContainer.useContainer();
   const textState = TextsContainer.useContainer();
-  const [currentMode, setMode] = useState<MODE>('RECT');
+  const [currentMode, setMode] = useState<MODE>('TEXT');
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
   const [selectedShape, setSelectedShape] = useState<O.Option<string>>(O.none);
+  const [editingText, setEditingText] = useState<O.Option<Text>>(O.none);
 
   const startToDraw = (point: Point) => {
     setSelectedShape(O.none);
-    textState.endToEdit();
+    setEditingText(O.none);
     toggleDrawing(true);
     if (currentMode == 'RECT') {
       console.log('start draw rect...');
       rectState.startToDraw(point);
     } else {
-      textState.startToDraw(point);
+      const newText = textState.startToDraw(point);
+      setEditingText(O.some(newText));
     }
   };
 
@@ -144,6 +136,25 @@ function useShapes() {
     }
   };
 
+  const startToEdit = (text: Text) => {
+    setEditingText(O.some(text));
+  };
+
+  const editing = (value: string) => {
+    pipe(
+      editingText,
+      O.map((x) => ({ ...x, value: value })),
+      setEditingText
+    );
+  };
+
+  const endToEdit = () => {
+    if (O.isSome(editingText)) {
+      textState.update(editingText.value);
+      setEditingText(O.none);
+    }
+  };
+
   const onSelect = (name: string) => setSelectedShape(O.some(name));
 
   const getSelectedShape = () => O.getOrElse(() => '')(selectedShape);
@@ -153,6 +164,10 @@ function useShapes() {
     startToDraw,
     drawing,
     endToDraw,
+    editingText,
+    startToEdit,
+    editing,
+    endToEdit,
     onSelect,
     getSelectedShape,
   };

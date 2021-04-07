@@ -1,11 +1,7 @@
 import React from 'react';
+import * as O from 'fp-ts/Option';
 import { makeStyles, Theme } from '@material-ui/core';
-import { Rect } from '../../store-unstated';
-type TextEditorProps = {
-  value: string;
-  rect: Rect;
-  onChange: (value: string) => void;
-};
+import { Rect, ShapeContainer, TextsContainer } from '../../store-unstated';
 const useStyles = makeStyles<Theme, Rect, string>(() => ({
   textEditor: {
     position: 'absolute',
@@ -23,14 +19,24 @@ const useStyles = makeStyles<Theme, Rect, string>(() => ({
     transformOrigin: 'left top',
   },
 }));
-const TextEditor = (props: TextEditorProps) => {
-  const classes = useStyles(props.rect);
+const TextEditor = () => {
+  const shapes = ShapeContainer.useContainer();
+  const editingText = shapes.editingText;
+  if (O.isNone(editingText)) {
+    return <React.Fragment />;
+  }
+  const classes = useStyles({
+    id: -1,
+    origin: editingText.value.origin,
+    width: 20,
+    height: 20,
+  });
 
   return (
     <textarea
-      value={props.value}
+      value={editingText.value.value}
       className={classes.name}
-      onChange={(e) => props.onChange(e.target.value)}
+      onChange={(e) => shapes.editing(e.target.value)}
     />
   );
 };

@@ -136,21 +136,24 @@ const EditorPage = (): React.ReactElement => {
                   />
                 );
               })}
-              {texts.texts.map((text) => {
-                return (
-                  <TextComponent
-                    key={`text-${text.id}`}
-                    text={text}
-                    onChange={texts.update}
-                    startToEdit={texts.startToEdit}
-                    editing={pipe(
-                      texts.editingText,
-                      O.map((x) => x.id === text.id),
-                      O.getOrElse(() => false)
-                    )}
-                  />
-                );
-              })}
+              {texts.texts
+                .filter((text) =>
+                  pipe(
+                    shapes.editingText,
+                    O.map((x) => x.id !== text.id),
+                    O.getOrElse(() => true)
+                  )
+                )
+                .map((text) => {
+                  return (
+                    <TextComponent
+                      key={`text-${text.id}`}
+                      text={text}
+                      onChange={texts.update}
+                      startToEdit={shapes.startToEdit}
+                    />
+                  );
+                })}
             </Layer>
             <Layer>
               <TransformerComponent
@@ -161,6 +164,7 @@ const EditorPage = (): React.ReactElement => {
         ) : (
           <Stage className={classes.konva} width={400} height={400} />
         )}
+        <TextEditor />
       </Box>
     </Box>
   );

@@ -1,18 +1,21 @@
 import Dexie from 'dexie';
 
-class AppDB extends Dexie {
+export class AppDB extends Dexie {
   cache: Dexie.Table<ImageCache, string>;
 
   constructor() {
     super('AppDB');
     this.version(1).stores({
-      cache: "key, img, lastModified',
+      cache: 'key, img, lastModified, boolean',
     });
   }
 }
 
-interface ImageCache {
+export interface ImageCache {
   key: string;
   img: Blob;
   lastModified: number;
+  sync: boolean;
 }
+
+export const db = new AppDB();

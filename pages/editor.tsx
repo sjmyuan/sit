@@ -20,6 +20,8 @@ import TransformerComponent from '../renderer/features/canvas/TransformerCompone
 import TextComponent from '../renderer/features/canvas/TextComponent';
 import { pipe } from 'fp-ts/lib/function';
 import TextEditor from '../renderer/features/canvas/TextEditor';
+import { db } from '../renderer/utils/AppDB';
+import { ipcRenderer } from 'electron';
 
 const useStyles = makeStyles(() => ({
   konva: {
@@ -52,10 +54,13 @@ const EditorPage = (): React.ReactElement => {
   >(O.none);
 
   useEffect(() => {
-    const image = new window.Image();
-    image.src =
-      'https://images.shangjiaming.com/16d67370-f68f-4413-85df-f2751286c53d.png';
-    image.addEventListener('load', () => setBackgroundImg(O.some(image)));
+    ipcRenderer.on('took-screen-shot', (_, key: any) => {
+      db.cache.get({ key: key }).then((imageCache) => {
+        const image = new window.Image();
+        image.src = URL.createObjectURL(imageCache.img);
+        image.addEventListener('load', () => setBackgroundImg(O.some(image)));
+      });
+    });
   });
   return (
     <Box

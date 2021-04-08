@@ -9,6 +9,7 @@ import {
 import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
 import jimp from 'jimp';
+import { db, ImageCache } from '../renderer/utils/AppDB';
 
 const getVideo = async () => {
   const sources = await desktopCapturer.getSources({
@@ -90,9 +91,19 @@ const CropperPage = (): React.ReactElement => {
       const Jimp = await jimp.read(Buffer.from(arrayBuffer));
       Jimp.crop(left, top, right - left, bottom - top);
       const buffer = await Jimp.getBufferAsync(jimp.MIME_PNG);
-      clipboard.writeImage(nativeImage.createFromBuffer(buffer));
 
-      ipcRenderer.send('took-screen-shot');
+      const key = `screenshot-${Date.now()}`;
+
+      await db.cache.add({
+        key: key,
+        img: new Blob([buffer]),
+        lastModified: Date.now(),
+        sync: false,
+      });
+
+      //clipboard.writeImage(nativeImage.createFromBuffer(buffer));
+
+      ipcRenderer.send('took-screen-shot', key);
     }
   };
 

@@ -8,7 +8,7 @@ import {
 import { is } from 'electron-util';
 
 import { openCropperWindow } from './cropper';
-import { hideBrowserWindow } from './browser';
+import { hideEditorWindow } from './editor';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -267,7 +267,7 @@ export const getTrayMenu = (): Menu => {
     {
       label: 'Screen Shot',
       click: async () => {
-        hideBrowserWindow();
+        hideEditorWindow();
         await openCropperWindow();
       },
     },

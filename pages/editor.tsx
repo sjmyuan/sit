@@ -7,7 +7,7 @@ import {
   Toolbar,
   IconButton,
 } from '@material-ui/core';
-import { BorderAll, TextFields } from '@material-ui/icons';
+import { CheckBoxOutlined, TextFields, PhotoLibrary } from '@material-ui/icons';
 import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import {
@@ -76,11 +76,10 @@ const EditorPage = (): React.ReactElement => {
           <IconButton
             color="inherit"
             aria-label="draw rectangle"
-            component="span"
             disabled={shapes.currentMode === 'RECT'}
             onClick={() => shapes.setMode('RECT')}
           >
-            <BorderAll />
+            <CheckBoxOutlined />
           </IconButton>
           <IconButton
             color="inherit"
@@ -89,6 +88,13 @@ const EditorPage = (): React.ReactElement => {
             onClick={() => shapes.setMode('TEXT')}
           >
             <TextFields />
+          </IconButton>
+          <IconButton
+            color="inherit"
+            aria-label="photo library"
+            onClick={() => ipcRenderer.send('go-to-browser')}
+          >
+            <PhotoLibrary />
           </IconButton>
         </Toolbar>
       </AppBar>

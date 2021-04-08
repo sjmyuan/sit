@@ -58,6 +58,18 @@ export const openEditorWindow = async (minimize: boolean): Promise<void> => {
     }
   });
 
+  ipcMain.on('go-to-browser', () => {
+    if (editorWindow) {
+      loadRoute(editorWindow, 'browser');
+    }
+  });
+
+  ipcMain.on('go-to-editor', () => {
+    if (editorWindow) {
+      loadRoute(editorWindow, 'editor');
+    }
+  });
+
   initializeAppMenu(editorWindow);
 };
 

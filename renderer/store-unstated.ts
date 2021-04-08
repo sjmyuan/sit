@@ -104,7 +104,7 @@ export const TextsContainer = createContainer(useTexts);
 function useShapes() {
   const rectState = RectsContainer.useContainer();
   const textState = TextsContainer.useContainer();
-  const [currentMode, setMode] = useState<MODE>('TEXT');
+  const [currentMode, setMode] = useState<MODE>('RECT');
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
   const [selectedShape, setSelectedShape] = useState<O.Option<string>>(O.none);
   const [editingText, setEditingText] = useState<O.Option<Text>>(O.none);
@@ -169,6 +169,7 @@ function useShapes() {
   const getSelectedShape = () => O.getOrElse(() => '')(selectedShape);
 
   return {
+    currentMode,
     setMode,
     startToDraw,
     drawing,

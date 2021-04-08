@@ -71,19 +71,19 @@ const EditorPage = (): React.ReactElement => {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="select shape"
-            component="span"
-          >
-            <ControlCamera />
-          </IconButton>
-          <IconButton
-            color="inherit"
             aria-label="draw rectangle"
             component="span"
+            disabled={shapes.currentMode === 'RECT'}
+            onClick={() => shapes.setMode('RECT')}
           >
             <BorderAll />
           </IconButton>
-          <IconButton color="inherit" aria-label="add text">
+          <IconButton
+            color="inherit"
+            aria-label="add text"
+            disabled={shapes.currentMode === 'TEXT'}
+            onClick={() => shapes.setMode('TEXT')}
+          >
             <TextFields />
           </IconButton>
         </Toolbar>

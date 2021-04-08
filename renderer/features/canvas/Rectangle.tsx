@@ -36,7 +36,7 @@ const Rectangle = (props: RectangleProps) => {
       width={props.rect.width}
       height={props.rect.height}
       strokeWidth={4}
-      stroke="red"
+      stroke="rgb(220,50,105)"
       fill="transparent"
       // force no scaling
       // otherwise Transformer will change it

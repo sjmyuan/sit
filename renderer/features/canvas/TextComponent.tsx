@@ -10,6 +10,9 @@ type TextProps = {
 const TextComponent = (props: TextProps) => {
   return (
     <ReactKonvaText
+      stroke="rgb(220,50,105)"
+      fontSize="30"
+      fontWeight="bold"
       text={props.text.value}
       x={props.text.origin.x}
       y={props.text.origin.y}

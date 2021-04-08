@@ -3,6 +3,7 @@ import * as A from 'fp-ts/Array';
 import * as O from 'fp-ts/Option';
 import { createContainer } from 'unstated-next';
 import { pipe } from 'fp-ts/lib/function';
+import { ImageIndex } from './utils/AppDB';
 
 export type Point = {
   x: number;
@@ -97,10 +98,6 @@ function useRects(initialState: Rect[] = []) {
   };
 }
 
-export const RectsContainer = createContainer(useRects);
-
-export const TextsContainer = createContainer(useTexts);
-
 function useShapes() {
   const rectState = RectsContainer.useContainer();
   const textState = TextsContainer.useContainer();
@@ -178,4 +175,35 @@ function useShapes() {
   };
 }
 
+function useInfo() {
+  const [info, setInfo] = useState<O.Option<string>>(O.none);
+  const [error, setError] = useState<O.Option<string>>(O.none);
+  const [inProgress, toggleInProgress] = useState<boolean>(false);
+
+  const startProcess = () => toggleInProgress(true);
+  const showInfo = (info: string) => {
+    toggleInProgress(false);
+    setInfo(O.some(info));
+    setError(O.none);
+  };
+  const showError = (error: string) => {
+    toggleInProgress(false);
+    setInfo(O.none);
+    setError(O.some(error));
+  };
+
+  return { info, error, inProgress, startProcess, showInfo, showError };
+}
+
+function useLocalImages() {
+  const loadImages = () => {};
+  const deleteImage = (key: string) => {};
+  const uploadImage = (key: string, image: Blob) => {};
+
+  return [loadImages, deleteImage, uploadImage];
+}
+
+export const RectsContainer = createContainer(useRects);
+export const TextsContainer = createContainer(useTexts);
 export const ShapeContainer = createContainer(useShapes);
+export const InfoContainer = createContainer(useInfo);

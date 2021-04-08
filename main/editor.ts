@@ -54,7 +54,7 @@ export const openEditorWindow = async (minimize: boolean): Promise<void> => {
     if (editorWindow) {
       editorWindow.show();
       editorWindow.focus();
-      editorWindow.webContents.send('took-screen-shot', key);
+      editorWindow.webContents.send('edit-image', key);
     }
   });
 
@@ -64,9 +64,10 @@ export const openEditorWindow = async (minimize: boolean): Promise<void> => {
     }
   });
 
-  ipcMain.on('go-to-editor', () => {
+  ipcMain.on('go-to-editor', (_, key) => {
     if (editorWindow) {
       loadRoute(editorWindow, 'editor');
+      editorWindow.webContents.send('edit-image', key);
     }
   });
 

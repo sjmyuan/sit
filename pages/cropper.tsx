@@ -10,6 +10,7 @@ import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
 import jimp from 'jimp';
 import { db, ImageCache } from '../renderer/utils/AppDB';
+import { uploadImage } from '../renderer/utils/localImages';
 
 const getVideo = async () => {
   const sources = await desktopCapturer.getSources({
@@ -94,12 +95,7 @@ const CropperPage = (): React.ReactElement => {
 
       const key = `screenshot-${Date.now()}`;
 
-      await db.cache.add({
-        key: key,
-        img: new Blob([buffer]),
-        lastModified: Date.now(),
-        sync: false,
-      });
+      await uploadImage(key, new Blob([buffer]));
 
       //clipboard.writeImage(nativeImage.createFromBuffer(buffer));
 

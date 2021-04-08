@@ -175,14 +175,6 @@ const BrowserPage = (): React.ReactElement => {
     dispatch(fetchNextPageImages());
   };
 
-  const handlePreviousPageClick = () => {
-    dispatch(fetchPreviousPageImages());
-  };
-
-  const handleNextPageClick = () => {
-    dispatch(fetchNextPageImages());
-  };
-
   return (
     <div className={classes.root}>
       <AppBar position="sticky">
@@ -191,23 +183,6 @@ const BrowserPage = (): React.ReactElement => {
             Images
           </Typography>
           <div>
-            <IconButton
-              color="inherit"
-              aria-label="previous page"
-              component="span"
-              disabled={historyPointer.length < 2}
-              onClick={handlePreviousPageClick}
-            >
-              <ChevronLeft />
-            </IconButton>
-            <IconButton
-              color="inherit"
-              aria-label="next page"
-              disabled={O.isNone(nextPointer)}
-              onClick={handleNextPageClick}
-            >
-              <ChevronRight />
-            </IconButton>
             <IconButton
               color="inherit"
               aria-label="refresh picture"

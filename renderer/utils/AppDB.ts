@@ -2,20 +2,26 @@ import Dexie from 'dexie';
 
 export class AppDB extends Dexie {
   cache: Dexie.Table<ImageCache, string>;
+  index: Dexie.Table<ImageIndex, string>;
 
   constructor() {
     super('AppDB');
-    this.version(1).stores({
-      cache: 'key, img, lastModified, boolean',
+    this.version(2).stores({
+      cache: 'key, image',
+      index: 'key, lastModified, state',
     });
   }
 }
 
 export interface ImageCache {
   key: string;
-  img: Blob;
+  image: Blob;
+}
+
+export interface ImageIndex {
+  key: string;
   lastModified: number;
-  sync: boolean;
+  state: 'ADDED' | 'DELETED' | 'ADDING' | 'DELETING';
 }
 
 export const db = new AppDB();

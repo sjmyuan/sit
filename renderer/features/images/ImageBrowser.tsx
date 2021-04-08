@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-wrap-multilines */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { clipboard } from 'electron';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import {
@@ -15,6 +15,8 @@ import Image from './Image';
 import { selectImages } from '../../store';
 import { setInfo } from '../../utils/infoSlice';
 import { deleteImgs } from '../../utils/imagesThunk';
+import { ImageIndex } from '../../utils/AppDB';
+import { deleteImage, loadImages, getImageUrl } from '../../utils/localImages';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -41,21 +43,29 @@ const useStyles = makeStyles(() =>
 
 const ImageBrowser = (): React.ReactElement => {
   const classes = useStyles();
-  const images = useSelector(selectImages);
-  const dispatch = useDispatch();
+  const [images, setImages] = useState<{ key: string; url: string }[]>([]);
+
+  useEffect(() => {
+    loadImages().then((x) =>
+      Promise.all(
+        x.map((y) =>
+          getImageUrl(y.key).then((url) => ({ key: y.key, url: url }))
+        )
+      ).then((r) => setImages(r))
+    );
+  });
 
   const copyLink = (link: string) => {
     clipboard.writeText(link);
-    dispatch(setInfo('Copied to Clipboard!'));
   };
 
   const deleteImage = (key: string) => {
-    dispatch(deleteImgs([key]));
+    deleteImage(key);
   };
 
   return (
     <ImageList cols={4} gap={8} rowHeight="auto" className={classes.root}>
-      {images.images.map(({ key, url }) => (
+      {images.map(({ key, url }) => (
         <ImageListItem key={key} className={classes.imageItem}>
           <Image src={url} />
           <ImageListItemBar

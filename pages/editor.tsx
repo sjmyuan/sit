@@ -54,10 +54,10 @@ const EditorPage = (): React.ReactElement => {
   >(O.none);
 
   useEffect(() => {
-    ipcRenderer.on('took-screen-shot', (_, key: any) => {
+    ipcRenderer.on('edit-image', (_, key: any) => {
       db.cache.get({ key: key }).then((imageCache) => {
         const image = new window.Image();
-        image.src = URL.createObjectURL(imageCache.img);
+        image.src = URL.createObjectURL(imageCache.image);
         image.addEventListener('load', () => setBackgroundImg(O.some(image)));
       });
     });

@@ -110,15 +110,15 @@ function useShapes() {
   const [editingText, setEditingText] = useState<O.Option<Text>>(O.none);
 
   const startToDraw = (point: Point) => {
+    if (O.isSome(editingText)) {
+      endToEdit();
+    }
     setSelectedShape(O.none);
     toggleDrawing(true);
     if (currentMode == 'RECT') {
-      console.log('start draw rect...');
       rectState.startToDraw(point);
     } else {
-      if (O.isSome(editingText)) {
-        endToEdit();
-      } else {
+      if (O.isNone(editingText)) {
         const newText = textState.startToDraw(point);
         setEditingText(O.some(newText));
       }
@@ -127,7 +127,6 @@ function useShapes() {
 
   const drawing = (point: Point) => {
     if (currentMode == 'RECT' && isDrawing) {
-      console.log('draing rect...');
       rectState.drawing(point);
     }
   };
@@ -135,7 +134,6 @@ function useShapes() {
   const endToDraw = () => {
     toggleDrawing(false);
     if (currentMode === 'RECT') {
-      console.log('end draw rect...');
       rectState.endToDraw();
     }
   };
@@ -156,11 +154,8 @@ function useShapes() {
 
   const endToEdit = () => {
     if (O.isSome(editingText)) {
-      console.log(editingText);
       textState.update(editingText.value);
       setEditingText(O.none);
-      console.log('end to edit....');
-      console.log(textState.texts);
     }
   };
 

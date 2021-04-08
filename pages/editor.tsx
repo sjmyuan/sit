@@ -7,7 +7,7 @@ import {
   Toolbar,
   IconButton,
 } from '@material-ui/core';
-import { BorderAll, TextFields, ControlCamera } from '@material-ui/icons';
+import { BorderAll, TextFields } from '@material-ui/icons';
 import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import {
@@ -23,7 +23,6 @@ import TextEditor from '../renderer/features/canvas/TextEditor';
 
 const useStyles = makeStyles(() => ({
   konva: {
-    border: '1px solid green',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -91,7 +90,6 @@ const EditorPage = (): React.ReactElement => {
       <Box
         sx={{
           p: 2,
-          border: '1px solid red',
           backgroundColor: 'rgb(116,116,116)',
           display: 'flex',
           justifyContent: 'center',

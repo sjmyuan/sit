@@ -21,6 +21,7 @@ const useStyles = makeStyles<Theme, Point, string>(() => ({
     fontWeight: 'bold',
     transformOrigin: 'left top',
     color: 'rgb(220,50,105)',
+    zIndex: 100,
   },
 }));
 

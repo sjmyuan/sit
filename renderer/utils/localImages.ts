@@ -1,9 +1,12 @@
 import { db, ImageIndex } from './AppDB';
-export const loadImages = (): Promise<ImageIndex[]> =>
-  db.index.where('state').anyOf('ADDING', 'ADDED').toArray();
+export const loadImages = (states: string[]): Promise<ImageIndex[]> =>
+  db.localIndex
+    .where('state')
+    .anyOf(...states)
+    .toArray();
 
 export const uploadImage = async (key: string, image: Blob): Promise<void> => {
-  await db.index.add({
+  await db.localIndex.add({
     key: key,
     lastModified: Date.now(),
     state: 'ADDING',
@@ -13,7 +16,7 @@ export const uploadImage = async (key: string, image: Blob): Promise<void> => {
 };
 
 export const deleteImage = async (key: string): Promise<void> => {
-  await db.index.update(key, {
+  await db.localIndex.update(key, {
     state: 'DELETING',
   });
 
@@ -23,4 +26,9 @@ export const deleteImage = async (key: string): Promise<void> => {
 export const getImageUrl = async (key: string): Promise<string> => {
   const imageCache = await db.cache.get(key);
   return URL.createObjectURL(imageCache.image);
+};
+
+export const getImageCache = async (key: string): Promise<Blob> => {
+  const imageCache = await db.cache.get(key);
+  return imageCache.image;
 };

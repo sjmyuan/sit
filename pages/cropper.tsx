@@ -93,7 +93,7 @@ const CropperPage = (): React.ReactElement => {
       Jimp.crop(left, top, right - left, bottom - top);
       const buffer = await Jimp.getBufferAsync(jimp.MIME_PNG);
 
-      const key = `screenshot-${Date.now()}`;
+      const key = `screenshot-${Date.now()}.png`;
 
       await uploadImage(key, new Blob([buffer]));
 

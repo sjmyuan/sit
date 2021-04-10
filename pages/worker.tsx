@@ -2,12 +2,9 @@ import React, { useEffect } from 'react';
 import * as A from 'fp-ts/Array';
 import * as TE from 'fp-ts/TaskEither';
 import * as T from 'fp-ts/Task';
-import * as O from 'fp-ts/Option';
 import { Do } from 'fp-ts-contrib';
 import { AppErrorOr } from '../renderer/types';
 import { loadImages, getImageCache } from '../renderer/utils/localImages';
-import { useSelector } from 'react-redux';
-import { selectAWSConfig } from '../renderer/store';
 import { S3 } from 'aws-sdk';
 import { pipe, constVoid, Lazy } from 'fp-ts/lib/function';
 import { uploadImage, deleteImage } from '../renderer/utils/remoteImages';
@@ -20,8 +17,8 @@ const startWoker = (worker: Lazy<AppErrorOr<void>>): T.Task<void> =>
     TE.fromIO(() => console.log('starting worker.....')),
     TE.chain(() => worker()),
     T.map((x) => {
-      console.log(`end worker, result is ${x}`);
-      setTimeout(() => startWoker(worker), 60000);
+      console.log(`end worker, result is ${JSON.stringify(x)}`);
+      setTimeout(() => startWoker(worker), 5000);
     })
   );
 const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>

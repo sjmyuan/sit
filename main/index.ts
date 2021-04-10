@@ -4,8 +4,9 @@ import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import prepareNext from 'electron-next';
 import { initializeTray } from './tray';
-import { openEditorWindow } from './editor';
+import { openMainWindow } from './main';
 import { openWorkerWindow } from './worker';
+import { initializeAppMenu } from './menu';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
@@ -35,10 +36,8 @@ const checkForUpdates = async (): Promise<void> => {
   enforceMacOSAppLocation();
 
   if (is.development) {
-    console.log('dev........');
     await prepareNext('./');
   } else {
-    console.log('prod........');
     await prepareNext('./renderer');
   }
 
@@ -49,8 +48,9 @@ const checkForUpdates = async (): Promise<void> => {
   }
 
   //openBrowserWindow(false);
-  openEditorWindow(false);
-  openWorkerWindow();
+  const mainWindow = await openMainWindow(false);
+  initializeAppMenu(mainWindow);
+  await openWorkerWindow();
 
   checkForUpdates();
 })();

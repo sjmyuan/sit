@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
 import * as A from 'fp-ts/Array';
 import { useSelector, useDispatch } from 'react-redux';
@@ -13,21 +13,25 @@ import {
   Snackbar,
   Backdrop,
   Alert,
+  Box,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { ipcRenderer } from 'electron';
-import { AddAPhoto, Crop } from '@material-ui/icons';
+import {
+  AddAPhoto,
+  Crop,
+  CheckBoxOutlined,
+  TextFields,
+  PhotoLibrary,
+} from '@material-ui/icons';
 import { pipe } from 'fp-ts/lib/function';
 import ImageBrowser from '../renderer/features/images/ImageBrowser';
 import { clearInfo, clearError } from '../renderer/utils/infoSlice';
-import {
-  selectAWSConfig,
-  selectImages,
-  selectSettings,
-  selectInformation,
-} from '../renderer/store';
+import { selectInformation } from '../renderer/store';
 import { FileInfo, TE } from '../renderer/types';
 import { uploadImage } from '../renderer/utils/localImages';
+import { ShapeContainer } from '../renderer/store-unstated';
+import Editor from '../renderer/features/canvas/Editor';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -60,11 +64,18 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const BrowserPage = (): React.ReactElement => {
+const MainPage = (): React.ReactElement => {
   const notification = useSelector(selectInformation);
+  const shapes = ShapeContainer.useContainer();
   const { inProgress } = notification;
   const dispatch = useDispatch();
   const classes = useStyles();
+
+  useEffect(() => {
+    ipcRenderer.on('edit-image', (_, key: any) => {
+      shapes.setEditingImage(O.some(key));
+    });
+  });
 
   const handleUploadFileImage = (event: ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
@@ -87,43 +98,80 @@ const BrowserPage = (): React.ReactElement => {
   };
 
   return (
-    <div className={classes.root}>
+    <Box sx={{ height: '100%' }}>
       <AppBar position="sticky">
         <Toolbar>
           <Typography variant="h6" className={classes.title}>
             Images
           </Typography>
-          <div>
-            <IconButton
-              color="inherit"
-              aria-label="upload picture"
-              component="label"
-            >
-              <AddAPhoto />
-              <input
-                accept="image/*"
-                hidden
-                id="icon-button-file"
-                type="file"
-                multiple
-                onChange={handleUploadFileImage}
-              />
-            </IconButton>
-            <IconButton
-              color="inherit"
-              aria-label="screen capture"
-              onClick={() => {
-                ipcRenderer.send('taking-screenshot');
-              }}
-            >
-              <Crop />
-            </IconButton>
-          </div>
+          {O.isNone(shapes.editingImageKey) ? (
+            <div>
+              <IconButton
+                color="inherit"
+                aria-label="upload picture"
+                component="label"
+              >
+                <AddAPhoto />
+                <input
+                  accept="image/*"
+                  hidden
+                  id="icon-button-file"
+                  type="file"
+                  multiple
+                  onChange={handleUploadFileImage}
+                />
+              </IconButton>
+              <IconButton
+                color="inherit"
+                aria-label="screen capture"
+                onClick={() => {
+                  ipcRenderer.send('taking-screen-shot');
+                }}
+              >
+                <Crop />
+              </IconButton>
+            </div>
+          ) : (
+            <div>
+              <IconButton
+                color="inherit"
+                aria-label="draw rectangle"
+                disabled={shapes.currentMode === 'RECT'}
+                onClick={() => shapes.setMode('RECT')}
+              >
+                <CheckBoxOutlined />
+              </IconButton>
+              <IconButton
+                color="inherit"
+                aria-label="add text"
+                disabled={shapes.currentMode === 'TEXT'}
+                onClick={() => shapes.setMode('TEXT')}
+              >
+                <TextFields />
+              </IconButton>
+              <IconButton
+                color="inherit"
+                aria-label="photo library"
+                onClick={() => shapes.setEditingImage(O.none)}
+              >
+                <PhotoLibrary />
+              </IconButton>
+            </div>
+          )}
         </Toolbar>
       </AppBar>
-      <Container className={classes.container} maxWidth="xl">
-        <ImageBrowser />
-      </Container>
+      {O.isNone(shapes.editingImageKey) ? (
+        <Container
+          sx={{ marginTop: '10px', marginBottom: '10px' }}
+          maxWidth="xl"
+        >
+          <ImageBrowser />
+        </Container>
+      ) : (
+        <Box sx={{ height: '100%', width: '100%', display: 'flex' }}>
+          <Editor />
+        </Box>
+      )}
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}
@@ -155,8 +203,8 @@ const BrowserPage = (): React.ReactElement => {
       <Backdrop className={classes.backdrop} open={inProgress}>
         <CircularProgress />
       </Backdrop>
-    </div>
+    </Box>
   );
 };
 
-export default BrowserPage;
+export default MainPage;

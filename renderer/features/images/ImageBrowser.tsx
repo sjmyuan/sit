@@ -40,39 +40,19 @@ const useStyles = makeStyles(() =>
   })
 );
 
-type ImageState = {
-  key: string;
-  url: string;
-};
-
 const ImageBrowser = (): React.ReactElement => {
   const classes = useStyles();
-  const [images, setImages] = useState<ImageState[]>([]);
+  const [images, setImages] = useState<ImageIndex[]>([]);
 
   useEffect(() => {
-    pipe(
-      loadImages(['ADDING', 'ADDED']),
-      TE.chain<Error, ImageIndex[], ImageState[]>((indexes) =>
-        A.array.traverse(TE.taskEither)(indexes, (index) =>
-          pipe(
-            getImageUrl(index.key),
-            TE.map((url) => ({ key: index.key, url }))
-          )
-        )
-      ),
-      TE.map(setImages)
-    )().catch((e) => console.log(e));
+    pipe(loadImages(['ADDING', 'ADDED']), TE.map(setImages))();
   });
-
-  const copyLink = (link: string) => {
-    clipboard.writeText(link);
-  };
 
   return (
     <ImageList cols={4} gap={8} rowHeight="auto" className={classes.root}>
-      {images.map(({ key, url }) => (
+      {images.map(({ key }) => (
         <ImageListItem key={key} className={classes.imageItem}>
-          <Image src={url} />
+          <Image imageKey={key} />
           <ImageListItemBar
             className={classes.imageBar}
             actionIcon={
@@ -83,13 +63,6 @@ const ImageBrowser = (): React.ReactElement => {
                   onClick={() => deleteImage(key)()}
                 >
                   <DeleteOutline />
-                </IconButton>
-                <IconButton
-                  aria-label={`copy ${key}`}
-                  className={classes.icon}
-                  onClick={() => copyLink(url)}
-                >
-                  <CopyKeyIcon />
                 </IconButton>
               </Box>
             }

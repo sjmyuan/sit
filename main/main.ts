@@ -3,13 +3,14 @@ import path from 'path';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { is } from 'electron-util';
 import { loadRoute } from './util/routes';
-import { initializeAppMenu } from './menu';
-import { closeCropperWindow } from './cropper';
+import { closeCropperWindow, openCropperWindow } from './cropper';
 
-let editorWindow: BrowserWindow | null = null;
+let mainWindow: BrowserWindow | null = null;
 
 // eslint-disable-next-line import/prefer-default-export
-export const openEditorWindow = async (minimize: boolean): Promise<void> => {
+export const openMainWindow = async (
+  minimize: boolean
+): Promise<BrowserWindow> => {
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'resources')
     : path.join(__dirname, '../resources');
@@ -18,7 +19,7 @@ export const openEditorWindow = async (minimize: boolean): Promise<void> => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
-  editorWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
     height: 728,
@@ -29,51 +30,45 @@ export const openEditorWindow = async (minimize: boolean): Promise<void> => {
     },
   });
 
-  loadRoute(editorWindow, 'editor');
+  loadRoute(mainWindow, 'main');
 
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
-  editorWindow.webContents.on('did-finish-load', () => {
-    if (!editorWindow) {
+  mainWindow.webContents.on('did-finish-load', () => {
+    if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
     if (minimize) {
-      editorWindow.minimize();
+      mainWindow.minimize();
     } else {
-      editorWindow.show();
-      editorWindow.focus();
+      mainWindow.show();
+      mainWindow.focus();
     }
   });
 
-  editorWindow.on('closed', () => {
-    editorWindow = null;
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  ipcMain.on('taking-screen-shot', () => {
+    if (mainWindow) {
+      mainWindow.hide();
+      openCropperWindow();
+    }
   });
 
   ipcMain.on('took-screen-shot', (_, key) => {
     closeCropperWindow();
-    if (editorWindow) {
-      editorWindow.show();
-      editorWindow.focus();
-      editorWindow.webContents.send('edit-image', key);
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+      mainWindow.webContents.send('edit-image', key);
     }
   });
 
-  ipcMain.on('go-to-browser', () => {
-    if (editorWindow) {
-      loadRoute(editorWindow, 'browser');
-    }
-  });
-
-  ipcMain.on('go-to-editor', (_, key) => {
-    if (editorWindow) {
-      loadRoute(editorWindow, 'editor');
-      editorWindow.webContents.send('edit-image', key);
-    }
-  });
-
-  initializeAppMenu(editorWindow);
+  return mainWindow;
 };
 
-export const hideEditorWindow = (): void => {
-  if (editorWindow) editorWindow.hide();
+export const hideMainWindow = (): void => {
+  if (mainWindow) mainWindow.hide();
 };

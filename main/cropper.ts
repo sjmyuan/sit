@@ -67,4 +67,5 @@ const openCropperWindow = async (): Promise<void> => {
 const closeCropperWindow = (): void => {
   if (cropperWindow) cropperWindow.destroy();
 };
+
 export { openCropperWindow, closeCropperWindow };

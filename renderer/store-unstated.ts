@@ -4,6 +4,8 @@ import * as O from 'fp-ts/Option';
 import { createContainer } from 'unstated-next';
 import { pipe } from 'fp-ts/lib/function';
 import { ImageIndex } from './utils/AppDB';
+import { getImageUrl } from './utils/localImages';
+import { TE } from './types';
 
 export type Point = {
   x: number;
@@ -42,7 +44,9 @@ function useTexts(initialState: Text[] = []) {
     );
   };
 
-  return { texts, startToDraw, update };
+  const clear = () => setTexts([]);
+
+  return { texts, startToDraw, update, clear };
 }
 
 function useRects(initialState: Rect[] = []) {
@@ -89,12 +93,15 @@ function useRects(initialState: Rect[] = []) {
     );
   };
 
+  const clear = () => setRects([]);
+
   return {
     getAllRects,
     startToDraw,
     drawing,
     endToDraw,
     update,
+    clear,
   };
 }
 
@@ -105,6 +112,9 @@ function useShapes() {
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
   const [selectedShape, setSelectedShape] = useState<O.Option<string>>(O.none);
   const [editingText, setEditingText] = useState<O.Option<Text>>(O.none);
+  const [editingImageKey, setEditingImageKey] = useState<O.Option<string>>(
+    O.none
+  );
 
   const startToDraw = (point: Point) => {
     if (O.isSome(editingText)) {
@@ -160,6 +170,22 @@ function useShapes() {
 
   const getSelectedShape = () => O.getOrElse(() => '')(selectedShape);
 
+  const getEditingImageUrl = () =>
+    pipe(
+      editingImageKey,
+      TE.fromOption(() => new Error('There is no editing image')),
+      TE.chain(getImageUrl)
+    );
+
+  const setEditingImage = (key: O.Option<string>) => {
+    rectState.clear();
+    textState.clear();
+    toggleDrawing(false);
+    setSelectedShape(O.none);
+    setMode('RECT');
+    setEditingText(O.none);
+    setEditingImageKey(key);
+  };
   return {
     currentMode,
     setMode,
@@ -172,6 +198,9 @@ function useShapes() {
     endToEdit,
     onSelect,
     getSelectedShape,
+    setEditingImage,
+    editingImageKey,
+    getEditingImageUrl,
   };
 }
 
@@ -193,14 +222,6 @@ function useInfo() {
   };
 
   return { info, error, inProgress, startProcess, showInfo, showError };
-}
-
-function useLocalImages() {
-  const loadImages = () => {};
-  const deleteImage = (key: string) => {};
-  const uploadImage = (key: string, image: Blob) => {};
-
-  return [loadImages, deleteImage, uploadImage];
 }
 
 export const RectsContainer = createContainer(useRects);

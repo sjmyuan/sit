@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Modal } from '@material-ui/core';
+import { ShapeContainer } from '../../store-unstated';
+import { O, TE } from '../../types';
+import { getImageUrl } from '../../utils/localImages';
+import { pipe } from 'fp-ts/lib/function';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -20,37 +24,29 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 type ImageProps = {
-  src: string;
+  imageKey: string;
 };
 
 const Image = (props: ImageProps) => {
   const classes = useStyles();
-  const { src: propSrc } = props;
-  const [isModal, setModal] = useState<boolean>(false);
-
-  const handleModalClose = () => {
-    setModal(false);
-  };
-
-  const handleModalOpen = () => {
-    setModal(true);
-  };
-
+  const shapes = ShapeContainer.useContainer();
+  const [src, setSrc] = useState<string>('');
+  useEffect(() => {
+    pipe(
+      getImageUrl(props.imageKey),
+      TE.map((url) => setSrc(url))
+    )();
+  });
   return (
     <div>
       <img
-        src={propSrc}
+        src={src}
+        key={props.imageKey}
         alt=""
-        onClick={handleModalOpen}
-        onKeyUp={handleModalOpen}
+        onDoubleClick={() => shapes.setEditingImage(O.some(props.imageKey))}
         role="presentation"
         className={classes.image}
       />
-      <Modal open={isModal} onClose={handleModalClose}>
-        <div className={classes.paper}>
-          <img src={propSrc} alt="" className={classes.image} />
-        </div>
-      </Modal>
     </div>
   );
 };

@@ -12,4 +12,5 @@ exports.exportPathMap = () => ({
   '/editor': { page: '/editor' },
   '/preferences': { page: '/preferences' },
   '/browser': { page: '/browser' },
+  '/worker': { page: '/worker' },
 });

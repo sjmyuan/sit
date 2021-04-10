@@ -5,6 +5,7 @@ import { autoUpdater } from 'electron-updater';
 import prepareNext from 'electron-next';
 import { initializeTray } from './tray';
 import { openEditorWindow } from './editor';
+import { openWorkerWindow } from './worker';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
@@ -49,6 +50,7 @@ const checkForUpdates = async (): Promise<void> => {
 
   //openBrowserWindow(false);
   openEditorWindow(false);
+  openWorkerWindow();
 
   checkForUpdates();
 })();

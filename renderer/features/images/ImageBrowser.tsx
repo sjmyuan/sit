@@ -10,13 +10,12 @@ import {
   ImageList,
 } from '@material-ui/core';
 import { Link as CopyKeyIcon, DeleteOutline } from '@material-ui/icons';
-import { useSelector, useDispatch } from 'react-redux';
+import { pipe } from 'fp-ts/function';
+import * as TE from 'fp-ts/TaskEither';
+import * as A from 'fp-ts/Array';
 import Image from './Image';
-import { selectImages } from '../../store';
-import { setInfo } from '../../utils/infoSlice';
-import { deleteImgs } from '../../utils/imagesThunk';
-import { ImageIndex } from '../../utils/AppDB';
 import { deleteImage, loadImages, getImageUrl } from '../../utils/localImages';
+import { ImageIndex } from '../../utils/AppDB';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -41,26 +40,32 @@ const useStyles = makeStyles(() =>
   })
 );
 
+type ImageState = {
+  key: string;
+  url: string;
+};
+
 const ImageBrowser = (): React.ReactElement => {
   const classes = useStyles();
-  const [images, setImages] = useState<{ key: string; url: string }[]>([]);
+  const [images, setImages] = useState<ImageState[]>([]);
 
   useEffect(() => {
-    loadImages().then((x) =>
-      Promise.all(
-        x.map((y) =>
-          getImageUrl(y.key).then((url) => ({ key: y.key, url: url }))
+    pipe(
+      loadImages(['ADDING', 'ADDED']),
+      TE.chain<Error, ImageIndex[], ImageState[]>((indexes) =>
+        A.array.traverse(TE.taskEither)(indexes, (index) =>
+          pipe(
+            getImageUrl(index.key),
+            TE.map((url) => ({ key: index.key, url }))
+          )
         )
-      ).then((r) => setImages(r))
-    );
+      ),
+      TE.map(setImages)
+    )().catch((e) => console.log(e));
   });
 
   const copyLink = (link: string) => {
     clipboard.writeText(link);
-  };
-
-  const deleteImage = (key: string) => {
-    deleteImage(key);
   };
 
   return (
@@ -75,7 +80,7 @@ const ImageBrowser = (): React.ReactElement => {
                 <IconButton
                   aria-label={`delete ${key}`}
                   className={classes.icon}
-                  onClick={() => deleteImage(key)}
+                  onClick={() => deleteImage(key)()}
                 >
                   <DeleteOutline />
                 </IconButton>

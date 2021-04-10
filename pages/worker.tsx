@@ -1,16 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import * as A from 'fp-ts/Array';
 import * as TE from 'fp-ts/TaskEither';
+import * as T from 'fp-ts/Task';
+import * as O from 'fp-ts/Option';
+import { Do } from 'fp-ts-contrib';
 import { AppErrorOr } from '../renderer/types';
 import { loadImages, getImageCache } from '../renderer/utils/localImages';
 import { useSelector } from 'react-redux';
 import { selectAWSConfig } from '../renderer/store';
 import { S3 } from 'aws-sdk';
-import { pipe, constVoid } from 'fp-ts/lib/function';
+import { pipe, constVoid, Lazy } from 'fp-ts/lib/function';
 import { uploadImage, deleteImage } from '../renderer/utils/remoteImages';
 import { ImageIndex } from '../renderer/utils/AppDB';
+import { getFromStorage } from '../renderer/utils/localStorage';
+import { s3Client } from '../renderer/utils/aws';
 
-const startWorker = (s3: S3, bucket: string): AppErrorOr<void> =>
+const startWoker = (worker: Lazy<AppErrorOr<void>>): T.Task<void> =>
+  pipe(
+    TE.fromIO(() => console.log('starting worker.....')),
+    TE.chain(() => worker()),
+    T.map((x) => {
+      console.log(`end worker, result is ${x}`);
+      setTimeout(() => startWoker(worker), 60000);
+    })
+  );
+const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
   pipe(
     loadImages(['ADDING', 'DELETING']),
     TE.chain((images) =>
@@ -27,8 +41,25 @@ const startWorker = (s3: S3, bucket: string): AppErrorOr<void> =>
     ),
     TE.map(constVoid)
   );
+
 const Worker = (): React.ReactElement => {
-  const awsConfig = useSelector(selectAWSConfig);
+  useEffect(() => {
+    const worker = Do.Do(TE.taskEither)
+      .bind('accessId', TE.fromEither(getFromStorage<string>('access_id')))
+      .bind(
+        'secretAccessKey',
+        TE.fromEither(getFromStorage<string>('secret_access_key'))
+      )
+      .bind('region', TE.fromEither(getFromStorage<string>('region')))
+      .bind('bucket', TE.fromEither(getFromStorage<string>('bucket')))
+      .letL('s3', ({ accessId, secretAccessKey, bucket, region }) =>
+        s3Client({ accessId, secretAccessKey, region, bucket })
+      )
+      .doL(({ s3, bucket }) => syncLocalToS3(s3, bucket))
+      .return(constVoid);
+
+    startWoker(() => worker)();
+  });
   return <div />;
 };
 

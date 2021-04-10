@@ -1,8 +1,8 @@
 import * as TE from 'fp-ts/TaskEither';
 import { constVoid, pipe } from 'fp-ts/lib/function';
-import { db, ImageIndex } from './AppDB';
+import { db, ImageIndex, ImageState } from './AppDB';
 import { AppErrorOr } from '../types';
-export const loadImages = (states: string[]): AppErrorOr<ImageIndex[]> =>
+export const loadImages = (states: ImageState[]): AppErrorOr<ImageIndex[]> =>
   TE.fromTask(() =>
     db.localIndex
       .where('state')

@@ -95,7 +95,7 @@ const CropperPage = (): React.ReactElement => {
 
       const key = `screenshot-${Date.now()}.png`;
 
-      await uploadImage(key, new Blob([buffer]));
+      await uploadImage(key, new Blob([buffer]))();
 
       //clipboard.writeImage(nativeImage.createFromBuffer(buffer));
 

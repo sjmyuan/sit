@@ -7,13 +7,15 @@ export class AppDB extends Dexie {
 
   constructor() {
     super('AppDB');
-    this.version(2).stores({
+    this.version(3).stores({
       cache: 'key, image',
       localIndex: 'key, lastModified, state',
       remoteIndex: 'key, lastModified, state',
     });
   }
 }
+
+export type ImageState = 'ADDED' | 'DELETED' | 'ADDING' | 'DELETING';
 
 export interface ImageCache {
   key: string;
@@ -23,7 +25,7 @@ export interface ImageCache {
 export interface ImageIndex {
   key: string;
   lastModified: number;
-  state: 'ADDED' | 'DELETED' | 'ADDING' | 'DELETING';
+  state: ImageState;
 }
 
 export const db = new AppDB();

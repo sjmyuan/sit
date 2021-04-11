@@ -4,6 +4,9 @@ import * as T from 'fp-ts/Task';
 import { Box, makeStyles } from '@material-ui/core';
 import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
+import { pipe } from 'fp-ts/lib/function';
+import { clipboard, nativeImage } from 'electron';
+import MouseTrap from 'mousetrap';
 import {
   RectsContainer,
   ShapeContainer,
@@ -12,7 +15,6 @@ import {
 import Rectangle from './Rectangle';
 import TransformerComponent from './TransformerComponent';
 import TextComponent from './TextComponent';
-import { pipe } from 'fp-ts/lib/function';
 import TextEditor from './TextEditor';
 
 const useStyles = makeStyles(() => ({
@@ -60,7 +62,24 @@ const Editor = (): React.ReactElement => {
         }
       })
     )();
+  }, [shapes.editingImageKey]);
+
+  useEffect(() => {
+    MouseTrap.bind(['ctrl+c', 'command+c'], () => copyImageToClipboard());
+    return () => {
+      MouseTrap.unbind(['ctrl+c', 'command+c']);
+    };
   });
+
+  const copyImageToClipboard = async () => {
+    clipboard.writeImage(
+      nativeImage.createFromDataURL(
+        stageRef.current.getStage().toDataURL({
+          mimeType: 'image/png',
+        })
+      )
+    );
+  };
 
   return (
     <Box
@@ -82,15 +101,6 @@ const Editor = (): React.ReactElement => {
           height={backgroundImg.value.height}
           onMouseUp={() => {
             shapes.endToDraw();
-            stageRef.current.getStage().toDataURL({
-              mimeType: 'image/png',
-              callback: (url) => {
-                console.log('saving image....');
-                return fetch(url).then((res) =>
-                  res.blob().then((blob) => shapes.saveEditingImage(blob)())
-                );
-              },
-            });
           }}
           onMouseMove={(e) => {
             shapes.drawing(getRelativePointerPosition(e.target.getStage()));

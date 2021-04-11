@@ -6,6 +6,7 @@ import { pipe, constVoid } from 'fp-ts/lib/function';
 import { ImageIndex } from './utils/AppDB';
 import { getImageUrl, updateImage } from './utils/localImages';
 import { TE, AppErrorOr } from './types';
+import Konva from 'konva';
 
 export type Point = {
   x: number;
@@ -115,6 +116,7 @@ function useShapes() {
   const [editingImageKey, setEditingImageKey] = useState<O.Option<string>>(
     O.none
   );
+  const [stage, setStage] = useState<O.Option<Konva.Stage>>(O.none);
 
   const startToDraw = (point: Point) => {
     if (O.isSome(editingText)) {
@@ -187,13 +189,6 @@ function useShapes() {
     setEditingImageKey(key);
   };
 
-  const saveEditingImage = (image: Blob): AppErrorOr<void> => {
-    if (O.isSome(editingImageKey)) {
-      return updateImage(editingImageKey.value, image);
-    } else {
-      return TE.of(constVoid());
-    }
-  };
   return {
     currentMode,
     setMode,
@@ -209,7 +204,6 @@ function useShapes() {
     setEditingImage,
     editingImageKey,
     getEditingImageUrl,
-    saveEditingImage,
   };
 }
 

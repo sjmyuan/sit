@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs, Tab, Box, Typography } from '@material-ui/core';
 import AWSSetting from '../renderer/features/settings/AWSSetting';
 import ImageSetting from '../renderer/features/settings/ImageSetting';
+import { PreferencesContainer } from '../renderer/store-unstated';
 
 interface TabPanelProps {
   // eslint-disable-next-line react/require-default-props
@@ -32,6 +33,12 @@ function TabPanel(props: TabPanelProps) {
 
 const PreferencesPage = (): React.ReactElement => {
   const [value, setValue] = React.useState(0);
+  const preferences = PreferencesContainer.useContainer();
+
+  useEffect(() => {
+    preferences.loadPreferences();
+    return () => preferences.savePreferences();
+  }, []);
 
   const handleChange = (_event: unknown, newValue: number) => {
     setValue(newValue);

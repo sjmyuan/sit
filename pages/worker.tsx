@@ -18,7 +18,7 @@ const startWoker = (worker: Lazy<AppErrorOr<void>>): T.Task<void> =>
     TE.chain(() => worker()),
     T.map((x) => {
       console.log(`end worker, result is ${JSON.stringify(x)}`);
-      setTimeout(() => startWoker(worker), 5000);
+      setTimeout(() => startWoker(worker)(), 5000);
     })
   );
 const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>

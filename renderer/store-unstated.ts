@@ -5,8 +5,9 @@ import { createContainer } from 'unstated-next';
 import { pipe, constVoid } from 'fp-ts/lib/function';
 import { ImageIndex } from './utils/AppDB';
 import { getImageUrl, updateImage } from './utils/localImages';
-import { TE, AppErrorOr } from './types';
+import { TE, AppErrorOr, Resolution } from './types';
 import Konva from 'konva';
+import { getFromStorage, saveToStorage } from './utils/localStorage';
 
 export type Point = {
   x: number;
@@ -227,7 +228,71 @@ function useInfo() {
   return { info, error, inProgress, startProcess, showInfo, showError };
 }
 
+function usePreferences() {
+  const [accessId, setAccessId] = useState<O.Option<string>>(O.none);
+  const [secretAccessKey, setSecretAccessKey] = useState<O.Option<string>>(
+    O.none
+  );
+  const [bucket, setBucket] = useState<O.Option<string>>(O.none);
+  const [region, setRegion] = useState<O.Option<string>>(O.none);
+  const [resolution, setResolution] = useState<Resolution>({
+    width: 640,
+    height: 480,
+  });
+
+  const loadPreferences = () => {
+    setAccessId(O.fromEither(getFromStorage<string>('access_id')));
+    setSecretAccessKey(
+      O.fromEither(getFromStorage<string>('secret_access_key'))
+    );
+    setRegion(O.fromEither(getFromStorage<string>('region')));
+    setBucket(O.fromEither(getFromStorage<string>('bucket')));
+
+    setResolution(
+      O.getOrElse(() => ({ width: 640, height: 480 }))(
+        O.fromEither(getFromStorage<Resolution>('resolution'))
+      )
+    );
+  };
+
+  const savePreferences = () => {
+    pipe(
+      accessId,
+      O.map((x) => saveToStorage('access_id', x))
+    );
+    pipe(
+      secretAccessKey,
+      O.map((x) => saveToStorage('secret_access_key', x))
+    );
+    pipe(
+      bucket,
+      O.map((x) => saveToStorage('bucket', x))
+    );
+    pipe(
+      region,
+      O.map((x) => saveToStorage('region', x))
+    );
+    saveToStorage('resolution', resolution);
+  };
+
+  return {
+    accessId,
+    setAccessId,
+    secretAccessKey,
+    setSecretAccessKey,
+    bucket,
+    setBucket,
+    region,
+    setRegion,
+    resolution,
+    setResolution,
+    loadPreferences,
+    savePreferences,
+  };
+}
+
 export const RectsContainer = createContainer(useRects);
 export const TextsContainer = createContainer(useTexts);
 export const ShapeContainer = createContainer(useShapes);
 export const InfoContainer = createContainer(useInfo);
+export const PreferencesContainer = createContainer(usePreferences);

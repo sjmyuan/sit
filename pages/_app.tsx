@@ -11,6 +11,7 @@ import {
   ShapeContainer,
   RectsContainer,
   TextsContainer,
+  PreferencesContainer,
 } from '../renderer/store-unstated';
 
 const store = configuredStore();
@@ -19,19 +20,21 @@ const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
 const App = ({ Component, pageProps }: AppProps) => {
   return (
-    <RectsContainer.Provider>
-      <TextsContainer.Provider>
-        <ShapeContainer.Provider>
-          <AppContainer>
-            <Provider store={store}>
-              <StylesProvider injectFirst>
-                <Component {...pageProps} />
-              </StylesProvider>
-            </Provider>
-          </AppContainer>
-        </ShapeContainer.Provider>
-      </TextsContainer.Provider>
-    </RectsContainer.Provider>
+    <PreferencesContainer.Provider>
+      <RectsContainer.Provider>
+        <TextsContainer.Provider>
+          <ShapeContainer.Provider>
+            <AppContainer>
+              <Provider store={store}>
+                <StylesProvider injectFirst>
+                  <Component {...pageProps} />
+                </StylesProvider>
+              </Provider>
+            </AppContainer>
+          </ShapeContainer.Provider>
+        </TextsContainer.Provider>
+      </RectsContainer.Provider>
+    </PreferencesContainer.Provider>
   );
 };
 

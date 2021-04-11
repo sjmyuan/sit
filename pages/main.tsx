@@ -75,7 +75,7 @@ const MainPage = (): React.ReactElement => {
     ipcRenderer.on('edit-image', (_, key: any) => {
       shapes.setEditingImage(O.some(key));
     });
-  });
+  }, []);
 
   const handleUploadFileImage = (event: ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;

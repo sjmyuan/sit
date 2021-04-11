@@ -11,6 +11,10 @@ let mainWindow: BrowserWindow | null = null;
 export const openMainWindow = async (
   minimize: boolean
 ): Promise<BrowserWindow> => {
+  if (mainWindow) {
+    return Promise.resolve(mainWindow);
+  }
+
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'resources')
     : path.join(__dirname, '../resources');
@@ -71,4 +75,8 @@ export const openMainWindow = async (
 
 export const hideMainWindow = (): void => {
   if (mainWindow) mainWindow.hide();
+};
+
+export const closeMainWindow = (): void => {
+  if (mainWindow) mainWindow.destroy();
 };

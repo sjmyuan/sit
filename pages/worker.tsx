@@ -56,7 +56,7 @@ const Worker = (): React.ReactElement => {
       .return(constVoid);
 
     startWoker(() => worker)();
-  });
+  }, []);
   return <div />;
 };
 

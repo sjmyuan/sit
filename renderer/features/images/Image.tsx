@@ -36,7 +36,7 @@ const Image = (props: ImageProps) => {
       getImageUrl(props.imageKey),
       TE.map((url) => setSrc(url))
     )();
-  });
+  }, [props.imageKey]);
   return (
     <div>
       <img

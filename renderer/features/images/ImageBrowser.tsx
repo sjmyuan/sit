@@ -46,6 +46,7 @@ const ImageBrowser = (): React.ReactElement => {
 
   useEffect(() => {
     pipe(loadImages(['ADDING', 'ADDED']), TE.map(setImages))();
+    console.log('render browser...');
   }, []);
 
   return (

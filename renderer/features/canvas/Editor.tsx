@@ -62,7 +62,8 @@ const Editor = (): React.ReactElement => {
         }
       })
     )();
-  }, [shapes.editingImageKey]);
+    console.log('render editor.....');
+  }, [shapes, shapes.editingImageKey]);
 
   useEffect(() => {
     MouseTrap.bind(['ctrl+c', 'command+c'], () => copyImageToClipboard());

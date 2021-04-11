@@ -4,9 +4,11 @@ import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import prepareNext from 'electron-next';
 import { initializeTray } from './tray';
-import { openMainWindow } from './main';
+import { openMainWindow, closeMainWindow } from './main';
 import { openWorkerWindow } from './worker';
 import { initializeAppMenu } from './menu';
+import { closeCropperWindow } from './cropper';
+import { closePreferencesWindow } from './preferences';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
@@ -47,7 +49,6 @@ const checkForUpdates = async (): Promise<void> => {
     app.setAsDefaultProtocolClient('sit');
   }
 
-  //openBrowserWindow(false);
   const mainWindow = await openMainWindow(false);
   initializeAppMenu(mainWindow);
   await openWorkerWindow();
@@ -55,7 +56,12 @@ const checkForUpdates = async (): Promise<void> => {
   checkForUpdates();
 })();
 
-app.on('window-all-closed', (event: { preventDefault: () => void }) => {
-  app.dock.hide();
-  event.preventDefault();
+app.on('activate', () => {
+  openMainWindow(false);
+});
+
+app.on('will-quit', () => {
+  closeCropperWindow();
+  closePreferencesWindow();
+  closeMainWindow();
 });

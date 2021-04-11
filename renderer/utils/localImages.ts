@@ -23,6 +23,17 @@ export const uploadImage = (key: string, image: Blob): AppErrorOr<void> =>
     ),
     TE.map(constVoid)
   );
+
+export const updateImage = (key: string, image: Blob): AppErrorOr<void> =>
+  pipe(
+    TE.fromTask<Error, unknown>(() =>
+      db.localIndex
+        .update(key, { lastModified: Date.now(), state: 'ADDING' })
+        .then(() => db.cache.update(key, { image }))
+    ),
+    TE.map(constVoid)
+  );
+
 export const deleteImage = (key: string): AppErrorOr<void> =>
   pipe(
     TE.fromTask<Error, unknown>(() =>

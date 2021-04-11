@@ -46,7 +46,7 @@ const ImageBrowser = (): React.ReactElement => {
 
   useEffect(() => {
     pipe(loadImages(['ADDING', 'ADDED']), TE.map(setImages))();
-  });
+  }, []);
 
   return (
     <ImageList cols={4} gap={8} rowHeight="auto" className={classes.root}>
@@ -60,7 +60,14 @@ const ImageBrowser = (): React.ReactElement => {
                 <IconButton
                   aria-label={`delete ${key}`}
                   className={classes.icon}
-                  onClick={() => deleteImage(key)()}
+                  onClick={() =>
+                    pipe(
+                      deleteImage(key),
+                      TE.map(() =>
+                        setImages(images.filter((x) => x.key !== key))
+                      )
+                    )()
+                  }
                 >
                   <DeleteOutline />
                 </IconButton>

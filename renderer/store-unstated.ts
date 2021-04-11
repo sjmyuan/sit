@@ -2,10 +2,10 @@ import { useState } from 'react';
 import * as A from 'fp-ts/Array';
 import * as O from 'fp-ts/Option';
 import { createContainer } from 'unstated-next';
-import { pipe } from 'fp-ts/lib/function';
+import { pipe, constVoid } from 'fp-ts/lib/function';
 import { ImageIndex } from './utils/AppDB';
-import { getImageUrl } from './utils/localImages';
-import { TE } from './types';
+import { getImageUrl, updateImage } from './utils/localImages';
+import { TE, AppErrorOr } from './types';
 
 export type Point = {
   x: number;
@@ -186,6 +186,14 @@ function useShapes() {
     setEditingText(O.none);
     setEditingImageKey(key);
   };
+
+  const saveEditingImage = (image: Blob): AppErrorOr<void> => {
+    if (O.isSome(editingImageKey)) {
+      return updateImage(editingImageKey.value, image);
+    } else {
+      return TE.of(constVoid());
+    }
+  };
   return {
     currentMode,
     setMode,
@@ -201,6 +209,7 @@ function useShapes() {
     setEditingImage,
     editingImageKey,
     getEditingImageUrl,
+    saveEditingImage,
   };
 }
 

@@ -82,6 +82,15 @@ const Editor = (): React.ReactElement => {
           height={backgroundImg.value.height}
           onMouseUp={() => {
             shapes.endToDraw();
+            stageRef.current.getStage().toDataURL({
+              mimeType: 'image/png',
+              callback: (url) => {
+                console.log('saving image....');
+                return fetch(url).then((res) =>
+                  res.blob().then((blob) => shapes.saveEditingImage(blob)())
+                );
+              },
+            });
           }}
           onMouseMove={(e) => {
             shapes.drawing(getRelativePointerPosition(e.target.getStage()));

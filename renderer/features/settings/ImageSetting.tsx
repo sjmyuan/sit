@@ -66,11 +66,12 @@ const ImageSetting = () => {
                 width === resolution.width && height === resolution.height
             )(availableResolutions)
           )}
-          onChange={(event) =>
+          onChange={(event) => {
             preferences.setResolution(
               availableResolutions[event.target.value as number]
-            )
-          }
+            );
+            preferences.savePreferences();
+          }}
         >
           {A.range(0, availableResolutions.length - 1).map((r) => (
             <MenuItem value={r} key={`resolution-${r}`}>

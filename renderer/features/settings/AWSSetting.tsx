@@ -55,14 +55,15 @@ const AWSSetting = () => {
           name="accessId"
           label="Access Key ID"
           value={pipe(accessId, O.fold(constant(''), identity))}
-          onChange={(event) =>
+          onChange={(event) => {
             preferences.setAccessId(
               pipe(
                 O.some(event.target.value as string),
                 O.filter((x) => x.trim() !== '')
               )
-            )
-          }
+            );
+            preferences.savePreferences();
+          }}
         />
       </Box>
       <Box sx={{ padding: '24px' }}>
@@ -74,14 +75,15 @@ const AWSSetting = () => {
           type="password"
           label="Secret Access Key"
           value={pipe(secretAccessKey, O.fold(constant(''), identity))}
-          onChange={(event) =>
+          onChange={(event) => {
             preferences.setSecretAccessKey(
               pipe(
                 O.some(event.target.value as string),
                 O.filter((x) => x.trim() !== '')
               )
-            )
-          }
+            );
+            preferences.savePreferences();
+          }}
         />
       </Box>
       <Box sx={{ padding: '24px' }}>
@@ -92,14 +94,15 @@ const AWSSetting = () => {
           label="Bucket"
           name="bucket"
           value={pipe(bucket, O.fold(constant(''), identity))}
-          onChange={(event) =>
+          onChange={(event) => {
             preferences.setBucket(
               pipe(
                 O.some(event.target.value as string),
                 O.filter((x) => x.trim() !== '')
               )
-            )
-          }
+            );
+            preferences.savePreferences();
+          }}
         />
       </Box>
       <Box sx={{ padding: '24px' }}>
@@ -113,14 +116,15 @@ const AWSSetting = () => {
             name="region"
             error={O.isNone(region)}
             value={pipe(region, O.fold(constant(''), identity))}
-            onChange={(event) =>
+            onChange={(event) => {
               preferences.setRegion(
                 pipe(
                   O.some(event.target.value as string),
                   O.filter((x) => x.trim() !== '')
                 )
-              )
-            }
+              ),
+                preferences.savePreferences();
+            }}
           >
             {regions.map((r) => (
               <MenuItem value={r} key={`region-${r}`}>

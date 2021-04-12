@@ -2,8 +2,6 @@
 import { configureStore, getDefaultMiddleware, Action } from '@reduxjs/toolkit';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
-import * as O from 'fp-ts/Option';
-import { sequenceS } from 'fp-ts/Apply';
 import createRootReducer from './rootReducer';
 
 const rootReducer = createRootReducer();
@@ -11,30 +9,6 @@ export type RootState = ReturnType<typeof rootReducer>;
 
 export const selectImages = (state: RootState) => state.images;
 export const selectInformation = (state: RootState) => state.information;
-
-export const selectAWSConfig = (state: RootState) => {
-  const awsConfig = {
-    accessId: state.settings.accessId,
-    secretAccessKey: state.settings.secretAccessKey,
-    bucket: state.settings.bucket,
-    region: state.settings.region,
-  };
-
-  return sequenceS(O.option)(awsConfig);
-};
-
-export const selectAWSSettings = (state: RootState) => {
-  return {
-    accessId: state.settings.accessId,
-    secretAccessKey: state.settings.secretAccessKey,
-    bucket: state.settings.bucket,
-    region: state.settings.region,
-  };
-};
-
-export const selectSettings = (state: RootState) => {
-  return state.settings;
-};
 
 const middleware = [...getDefaultMiddleware()];
 

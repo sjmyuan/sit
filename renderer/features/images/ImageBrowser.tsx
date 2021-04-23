@@ -1,6 +1,5 @@
 /* eslint-disable react/jsx-wrap-multilines */
 import React, { useState, useEffect } from 'react';
-import { clipboard } from 'electron';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import {
   ImageListItem,
@@ -9,12 +8,11 @@ import {
   Box,
   ImageList,
 } from '@material-ui/core';
-import { Link as CopyKeyIcon, DeleteOutline } from '@material-ui/icons';
+import { DeleteOutline } from '@material-ui/icons';
 import { pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/TaskEither';
-import * as A from 'fp-ts/Array';
 import Image from './Image';
-import { deleteImage, loadImages, getImageUrl } from '../../utils/localImages';
+import { deleteImage, loadImages } from '../../utils/localImages';
 import { ImageIndex } from '../../utils/AppDB';
 
 const useStyles = makeStyles(() =>
@@ -46,7 +44,6 @@ const ImageBrowser = (): React.ReactElement => {
 
   useEffect(() => {
     pipe(loadImages(['ADDING', 'ADDED']), TE.map(setImages))();
-    console.log('render browser...');
   }, []);
 
   return (

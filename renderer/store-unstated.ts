@@ -214,15 +214,15 @@ function useInfo() {
   const [inProgress, toggleInProgress] = useState<boolean>(false);
 
   const startProcess = () => toggleInProgress(true);
-  const showInfo = (info: string) => {
+  const showInfo = (infoMsg: O.Option<string>) => {
     toggleInProgress(false);
-    setInfo(O.some(info));
+    setInfo(infoMsg);
     setError(O.none);
   };
-  const showError = (error: string) => {
+  const showError = (errorMsg: O.Option<string>) => {
     toggleInProgress(false);
     setInfo(O.none);
-    setError(O.some(error));
+    setError(errorMsg);
   };
 
   return { info, error, inProgress, startProcess, showInfo, showError };

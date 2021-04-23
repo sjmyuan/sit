@@ -1,5 +1,4 @@
 import React from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import * as A from 'fp-ts/Array';
 import {
   FormControl,
@@ -11,25 +10,6 @@ import {
 import * as O from 'fp-ts/Option';
 import { Resolution } from '../../types';
 import { PreferencesContainer } from '../../store-unstated';
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      '& .MuiTextField-root': {
-        margin: theme.spacing(1),
-        minWidth: 194,
-      },
-      maxWidth: '100%',
-      display: 'flex',
-      flexWrap: 'wrap',
-      flexDirection: 'row',
-    },
-    formControl: {
-      margin: theme.spacing(1),
-      minWidth: 194,
-    },
-  })
-);
 
 const availableResolutions: Resolution[] = [
   { width: 480, height: 320 },

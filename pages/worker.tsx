@@ -18,7 +18,7 @@ const startWoker = (worker: Lazy<AppErrorOr<void>>): T.Task<void> =>
     TE.chain(() => worker()),
     T.map((x) => {
       console.log(`end worker, result is ${JSON.stringify(x)}`);
-      setTimeout(() => startWoker(worker)(), 5000);
+      setTimeout(() => startWoker(worker)(), 60000);
     })
   );
 const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
@@ -31,9 +31,8 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
             getImageCache(image.key),
             TE.chain((x) => uploadImage(s3, bucket)(image.key, x))
           );
-        } else {
-          return deleteImage(s3, bucket)(image.key);
         }
+        return deleteImage(s3, bucket)(image.key);
       })(images)
     ),
     TE.map(constVoid)
@@ -42,13 +41,14 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
 const Worker = (): React.ReactElement => {
   useEffect(() => {
     const worker = Do.Do(TE.taskEither)
-      .bind('accessId', TE.fromEither(getFromStorage<string>('access_id')))
-      .bind(
-        'secretAccessKey',
+      .bindL('accessId', () =>
+        TE.fromEither(getFromStorage<string>('access_id'))
+      )
+      .bindL('secretAccessKey', () =>
         TE.fromEither(getFromStorage<string>('secret_access_key'))
       )
-      .bind('region', TE.fromEither(getFromStorage<string>('region')))
-      .bind('bucket', TE.fromEither(getFromStorage<string>('bucket')))
+      .bindL('region', () => TE.fromEither(getFromStorage<string>('region')))
+      .bindL('bucket', () => TE.fromEither(getFromStorage<string>('bucket')))
       .letL('s3', ({ accessId, secretAccessKey, bucket, region }) =>
         s3Client({ accessId, secretAccessKey, region, bucket })
       )

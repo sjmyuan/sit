@@ -11,6 +11,7 @@ import {
   RectsContainer,
   ShapeContainer,
   TextsContainer,
+  InfoContainer,
 } from '../../store-unstated';
 import Rectangle from './Rectangle';
 import TransformerComponent from './TransformerComponent';
@@ -43,6 +44,7 @@ const Editor = (): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
   const rects = RectsContainer.useContainer();
   const texts = TextsContainer.useContainer();
+  const notification = InfoContainer.useContainer();
   const stageRef = useRef<Stage>(null);
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
@@ -62,7 +64,6 @@ const Editor = (): React.ReactElement => {
         }
       })
     )();
-    console.log('render editor.....');
   }, [shapes, shapes.editingImageKey]);
 
   useEffect(() => {
@@ -80,6 +81,7 @@ const Editor = (): React.ReactElement => {
         })
       )
     );
+    notification.showInfo(O.some('Image Copied to Clipboard'));
   };
 
   return (

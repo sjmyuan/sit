@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { Modal } from '@material-ui/core';
-import { ShapeContainer } from '../../store-unstated';
-import { O, TE } from '../../types';
-import { getImageUrl } from '../../utils/localImages';
 import { pipe } from 'fp-ts/lib/function';
+import { O, TE } from '../../types';
+import { ShapeContainer } from '../../store-unstated';
+import { getImageUrl } from '../../utils/localImages';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

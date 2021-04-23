@@ -5,36 +5,34 @@ import { AppProps } from 'next/app';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { Provider } from 'react-redux';
 import { StylesProvider } from '@material-ui/core';
-import { configuredStore } from '../renderer/store';
 import '../renderer/app.global.css';
 import {
   ShapeContainer,
   RectsContainer,
   TextsContainer,
   PreferencesContainer,
+  InfoContainer,
 } from '../renderer/store-unstated';
-
-const store = configuredStore();
 
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
 const App = ({ Component, pageProps }: AppProps) => {
   return (
-    <PreferencesContainer.Provider>
-      <RectsContainer.Provider>
-        <TextsContainer.Provider>
-          <ShapeContainer.Provider>
-            <AppContainer>
-              <Provider store={store}>
+    <InfoContainer.Provider>
+      <PreferencesContainer.Provider>
+        <RectsContainer.Provider>
+          <TextsContainer.Provider>
+            <ShapeContainer.Provider>
+              <AppContainer>
                 <StylesProvider injectFirst>
                   <Component {...pageProps} />
                 </StylesProvider>
-              </Provider>
-            </AppContainer>
-          </ShapeContainer.Provider>
-        </TextsContainer.Provider>
-      </RectsContainer.Provider>
-    </PreferencesContainer.Provider>
+              </AppContainer>
+            </ShapeContainer.Provider>
+          </TextsContainer.Provider>
+        </RectsContainer.Provider>
+      </PreferencesContainer.Provider>
+    </InfoContainer.Provider>
   );
 };
 

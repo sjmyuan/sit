@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState, useEffect } from 'react';
+import React, { ChangeEvent, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
 import * as A from 'fp-ts/Array';
 import { useSelector, useDispatch } from 'react-redux';
@@ -26,11 +26,9 @@ import {
 } from '@material-ui/icons';
 import { pipe } from 'fp-ts/lib/function';
 import ImageBrowser from '../renderer/features/images/ImageBrowser';
-import { clearInfo, clearError } from '../renderer/utils/infoSlice';
-import { selectInformation } from '../renderer/store';
 import { FileInfo, TE } from '../renderer/types';
 import { uploadImage } from '../renderer/utils/localImages';
-import { ShapeContainer } from '../renderer/store-unstated';
+import { ShapeContainer, InfoContainer } from '../renderer/store-unstated';
 import Editor from '../renderer/features/canvas/Editor';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -65,10 +63,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const MainPage = (): React.ReactElement => {
-  const notification = useSelector(selectInformation);
+  const notification = InfoContainer.useContainer();
   const shapes = ShapeContainer.useContainer();
   const { inProgress } = notification;
-  const dispatch = useDispatch();
   const classes = useStyles();
 
   useEffect(() => {
@@ -91,9 +88,16 @@ const MainPage = (): React.ReactElement => {
         })
       );
 
-      A.array.traverse(TE.taskEither)(uploadingImages, (file) =>
-        uploadImage(file.name, file.content)
-      )();
+      notification.startProcess();
+
+      A.array
+        .traverse(TE.taskEither)(uploadingImages, (file) =>
+          uploadImage(file.name, file.content)
+        )()
+        .then(() => notification.showInfo(O.some('Image uploaded')))
+        .catch(() => {
+          notification.showError(O.some('Failed to upload image'));
+        });
     }
   };
 
@@ -176,11 +180,11 @@ const MainPage = (): React.ReactElement => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}
         autoHideDuration={6000}
-        onClose={() => dispatch(clearInfo(null))}
+        onClose={() => notification.showInfo(O.none)}
       >
         <Alert
           variant="filled"
-          onClose={() => dispatch(clearInfo(null))}
+          onClose={() => notification.showInfo(O.none)}
           severity="info"
         >
           {O.getOrElse(() => '')(notification.info)}
@@ -190,11 +194,11 @@ const MainPage = (): React.ReactElement => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.error)}
         autoHideDuration={6000}
-        onClose={() => dispatch(clearError(null))}
+        onClose={() => notification.showError(O.none)}
       >
         <Alert
           variant="filled"
-          onClose={() => dispatch(clearError(null))}
+          onClose={() => notification.showError(O.none)}
           severity="error"
         >
           {O.getOrElse(() => '')(notification.error)}

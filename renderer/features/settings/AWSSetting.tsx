@@ -1,5 +1,4 @@
 import React from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import {
   FormControl,
   InputLabel,
@@ -13,27 +12,7 @@ import { pipe, constant, identity } from 'fp-ts/lib/function';
 import { regions } from '../../constants/regions.json';
 import { PreferencesContainer } from '../../store-unstated';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      '& .MuiTextField-root': {
-        margin: theme.spacing(1),
-        minWidth: 194,
-      },
-
-      maxWidth: '100%',
-      display: 'flex',
-      flexWrap: 'wrap',
-      flexDirection: 'row',
-    },
-    formControl: {
-      margin: theme.spacing(1),
-      minWidth: 194,
-    },
-  })
-);
-
-const AWSSetting = () => {
+const AWSSetting = (): React.ReactElement => {
   const preferences = PreferencesContainer.useContainer();
 
   const { accessId, secretAccessKey, bucket, region } = preferences;
@@ -122,8 +101,8 @@ const AWSSetting = () => {
                   O.some(event.target.value as string),
                   O.filter((x) => x.trim() !== '')
                 )
-              ),
-                preferences.savePreferences();
+              );
+              preferences.savePreferences();
             }}
           >
             {regions.map((r) => (

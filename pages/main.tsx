@@ -20,7 +20,7 @@ import { ipcRenderer } from 'electron';
 import {
   AddAPhoto,
   Crop,
-  CheckBoxOutlined,
+  Crop32,
   TextFields,
   PhotoLibrary,
 } from '@material-ui/icons';
@@ -139,7 +139,7 @@ const MainPage = (): React.ReactElement => {
                 disabled={shapes.currentMode === 'RECT'}
                 onClick={() => shapes.setMode('RECT')}
               >
-                <CheckBoxOutlined />
+                <Crop32 />
               </IconButton>
               <IconButton
                 color="inherit"

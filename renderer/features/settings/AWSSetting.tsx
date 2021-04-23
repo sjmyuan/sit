@@ -24,6 +24,10 @@ const AWSSetting = (): React.ReactElement => {
         display: 'flex',
         flexWrap: 'wrap',
         flexDirection: 'row',
+        '& .MuiTextField-root': {
+          margin: '10px',
+          minWidth: 194,
+        },
       }}
     >
       <Box sx={{ padding: '24px' }}>

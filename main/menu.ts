@@ -163,8 +163,9 @@ const buildDarwinTemplate = (
   };
 
   const subMenuView = is.development ? subMenuViewDev : subMenuViewProd;
+  const subMenuView1 = subMenuView ? subMenuViewDev : subMenuView;
 
-  return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
+  return [subMenuAbout, subMenuEdit, subMenuView1, subMenuWindow, subMenuHelp];
 };
 const buildDefaultTemplate = (
   mainWindow: BrowserWindow

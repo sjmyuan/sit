@@ -11,7 +11,7 @@ export const loadRoute = (
     win.loadURL(`http://localhost:8000/${routeName}`);
     win.webContents.openDevTools({ mode: 'detach' });
   } else {
-    win.loadFile(`${app.getAppPath()}/renderer/${routeName}.html`);
+    win.loadFile(`${app.getAppPath()}/dist/renderer/out/${routeName}.html`);
     if (openDevTools) {
       win.webContents.openDevTools({ mode: 'detach' });
     }

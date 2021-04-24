@@ -40,7 +40,7 @@ const checkForUpdates = async (): Promise<void> => {
   if (is.development) {
     await prepareNext('./');
   } else {
-    await prepareNext('./renderer');
+    await prepareNext('./dist/renderer');
   }
 
   initializeTray();

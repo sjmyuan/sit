@@ -1,5 +1,4 @@
 import { BrowserWindow } from 'electron';
-import { is } from 'electron-util';
 import { loadRoute } from './util/routes';
 
 let preferencesWindow: BrowserWindow | null = null;
@@ -16,7 +15,7 @@ export const openPreferencesWindow = async (): Promise<BrowserWindow> => {
     title: 'Preferences',
     webPreferences: {
       nodeIntegration: true,
-      webSecurity: !is.development, // Disable webSecurity in dev to load video over file:// protocol while serving over insecure http, this is not needed in production where we use file:// protocol for html serving.
+      webSecurity: false,
     },
   });
 
@@ -35,7 +34,6 @@ export const openPreferencesWindow = async (): Promise<BrowserWindow> => {
   preferencesWindow.on('closed', () => {
     preferencesWindow = null;
   });
-
   return preferencesWindow;
 };
 

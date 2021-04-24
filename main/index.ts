@@ -1,4 +1,4 @@
-import { app, ipcMain } from 'electron';
+import { app, ipcMain, globalShortcut } from 'electron';
 import { is, enforceMacOSAppLocation } from 'electron-util';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
@@ -58,6 +58,11 @@ const checkForUpdates = async (): Promise<void> => {
   initializeAppMenu(mainWindow);
   await openWorkerWindow();
 
+  globalShortcut.register('CommandOrControl + Shift + 5', () => {
+    hideMainWindow();
+    openCropperWindow();
+  });
+
   ipcMain.on('taking-screen-shot', () => {
     hideMainWindow();
     openCropperWindow();
@@ -79,4 +84,5 @@ app.on('will-quit', () => {
   closeCropperWindow();
   closePreferencesWindow();
   closeMainWindow();
+  globalShortcut.unregisterAll();
 });

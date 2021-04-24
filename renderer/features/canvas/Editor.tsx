@@ -6,6 +6,7 @@ import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { pipe } from 'fp-ts/lib/function';
 import { clipboard, nativeImage } from 'electron';
+import { ipcRenderer } from 'electron';
 import MouseTrap from 'mousetrap';
 import {
   RectsContainer,
@@ -58,7 +59,10 @@ const Editor = (): React.ReactElement => {
         if (O.isSome(url)) {
           const image = new window.Image();
           image.src = url.value;
-          image.addEventListener('load', () => setBackgroundImg(O.some(image)));
+          image.addEventListener('load', () => {
+            setBackgroundImg(O.some(image));
+            ipcRenderer.send('resize-main-window', [image.width, image.height]);
+          });
         } else {
           setBackgroundImg(O.none);
         }

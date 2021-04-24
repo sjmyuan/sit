@@ -25,6 +25,7 @@ export const openMainWindow = async (
     show: false,
     width: 1024,
     height: 728,
+    center: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       nodeIntegration: true,
@@ -56,15 +57,20 @@ export const openMainWindow = async (
 };
 
 export const editImageinMainWindow = async (key: string): Promise<void> => {
+  const newMainWindow = mainWindow || (await openMainWindow(false));
+  newMainWindow.show();
+  newMainWindow.focus();
+  newMainWindow.webContents.on('did-finish-load', () => {
+    newMainWindow.webContents.send('edit-image', key);
+  });
+};
+
+export const resizeMainWindow = (width: number, height: number) => {
   if (mainWindow) {
-    mainWindow.show();
-    mainWindow.focus();
-    mainWindow.webContents.send('edit-image', key);
-  } else {
-    const newMainWindow = await openMainWindow(false);
-    newMainWindow.webContents.on('did-finish-load', () => {
-      newMainWindow.webContents.send('edit-image', key);
-    });
+    const newWidth = Math.max(mainWindow.getSize()[0], width + 30);
+    const newHeight = Math.max(mainWindow.getSize()[1], height + 30);
+    mainWindow.setContentSize(newWidth, newHeight);
+    mainWindow.center();
   }
 };
 

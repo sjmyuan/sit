@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  remote,
-  desktopCapturer,
-  clipboard,
-  nativeImage,
-  ipcRenderer,
-} from 'electron';
+import { remote, desktopCapturer, ipcRenderer } from 'electron';
 import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
 import jimp from 'jimp';
-import { db, ImageCache } from '../renderer/utils/AppDB';
 import { uploadImage } from '../renderer/utils/localImages';
 
 const getVideo = async () => {
@@ -96,8 +89,6 @@ const CropperPage = (): React.ReactElement => {
       const key = `screenshot-${Date.now()}.png`;
 
       await uploadImage(key, new Blob([buffer]))();
-
-      //clipboard.writeImage(nativeImage.createFromBuffer(buffer));
 
       ipcRenderer.send('took-screen-shot', key);
     }

@@ -9,6 +9,7 @@ import {
   closeMainWindow,
   hideMainWindow,
   editImageinMainWindow,
+  resizeMainWindow,
 } from './main';
 import { openWorkerWindow } from './worker';
 import { initializeAppMenu } from './menu';
@@ -71,6 +72,11 @@ const checkForUpdates = async (): Promise<void> => {
   ipcMain.on('took-screen-shot', (_, key) => {
     closeCropperWindow();
     editImageinMainWindow(key);
+  });
+
+  ipcMain.on('resize-main-window', (_, info) => {
+    const [width, height] = info;
+    resizeMainWindow(width, height);
   });
 
   checkForUpdates();

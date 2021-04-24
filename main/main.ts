@@ -1,8 +1,7 @@
 import path from 'path';
 
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import { loadRoute } from './util/routes';
-import { closeCropperWindow, openCropperWindow } from './cropper';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -53,23 +52,20 @@ export const openMainWindow = async (
     mainWindow = null;
   });
 
-  ipcMain.on('taking-screen-shot', () => {
-    if (mainWindow) {
-      mainWindow.hide();
-      openCropperWindow();
-    }
-  });
-
-  ipcMain.on('took-screen-shot', (_, key) => {
-    closeCropperWindow();
-    if (mainWindow) {
-      mainWindow.show();
-      mainWindow.focus();
-      mainWindow.webContents.send('edit-image', key);
-    }
-  });
-
   return mainWindow;
+};
+
+export const editImageinMainWindow = async (key: string): Promise<void> => {
+  if (mainWindow) {
+    mainWindow.show();
+    mainWindow.focus();
+    mainWindow.webContents.send('edit-image', key);
+  } else {
+    const newMainWindow = await openMainWindow(false);
+    newMainWindow.webContents.on('did-finish-load', () => {
+      newMainWindow.webContents.send('edit-image', key);
+    });
+  }
 };
 
 export const hideMainWindow = (): void => {

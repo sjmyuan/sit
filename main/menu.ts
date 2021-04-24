@@ -72,17 +72,17 @@ const buildDarwinTemplate = (
   const subMenuEdit: DarwinMenuItemConstructorOptions = {
     label: 'Edit',
     submenu: [
-      { label: 'Undo', accelerator: 'Command+Z', selector: 'undo:' },
-      { label: 'Redo', accelerator: 'Shift+Command+Z', selector: 'redo:' },
+      {
+        label: 'Screen Shot',
+        accelerator: 'Shift + Command+ 5',
+        click: async () => {
+          hideMainWindow();
+          await openCropperWindow();
+        },
+      },
       { type: 'separator' },
-      { label: 'Cut', accelerator: 'Command+X', selector: 'cut:' },
       { label: 'Copy', accelerator: 'Command+C', selector: 'copy:' },
       { label: 'Paste', accelerator: 'Command+V', selector: 'paste:' },
-      {
-        label: 'Select All',
-        accelerator: 'Command+A',
-        selector: 'selectAll:',
-      },
     ],
   };
   const subMenuViewDev: MenuItemConstructorOptions = {
@@ -274,6 +274,7 @@ export const getTrayMenu = (): Menu => {
   const template = [
     {
       label: 'Screen Shot',
+      accelerator: 'Shift + Command + 5',
       click: async () => {
         hideMainWindow();
         await openCropperWindow();

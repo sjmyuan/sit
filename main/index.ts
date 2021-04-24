@@ -1,13 +1,18 @@
-import { app } from 'electron';
+import { app, ipcMain } from 'electron';
 import { is, enforceMacOSAppLocation } from 'electron-util';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import prepareNext from 'electron-next';
 import { initializeTray } from './tray';
-import { openMainWindow, closeMainWindow } from './main';
+import {
+  openMainWindow,
+  closeMainWindow,
+  hideMainWindow,
+  editImageinMainWindow,
+} from './main';
 import { openWorkerWindow } from './worker';
 import { initializeAppMenu } from './menu';
-import { closeCropperWindow } from './cropper';
+import { closeCropperWindow, openCropperWindow } from './cropper';
 import { closePreferencesWindow } from './preferences';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
@@ -52,6 +57,16 @@ const checkForUpdates = async (): Promise<void> => {
   const mainWindow = await openMainWindow(false);
   initializeAppMenu(mainWindow);
   await openWorkerWindow();
+
+  ipcMain.on('taking-screen-shot', () => {
+    hideMainWindow();
+    openCropperWindow();
+  });
+
+  ipcMain.on('took-screen-shot', (_, key) => {
+    closeCropperWindow();
+    editImageinMainWindow(key);
+  });
 
   checkForUpdates();
 })();

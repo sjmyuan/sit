@@ -5,10 +5,16 @@ let preferencesWindow: BrowserWindow | null = null;
 
 // eslint-disable-next-line import/prefer-default-export
 export const openPreferencesWindow = async (): Promise<BrowserWindow> => {
+  if (preferencesWindow) {
+    preferencesWindow.show();
+    preferencesWindow.focus();
+    return Promise.resolve(preferencesWindow);
+  }
+
   preferencesWindow = new BrowserWindow({
     show: false,
-    width: 600,
-    height: 300,
+    width: 800,
+    height: 400,
     maximizable: false,
     resizable: false,
     center: true,

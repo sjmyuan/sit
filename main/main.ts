@@ -80,6 +80,12 @@ export const resizeMainWindow = (width: number, height: number) => {
   }
 };
 
+export const setSyncStatusInMainWindow = (info: { syncing: boolean }) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('sync-status', info);
+  }
+};
+
 export const hideMainWindow = (): void => {
   if (mainWindow) mainWindow.hide();
 };

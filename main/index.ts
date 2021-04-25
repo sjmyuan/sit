@@ -10,6 +10,7 @@ import {
   hideMainWindow,
   editImageinMainWindow,
   resizeMainWindow,
+  setSyncStatusInMainWindow,
 } from './main';
 import { openWorkerWindow } from './worker';
 import { initializeAppMenu } from './menu';
@@ -77,6 +78,10 @@ const checkForUpdates = async (): Promise<void> => {
   ipcMain.on('resize-main-window', (_, info) => {
     const [width, height] = info;
     resizeMainWindow(width, height);
+  });
+
+  ipcMain.on('sync-status', (_, info) => {
+    setSyncStatusInMainWindow(info);
   });
 
   checkForUpdates();

@@ -11,13 +11,18 @@ import { uploadImage, deleteImage } from '../renderer/utils/remoteImages';
 import { ImageIndex } from '../renderer/utils/AppDB';
 import { getFromStorage } from '../renderer/utils/localStorage';
 import { s3Client } from '../renderer/utils/aws';
+import { ipcRenderer } from 'electron';
 
 const startWoker = (worker: Lazy<AppErrorOr<void>>): T.Task<void> =>
   pipe(
-    TE.fromIO(() => console.log('starting worker.....')),
+    TE.fromIO(() => {
+      console.log('starting worker.....');
+      ipcRenderer.send('sync-status', { syncing: true });
+    }),
     TE.chain(() => worker()),
     T.map((x) => {
       console.log(`end worker, result is ${JSON.stringify(x)}`);
+      ipcRenderer.send('sync-status', { syncing: false });
       setTimeout(() => startWoker(worker)(), 60000);
     })
   );

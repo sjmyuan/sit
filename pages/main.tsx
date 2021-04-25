@@ -1,35 +1,22 @@
-import React, { ChangeEvent, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as O from 'fp-ts/Option';
-import * as A from 'fp-ts/Array';
-import { useSelector, useDispatch } from 'react-redux';
 import {
   Container,
   AppBar,
-  Typography,
   Toolbar,
-  Theme,
-  IconButton,
   CircularProgress,
   Snackbar,
   Backdrop,
   Alert,
   Box,
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import { ipcRenderer } from 'electron';
-import {
-  AddAPhoto,
-  Crop,
-  Crop32,
-  TextFields,
-  PhotoLibrary,
-} from '@material-ui/icons';
-import { pipe } from 'fp-ts/lib/function';
 import ImageBrowser from '../renderer/features/images/ImageBrowser';
-import { FileInfo, TE } from '../renderer/types';
-import { uploadImage } from '../renderer/utils/localImages';
 import { ShapeContainer, InfoContainer } from '../renderer/store-unstated';
 import Editor from '../renderer/features/canvas/Editor';
+import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
+import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -67,100 +54,32 @@ const MainPage = (): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
   const { inProgress } = notification;
   const classes = useStyles();
+  const [isSyncing, toggleSyncing] = useState<boolean>(false);
 
   useEffect(() => {
     ipcRenderer.on('edit-image', (_, key: any) => {
       shapes.setEditingImage(O.some(key));
     });
+    ipcRenderer.on('sync-status', (_, info: { syncing: boolean }) => {
+      toggleSyncing(info.syncing);
+    });
   }, []);
-
-  const handleUploadFileImage = (event: ChangeEvent<HTMLInputElement>) => {
-    const { files } = event.target;
-    if (files) {
-      const uploadingImages = pipe(
-        A.range(0, files.length - 1),
-        A.reduce<number, FileInfo[]>([], (acc, ele) => {
-          const file = files[ele];
-          if (file) {
-            return [...acc, { name: file.name, content: file }];
-          }
-          return acc;
-        })
-      );
-
-      notification.startProcess();
-
-      A.array
-        .traverse(TE.taskEither)(uploadingImages, (file) =>
-          uploadImage(file.name, file.content)
-        )()
-        .then(() => notification.showInfo(O.some('Image uploaded')))
-        .catch(() => {
-          notification.showError(O.some('Failed to upload image'));
-        });
-    }
-  };
 
   return (
     <Box sx={{ height: '100%' }}>
       <AppBar position="sticky">
         <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            Images
-          </Typography>
+          <Box
+            sx={{
+              display: isSyncing ? 'block' : 'none',
+            }}
+          >
+            <CircularProgress color="secondary" size={20} />
+          </Box>
           {O.isNone(shapes.editingImageKey) ? (
-            <div>
-              <IconButton
-                color="inherit"
-                aria-label="upload picture"
-                component="label"
-              >
-                <AddAPhoto />
-                <input
-                  accept="image/*"
-                  hidden
-                  id="icon-button-file"
-                  type="file"
-                  multiple
-                  onChange={handleUploadFileImage}
-                />
-              </IconButton>
-              <IconButton
-                color="inherit"
-                aria-label="screen capture"
-                onClick={() => {
-                  ipcRenderer.send('taking-screen-shot');
-                }}
-              >
-                <Crop />
-              </IconButton>
-            </div>
+            <BrowserToolbar />
           ) : (
-            <div>
-              <IconButton
-                color="inherit"
-                aria-label="draw rectangle"
-                disabled={shapes.currentMode === 'RECT'}
-                onClick={() => shapes.setMode('RECT')}
-              >
-                <Crop32 />
-              </IconButton>
-              <IconButton
-                color="inherit"
-                aria-label="add text"
-                disabled={shapes.currentMode === 'TEXT'}
-                onClick={() => shapes.setMode('TEXT')}
-              >
-                <TextFields />
-              </IconButton>
-              <IconButton
-                color="inherit"
-                aria-label="photo library"
-                onClick={() => shapes.setEditingImage(O.none)}
-              >
-                <PhotoLibrary />
-              </IconButton>
-            </div>
+            <EditorToolbar />
           )}
         </Toolbar>
       </AppBar>

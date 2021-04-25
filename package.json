@@ -45,6 +45,7 @@
       ]
     },
     "dmg": {
+      "icon": "dist/resources/icon.icns",
       "contents": [
         {
           "x": 130,
@@ -59,12 +60,14 @@
       ]
     },
     "win": {
+      "icon": "dist/resources/icon.ico",
       "target": [
         "nsis",
         "msi"
       ]
     },
     "linux": {
+      "icon": "dist/resources/icon.png",
       "target": [
         "deb",
         "rpm",
@@ -73,7 +76,8 @@
       "category": "Development"
     },
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "resources"
     },
     "asar": true,
     "files": [

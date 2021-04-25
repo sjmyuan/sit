@@ -39,13 +39,12 @@ const AWSSetting = (): React.ReactElement => {
           label="Access Key ID"
           value={pipe(accessId, O.fold(constant(''), identity))}
           onChange={(event) => {
-            preferences.setAccessId(
+            preferences.setAndSaveAccessId(
               pipe(
                 O.some(event.target.value as string),
                 O.filter((x) => x.trim() !== '')
               )
             );
-            preferences.savePreferences();
           }}
         />
       </Box>
@@ -59,13 +58,12 @@ const AWSSetting = (): React.ReactElement => {
           label="Secret Access Key"
           value={pipe(secretAccessKey, O.fold(constant(''), identity))}
           onChange={(event) => {
-            preferences.setSecretAccessKey(
+            preferences.setAndSaveSecretAccessKey(
               pipe(
                 O.some(event.target.value as string),
                 O.filter((x) => x.trim() !== '')
               )
             );
-            preferences.savePreferences();
           }}
         />
       </Box>
@@ -78,13 +76,12 @@ const AWSSetting = (): React.ReactElement => {
           name="bucket"
           value={pipe(bucket, O.fold(constant(''), identity))}
           onChange={(event) => {
-            preferences.setBucket(
+            preferences.setAndSaveBucket(
               pipe(
                 O.some(event.target.value as string),
                 O.filter((x) => x.trim() !== '')
               )
             );
-            preferences.savePreferences();
           }}
         />
       </Box>
@@ -100,13 +97,12 @@ const AWSSetting = (): React.ReactElement => {
             error={O.isNone(region)}
             value={pipe(region, O.fold(constant(''), identity))}
             onChange={(event) => {
-              preferences.setRegion(
+              preferences.setAndSaveRegion(
                 pipe(
                   O.some(event.target.value as string),
                   O.filter((x) => x.trim() !== '')
                 )
               );
-              preferences.savePreferences();
             }}
           >
             {regions.map((r) => (

@@ -240,6 +240,42 @@ function usePreferences() {
     height: 480,
   });
 
+  const setAndSaveAccessId = (newAccessId: O.Option<string>) => {
+    setAccessId(newAccessId);
+    pipe(
+      newAccessId,
+      O.map((x) => saveToStorage('access_id', x))
+    );
+  };
+  const setAndSaveSecretAccessKey = (newSecretAccessKey: O.Option<string>) => {
+    setSecretAccessKey(newSecretAccessKey);
+    pipe(
+      newSecretAccessKey,
+      O.map((x) => saveToStorage('secret_access_key', x))
+    );
+  };
+
+  const setAndSaveRegion = (newRegion: O.Option<string>) => {
+    setRegion(newRegion);
+    pipe(
+      newRegion,
+      O.map((x) => saveToStorage('region', x))
+    );
+  };
+
+  const setAndSaveBucket = (newBucket: O.Option<string>) => {
+    setBucket(newBucket);
+    pipe(
+      newBucket,
+      O.map((x) => saveToStorage('bucket', x))
+    );
+  };
+
+  const setAndSaveResolution = (newResolution: Resolution) => {
+    setResolution(newResolution);
+    saveToStorage('resolution', newResolution);
+  };
+
   const loadPreferences = () => {
     setAccessId(O.fromEither(getFromStorage<string>('access_id')));
     setSecretAccessKey(
@@ -255,39 +291,18 @@ function usePreferences() {
     );
   };
 
-  const savePreferences = () => {
-    pipe(
-      accessId,
-      O.map((x) => saveToStorage('access_id', x))
-    );
-    pipe(
-      secretAccessKey,
-      O.map((x) => saveToStorage('secret_access_key', x))
-    );
-    pipe(
-      bucket,
-      O.map((x) => saveToStorage('bucket', x))
-    );
-    pipe(
-      region,
-      O.map((x) => saveToStorage('region', x))
-    );
-    saveToStorage('resolution', resolution);
-  };
-
   return {
     accessId,
-    setAccessId,
+    setAndSaveAccessId,
     secretAccessKey,
-    setSecretAccessKey,
+    setAndSaveSecretAccessKey,
     bucket,
-    setBucket,
+    setAndSaveBucket,
     region,
-    setRegion,
+    setAndSaveRegion,
     resolution,
-    setResolution,
+    setAndSaveResolution,
     loadPreferences,
-    savePreferences,
   };
 }
 

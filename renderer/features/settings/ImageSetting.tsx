@@ -47,10 +47,9 @@ const ImageSetting = () => {
             )(availableResolutions)
           )}
           onChange={(event) => {
-            preferences.setResolution(
+            preferences.setAndSaveResolution(
               availableResolutions[event.target.value as number]
             );
-            preferences.savePreferences();
           }}
         >
           {A.range(0, availableResolutions.length - 1).map((r) => (

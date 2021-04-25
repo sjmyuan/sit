@@ -90,6 +90,7 @@ const Editor = (): React.ReactElement => {
   return (
     <Box
       sx={{
+        minHeight: '580px',
         p: 2,
         backgroundColor: 'rgb(116,116,116)',
         display: 'flex',

@@ -25,6 +25,8 @@ export const openMainWindow = async (
     show: false,
     width: 1024,
     height: 728,
+    minWidth: 1024,
+    minHeight: 728,
     center: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
@@ -73,8 +75,10 @@ export const editImageinMainWindow = async (key: string): Promise<void> => {
 
 export const resizeMainWindow = (width: number, height: number) => {
   if (mainWindow) {
-    const newWidth = Math.max(mainWindow.getSize()[0], width + 30);
-    const newHeight = Math.max(mainWindow.getSize()[1], height + 30);
+    //const newWidth = Math.max(mainWindow.getSize()[0], width + 30);
+    //const newHeight = Math.max(mainWindow.getSize()[1], height + 30);
+    const newWidth = width + 40;
+    const newHeight = height + 80;
     mainWindow.setContentSize(newWidth, newHeight);
     mainWindow.center();
   }

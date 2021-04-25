@@ -17,6 +17,7 @@ import { ShapeContainer, InfoContainer } from '../renderer/store-unstated';
 import Editor from '../renderer/features/canvas/Editor';
 import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
 import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
+import { CloudDone } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -69,12 +70,12 @@ const MainPage = (): React.ReactElement => {
     <Box sx={{ height: '100%' }}>
       <AppBar position="sticky">
         <Toolbar>
-          <Box
-            sx={{
-              display: isSyncing ? 'block' : 'none',
-            }}
-          >
-            <CircularProgress color="secondary" size={20} />
+          <Box sx={{ flexGrow: 1 }}>
+            {isSyncing ? (
+              <CircularProgress color="secondary" size={20} />
+            ) : (
+              <CloudDone />
+            )}
           </Box>
           {O.isNone(shapes.editingImageKey) ? (
             <BrowserToolbar />
@@ -83,18 +84,16 @@ const MainPage = (): React.ReactElement => {
           )}
         </Toolbar>
       </AppBar>
-      {O.isNone(shapes.editingImageKey) ? (
-        <Container
-          sx={{ marginTop: '10px', marginBottom: '10px' }}
-          maxWidth="xl"
-        >
-          <ImageBrowser />
-        </Container>
-      ) : (
-        <Box sx={{ height: '100%', width: '100%', display: 'flex' }}>
-          <Editor />
-        </Box>
-      )}
+      <Container
+        sx={{
+          marginTop: '10px',
+          marginBottom: '10px',
+          minHeight: 'calc(100% - (84px))',
+        }}
+        maxWidth="xl"
+      >
+        {O.isNone(shapes.editingImageKey) ? <ImageBrowser /> : <Editor />}
+      </Container>
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}

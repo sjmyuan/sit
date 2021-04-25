@@ -57,12 +57,18 @@ export const openMainWindow = async (
 };
 
 export const editImageinMainWindow = async (key: string): Promise<void> => {
-  const newMainWindow = mainWindow || (await openMainWindow(false));
-  newMainWindow.show();
-  newMainWindow.focus();
-  newMainWindow.webContents.on('did-finish-load', () => {
-    newMainWindow.webContents.send('edit-image', key);
-  });
+  if (mainWindow) {
+    mainWindow.show();
+    mainWindow.focus();
+    mainWindow.webContents.send('edit-image', key);
+  } else {
+    const newMainWindow = await openMainWindow(false);
+    newMainWindow.show();
+    newMainWindow.focus();
+    newMainWindow.webContents.on('did-finish-load', () => {
+      newMainWindow.webContents.send('edit-image', key);
+    });
+  }
 };
 
 export const resizeMainWindow = (width: number, height: number) => {

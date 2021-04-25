@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
 import * as T from 'fp-ts/Task';
 import { Box, makeStyles } from '@material-ui/core';
 import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { pipe } from 'fp-ts/lib/function';
-import { clipboard, nativeImage } from 'electron';
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, clipboard, nativeImage } from 'electron';
 import MouseTrap from 'mousetrap';
 import {
   RectsContainer,
@@ -68,7 +67,7 @@ const Editor = (): React.ReactElement => {
         }
       })
     )();
-  }, [shapes, shapes.editingImageKey]);
+  }, [shapes.editingImageKey]);
 
   useEffect(() => {
     MouseTrap.bind(['ctrl+c', 'command+c'], () => copyImageToClipboard());

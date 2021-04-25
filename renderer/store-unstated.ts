@@ -158,8 +158,6 @@ function useShapes() {
       O.map((x) => ({ ...x, value: value })),
       setEditingText
     );
-
-    console.log(editingText);
   };
 
   const endToEdit = () => {

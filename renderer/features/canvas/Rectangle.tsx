@@ -48,7 +48,6 @@ const Rectangle = (props: RectangleProps) => {
       onDragEnd={handleChange}
       onTransformEnd={handleChange}
       onMouseDown={handleMouseDown}
-      onMouseUp={() => console.log('rect mouse up......')}
       draggable
     />
   );

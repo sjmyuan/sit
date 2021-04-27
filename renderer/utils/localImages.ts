@@ -1,6 +1,7 @@
 import * as TE from 'fp-ts/TaskEither';
 import * as A from 'fp-ts/Array';
 import * as Eq from 'fp-ts/Eq';
+import * as E from 'fp-ts/Either';
 import { Do } from 'fp-ts-contrib';
 import { constVoid, pipe } from 'fp-ts/lib/function';
 import { db, ImageIndex, ImageState } from './AppDB';
@@ -44,51 +45,59 @@ export const syncImages = (remoteImages: ImageIndex[]): AppErrorOr<void> => {
 
 export const addImageIndex = (imageIndex: ImageIndex): AppErrorOr<void> =>
   pipe(
-    TE.fromTask<Error, unknown>(() => db.localIndex.add(imageIndex)),
+    TE.tryCatch<Error, unknown>(() => db.localIndex.put(imageIndex), E.toError),
     TE.map(constVoid)
   );
 
 export const uploadImage = (key: string, image: Blob): AppErrorOr<void> =>
   pipe(
-    TE.fromTask<Error, unknown>(() =>
-      db.localIndex
-        .add({
-          key,
-          lastModified: Date.now(),
-          state: 'ADDING',
-        })
-        .then(() => db.cache.add({ key, image }))
+    TE.tryCatch<Error, unknown>(
+      () =>
+        db.localIndex
+          .put({
+            key,
+            lastModified: Date.now(),
+            state: 'ADDING',
+          })
+          .then(() => db.cache.put({ key, image })),
+      E.toError
     ),
     TE.map(constVoid)
   );
 
 export const updateImage = (key: string, image: Blob): AppErrorOr<void> =>
   pipe(
-    TE.fromTask<Error, unknown>(() =>
-      db.localIndex
-        .update(key, { lastModified: Date.now(), state: 'ADDING' })
-        .then(() => db.cache.update(key, { image }))
+    TE.tryCatch<Error, unknown>(
+      () =>
+        db.localIndex
+          .update(key, { lastModified: Date.now(), state: 'ADDING' })
+          .then(() => db.cache.update(key, { image })),
+      E.toError
     ),
     TE.map(constVoid)
   );
 
 export const deleteImage = (key: string): AppErrorOr<void> =>
   pipe(
-    TE.fromTask<Error, unknown>(() =>
-      db.localIndex
-        .update(key, {
-          state: 'DELETING',
-        })
-        .then(() => db.cache.delete(key))
+    TE.tryCatch<Error, unknown>(
+      () =>
+        db.localIndex
+          .update(key, {
+            state: 'DELETING',
+          })
+          .then(() => db.cache.delete(key)),
+      E.toError
     ),
     TE.map(constVoid)
   );
 
 export const getImageUrl = (key: string): AppErrorOr<string> =>
-  TE.fromTask(() =>
-    db.cache
-      .get(key)
-      .then((imageCache) => URL.createObjectURL(imageCache.image))
+  TE.tryCatch(
+    () =>
+      db.cache
+        .get(key)
+        .then((imageCache) => URL.createObjectURL(imageCache.image)),
+    E.toError
   );
 
 export const getImageCache = (key: string): AppErrorOr<Blob> =>

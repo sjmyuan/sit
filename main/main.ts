@@ -90,6 +90,12 @@ export const setSyncStatusInMainWindow = (info: { syncing: boolean }) => {
   }
 };
 
+export const notifyPreferrencesChangedInMainWindow = () => {
+  if (mainWindow) {
+    mainWindow.webContents.send('preferences-changed');
+  }
+};
+
 export const hideMainWindow = (): void => {
   if (mainWindow) mainWindow.hide();
 };

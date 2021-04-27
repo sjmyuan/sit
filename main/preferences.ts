@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron';
 import { loadRoute } from './util/routes';
+import { notifyPreferrencesChangedInMainWindow } from './main';
 
 let preferencesWindow: BrowserWindow | null = null;
 
@@ -39,6 +40,7 @@ export const openPreferencesWindow = async (): Promise<BrowserWindow> => {
 
   preferencesWindow.on('closed', () => {
     preferencesWindow = null;
+    notifyPreferrencesChangedInMainWindow();
   });
   return preferencesWindow;
 };

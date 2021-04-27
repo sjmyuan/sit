@@ -27,11 +27,13 @@ export const s3Client = (config: AWSConfig): S3 => {
 export const getSignedUrl = (s3: S3, bucket: string) => (
   key: string
 ): AppErrorOr<string> => {
-  return TE.fromTask(() =>
-    s3.getSignedUrlPromise('getObject', {
-      Bucket: bucket,
-      Key: key,
-    })
+  return TE.tryCatch(
+    () =>
+      s3.getSignedUrlPromise('getObject', {
+        Bucket: bucket,
+        Key: key,
+      }),
+    E.toError
   );
 };
 
@@ -213,17 +215,19 @@ export const listAllImages = (
     O.filter((x) => x.length > 0),
     O.toUndefined
   );
+
   return pipe(
-    TE.fromTask(() =>
-      s3
-        .listObjectsV2({
-          Bucket: bucket,
-          MaxKeys: 100,
-          ContinuationToken: markder,
-        })
-        .promise()
+    TE.tryCatch(
+      () =>
+        s3
+          .listObjectsV2({
+            Bucket: bucket,
+            MaxKeys: 100,
+            ContinuationToken: markder,
+          })
+          .promise(),
+      E.toError
     ),
-    TE.mapLeft((e) => new Error(`Failed to list objects, error is ${e}`)),
     TE.chain((res) => {
       return pipe(
         O.fromNullable(res.Contents),
@@ -238,7 +242,9 @@ export const listAllImages = (
               (x) =>
                 sequenceS(O.option)({
                   key: O.fromNullable<string>(x.Key),
-                  lastModified: O.fromNullable<number>(1),
+                  lastModified: O.fromNullable<number>(
+                    x.LastModified?.getTime()
+                  ),
                   state: O.some('ADDED'),
                 }) as O.Option<ImageIndex>
             )

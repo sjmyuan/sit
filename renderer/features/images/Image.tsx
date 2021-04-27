@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { pipe } from 'fp-ts/lib/function';
+import * as T from 'fp-ts/Task';
 import { Do } from 'fp-ts-contrib';
+import { sequenceS } from 'fp-ts/lib/Apply';
 import { O, TE, AWSConfig, AppErrorOr } from '../../types';
 import { ShapeContainer, PreferencesContainer } from '../../store-unstated';
 import { getImageUrl } from '../../utils/localImages';
@@ -27,6 +29,7 @@ const useStyles = makeStyles((theme: Theme) =>
 const getObjectSignedUrl = (awsConfig: O.Option<AWSConfig>) => (
   key: string
 ): AppErrorOr<string> => {
+  console.log(`getting signed url for ${key}`);
   return Do.Do(TE.taskEither)
     .bind(
       'config',
@@ -50,9 +53,19 @@ const Image = (props: ImageProps) => {
     pipe(
       getImageUrl(props.imageKey),
       TE.orElse(() =>
-        getObjectSignedUrl(preferences.getAWSConfig())(props.imageKey)
+        getObjectSignedUrl(
+          sequenceS(O.option)({
+            accessId: preferences.accessId,
+            secretAccessKey: preferences.secretAccessKey,
+            bucket: preferences.bucket,
+            region: preferences.region,
+          })
+        )(props.imageKey)
       ),
-      TE.map((url) => setSrc(url))
+      TE.fold(
+        (e) => T.of(console.log(`image url error ${e.message}`)),
+        (url) => T.of(setSrc(url))
+      )
     )();
   }, [props.imageKey]);
   return (

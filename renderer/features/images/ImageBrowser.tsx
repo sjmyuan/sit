@@ -11,6 +11,8 @@ import {
 import { DeleteOutline } from '@material-ui/icons';
 import { pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/TaskEither';
+import * as A from 'fp-ts/Array';
+import * as Ord from 'fp-ts/lib/Ord';
 import Image from './Image';
 import { deleteImage, loadImages } from '../../utils/localImages';
 import { ImageIndex } from '../../utils/AppDB';
@@ -43,7 +45,17 @@ const ImageBrowser = (): React.ReactElement => {
   const [images, setImages] = useState<ImageIndex[]>([]);
 
   useEffect(() => {
-    pipe(loadImages(['ADDING', 'ADDED']), TE.map(setImages))();
+    pipe(
+      loadImages(['ADDING', 'ADDED']),
+      TE.map(
+        A.sortBy([
+          Ord.fromCompare<ImageIndex>((x: ImageIndex, y: ImageIndex) =>
+            x.lastModified > y.lastModified ? -1 : 1
+          ),
+        ])
+      ),
+      TE.map(setImages)
+    )();
   }, []);
 
   return (

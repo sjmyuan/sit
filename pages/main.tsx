@@ -14,7 +14,11 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import { ipcRenderer } from 'electron';
 import { CloudDone } from '@material-ui/icons';
 import ImageBrowser from '../renderer/features/images/ImageBrowser';
-import { ShapeContainer, InfoContainer } from '../renderer/store-unstated';
+import {
+  ShapeContainer,
+  InfoContainer,
+  PreferencesContainer,
+} from '../renderer/store-unstated';
 import Editor from '../renderer/features/canvas/Editor';
 import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
 import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
@@ -53,6 +57,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 const MainPage = (): React.ReactElement => {
   const notification = InfoContainer.useContainer();
   const shapes = ShapeContainer.useContainer();
+  const preferences = PreferencesContainer.useContainer();
   const { inProgress } = notification;
   const classes = useStyles();
   const [isSyncing, toggleSyncing] = useState<boolean>(false);
@@ -64,6 +69,10 @@ const MainPage = (): React.ReactElement => {
     ipcRenderer.on('sync-status', (_, info: { syncing: boolean }) => {
       toggleSyncing(info.syncing);
     });
+    ipcRenderer.on('preferences-changed', () => {
+      preferences.loadPreferences();
+    });
+    preferences.loadPreferences();
   }, []);
 
   return (

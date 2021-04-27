@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import * as A from 'fp-ts/Array';
 import * as TE from 'fp-ts/TaskEither';
-import * as T from 'fp-ts/Task';
-import * as E from 'fp-ts/Either';
 import * as O from 'fp-ts/Option';
 import { Do } from 'fp-ts-contrib';
 import { S3 } from 'aws-sdk';
@@ -21,7 +19,6 @@ import {
   listAllImages,
 } from '../renderer/utils/aws';
 import { ImageIndex } from '../renderer/utils/AppDB';
-import { PreferencesContainer } from '../renderer/store-unstated';
 import { sequenceS } from 'fp-ts/lib/Apply';
 import { getFromStorage } from '../renderer/utils/localStorage';
 
@@ -60,7 +57,6 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
   );
 
 const Worker = (): React.ReactElement => {
-  const preferences = PreferencesContainer.useContainer();
   useEffect(() => {
     const worker = Do.Do(TE.taskEither)
       .bindL('awsConfig', () => {
@@ -75,15 +71,9 @@ const Worker = (): React.ReactElement => {
           })
         );
       })
-      .doL(({ awsConfig }) =>
-        TE.fromIO(() => console.log(JSON.stringify(awsConfig)))
-      )
       .letL('s3', ({ awsConfig }) => s3Client(awsConfig))
       .bindL('allRemoteImages', ({ s3, awsConfig }) =>
         listAllImages(s3, awsConfig.bucket, O.none)
-      )
-      .doL(({ allRemoteImages }) =>
-        TE.fromIO(() => console.log(JSON.stringify(allRemoteImages)))
       )
       .doL(({ allRemoteImages }) => syncImages(allRemoteImages))
       .doL(({ s3, awsConfig }) => syncLocalToS3(s3, awsConfig.bucket))

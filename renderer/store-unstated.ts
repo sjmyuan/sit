@@ -290,9 +290,6 @@ function usePreferences() {
     );
   };
 
-  const getAWSConfig = (): O.Option<AWSConfig> =>
-    sequenceS(O.option)({ accessId, secretAccessKey, bucket, region });
-
   return {
     accessId,
     setAndSaveAccessId,
@@ -305,7 +302,6 @@ function usePreferences() {
     resolution,
     setAndSaveResolution,
     loadPreferences,
-    getAWSConfig,
   };
 }
 

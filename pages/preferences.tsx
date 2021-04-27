@@ -33,7 +33,6 @@ const PreferencesPage = (): React.ReactElement => {
 
   useEffect(() => {
     preferences.loadPreferences();
-    return () => preferences.savePreferences();
   }, []);
 
   const handleChange = (_event: unknown, newValue: number) => {

@@ -22,19 +22,21 @@ import {
 } from '../renderer/utils/aws';
 import { ImageIndex } from '../renderer/utils/AppDB';
 import { PreferencesContainer } from '../renderer/store-unstated';
+import { sequenceS } from 'fp-ts/lib/Apply';
+import { getFromStorage } from '../renderer/utils/localStorage';
 
-const startWoker = (worker: Lazy<AppErrorOr<void>>): T.Task<void> =>
+const startWoker = (worker: Lazy<AppErrorOr<void>>): AppErrorOr<void> =>
   pipe(
     TE.fromIO(() => {
       console.log('starting worker.....');
       ipcRenderer.send('sync-status', { syncing: true });
     }),
     TE.chain(() => worker()),
-    T.map((x) => {
-      E.fold(
-        (e) => console.log(`end worker, error is ${JSON.stringify(e)}`),
-        () => console.log('end worker successfully')
-      )(x);
+    TE.orElse<Error, void, Error>((e: Error) =>
+      TE.fromIO(() => console.log(`Error happend: ${e.message}`))
+    ),
+    TE.map(() => {
+      console.log('end worker.....');
       ipcRenderer.send('sync-status', { syncing: false });
       setTimeout(() => startWoker(worker)(), 60000);
       return constVoid();
@@ -60,17 +62,19 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
 const Worker = (): React.ReactElement => {
   const preferences = PreferencesContainer.useContainer();
   useEffect(() => {
-    preferences.loadPreferences();
     const worker = Do.Do(TE.taskEither)
-      .doL(() => {
-        console.log('loading aws configuration...');
-        return TE.fromIO(() => preferences.loadPreferences());
+      .bindL('awsConfig', () => {
+        return TE.fromOption(() => new Error('No AWS Configuration'))(
+          sequenceS(O.option)({
+            accessId: O.fromEither(getFromStorage<string>('access_id')),
+            secretAccessKey: O.fromEither(
+              getFromStorage<string>('secret_access_key')
+            ),
+            bucket: O.fromEither(getFromStorage<string>('bucket')),
+            region: O.fromEither(getFromStorage<string>('region')),
+          })
+        );
       })
-      .bindL('awsConfig', () =>
-        TE.fromOption(() => new Error('No AWS Configuration'))(
-          preferences.getAWSConfig()
-        )
-      )
       .doL(({ awsConfig }) =>
         TE.fromIO(() => console.log(JSON.stringify(awsConfig)))
       )

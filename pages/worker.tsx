@@ -2,16 +2,26 @@ import React, { useEffect } from 'react';
 import * as A from 'fp-ts/Array';
 import * as TE from 'fp-ts/TaskEither';
 import * as T from 'fp-ts/Task';
+import * as E from 'fp-ts/Either';
+import * as O from 'fp-ts/Option';
 import { Do } from 'fp-ts-contrib';
-import { AppErrorOr } from '../renderer/types';
-import { loadImages, getImageCache } from '../renderer/utils/localImages';
 import { S3 } from 'aws-sdk';
 import { pipe, constVoid, Lazy } from 'fp-ts/lib/function';
-import { uploadImage, deleteImage } from '../renderer/utils/remoteImages';
-import { ImageIndex } from '../renderer/utils/AppDB';
-import { getFromStorage } from '../renderer/utils/localStorage';
-import { s3Client } from '../renderer/utils/aws';
 import { ipcRenderer } from 'electron';
+import { AppErrorOr } from '../renderer/types';
+import {
+  loadImages,
+  getImageCache,
+  syncImages,
+} from '../renderer/utils/localImages';
+import {
+  uploadImage,
+  deleteImage,
+  s3Client,
+  listAllImages,
+} from '../renderer/utils/aws';
+import { ImageIndex } from '../renderer/utils/AppDB';
+import { PreferencesContainer } from '../renderer/store-unstated';
 
 const startWoker = (worker: Lazy<AppErrorOr<void>>): T.Task<void> =>
   pipe(
@@ -21,9 +31,13 @@ const startWoker = (worker: Lazy<AppErrorOr<void>>): T.Task<void> =>
     }),
     TE.chain(() => worker()),
     T.map((x) => {
-      console.log(`end worker, result is ${JSON.stringify(x)}`);
+      E.fold(
+        (e) => console.log(`end worker, error is ${JSON.stringify(e)}`),
+        () => console.log('end worker successfully')
+      )(x);
       ipcRenderer.send('sync-status', { syncing: false });
       setTimeout(() => startWoker(worker)(), 60000);
+      return constVoid();
     })
   );
 const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
@@ -44,20 +58,31 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
   );
 
 const Worker = (): React.ReactElement => {
+  const preferences = PreferencesContainer.useContainer();
   useEffect(() => {
+    preferences.loadPreferences();
     const worker = Do.Do(TE.taskEither)
-      .bindL('accessId', () =>
-        TE.fromEither(getFromStorage<string>('access_id'))
+      .doL(() => {
+        console.log('loading aws configuration...');
+        return TE.fromIO(() => preferences.loadPreferences());
+      })
+      .bindL('awsConfig', () =>
+        TE.fromOption(() => new Error('No AWS Configuration'))(
+          preferences.getAWSConfig()
+        )
       )
-      .bindL('secretAccessKey', () =>
-        TE.fromEither(getFromStorage<string>('secret_access_key'))
+      .doL(({ awsConfig }) =>
+        TE.fromIO(() => console.log(JSON.stringify(awsConfig)))
       )
-      .bindL('region', () => TE.fromEither(getFromStorage<string>('region')))
-      .bindL('bucket', () => TE.fromEither(getFromStorage<string>('bucket')))
-      .letL('s3', ({ accessId, secretAccessKey, bucket, region }) =>
-        s3Client({ accessId, secretAccessKey, region, bucket })
+      .letL('s3', ({ awsConfig }) => s3Client(awsConfig))
+      .bindL('allRemoteImages', ({ s3, awsConfig }) =>
+        listAllImages(s3, awsConfig.bucket, O.none)
       )
-      .doL(({ s3, bucket }) => syncLocalToS3(s3, bucket))
+      .doL(({ allRemoteImages }) =>
+        TE.fromIO(() => console.log(JSON.stringify(allRemoteImages)))
+      )
+      .doL(({ allRemoteImages }) => syncImages(allRemoteImages))
+      .doL(({ s3, awsConfig }) => syncLocalToS3(s3, awsConfig.bucket))
       .return(constVoid);
 
     startWoker(() => worker)();

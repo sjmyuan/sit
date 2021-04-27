@@ -3,7 +3,6 @@
 import React, { Fragment } from 'react';
 import { AppProps } from 'next/app';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
-import { Provider } from 'react-redux';
 import { StylesProvider } from '@material-ui/core';
 import '../renderer/app.global.css';
 import {
@@ -14,7 +13,8 @@ import {
   InfoContainer,
 } from '../renderer/store-unstated';
 
-const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
+//const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
+const AppContainer = ReactHotAppContainer;
 
 const App = ({ Component, pageProps }: AppProps) => {
   return (

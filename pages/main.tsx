@@ -12,12 +12,12 @@ import {
 } from '@material-ui/core';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { ipcRenderer } from 'electron';
+import { CloudDone } from '@material-ui/icons';
 import ImageBrowser from '../renderer/features/images/ImageBrowser';
 import { ShapeContainer, InfoContainer } from '../renderer/store-unstated';
 import Editor from '../renderer/features/canvas/Editor';
 import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
 import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
-import { CloudDone } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {

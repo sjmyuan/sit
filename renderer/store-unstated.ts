@@ -3,10 +3,11 @@ import * as A from 'fp-ts/Array';
 import * as O from 'fp-ts/Option';
 import { createContainer } from 'unstated-next';
 import { pipe, constVoid } from 'fp-ts/lib/function';
+import { sequenceS } from 'fp-ts/lib/Apply';
+import Konva from 'konva';
 import { ImageIndex } from './utils/AppDB';
 import { getImageUrl, updateImage } from './utils/localImages';
-import { TE, AppErrorOr, Resolution } from './types';
-import Konva from 'konva';
+import { TE, Resolution, AWSConfig } from './types';
 import { getFromStorage, saveToStorage } from './utils/localStorage';
 
 export type Point = {
@@ -155,7 +156,7 @@ function useShapes() {
   const editing = (value: string) => {
     pipe(
       editingText,
-      O.map((x) => ({ ...x, value: value })),
+      O.map((x) => ({ ...x, value })),
       setEditingText
     );
   };
@@ -289,6 +290,9 @@ function usePreferences() {
     );
   };
 
+  const getAWSConfig = (): O.Option<AWSConfig> =>
+    sequenceS(O.option)({ accessId, secretAccessKey, bucket, region });
+
   return {
     accessId,
     setAndSaveAccessId,
@@ -301,6 +305,7 @@ function usePreferences() {
     resolution,
     setAndSaveResolution,
     loadPreferences,
+    getAWSConfig,
   };
 }
 

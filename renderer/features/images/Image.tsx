@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { pipe } from 'fp-ts/lib/function';
-import { O, TE } from '../../types';
-import { ShapeContainer } from '../../store-unstated';
+import { Do } from 'fp-ts-contrib';
+import { O, TE, AWSConfig, AppErrorOr } from '../../types';
+import { ShapeContainer, PreferencesContainer } from '../../store-unstated';
 import { getImageUrl } from '../../utils/localImages';
+import { s3Client, getSignedUrl } from '../../utils/aws';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -22,6 +24,19 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+const getObjectSignedUrl = (awsConfig: O.Option<AWSConfig>) => (
+  key: string
+): AppErrorOr<string> => {
+  return Do.Do(TE.taskEither)
+    .bind(
+      'config',
+      TE.fromOption<Error>(() => new Error('No AWS Configuration'))(awsConfig)
+    )
+    .letL('s3', ({ config }) => s3Client(config))
+    .bindL('url', ({ s3, config }) => getSignedUrl(s3, config.bucket)(key))
+    .return(({ url }) => url);
+};
+
 type ImageProps = {
   imageKey: string;
 };
@@ -29,10 +44,14 @@ type ImageProps = {
 const Image = (props: ImageProps) => {
   const classes = useStyles();
   const shapes = ShapeContainer.useContainer();
+  const preferences = PreferencesContainer.useContainer();
   const [src, setSrc] = useState<string>('');
   useEffect(() => {
     pipe(
       getImageUrl(props.imageKey),
+      TE.orElse(() =>
+        getObjectSignedUrl(preferences.getAWSConfig())(props.imageKey)
+      ),
       TE.map((url) => setSrc(url))
     )();
   }, [props.imageKey]);

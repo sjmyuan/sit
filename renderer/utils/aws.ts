@@ -1,6 +1,6 @@
 import { sequenceS } from 'fp-ts/Apply';
 import { S3 } from 'aws-sdk';
-import { pipe, constVoid } from 'fp-ts/lib/function';
+import { pipe, constVoid, identity } from 'fp-ts/lib/function';
 import * as Ord from 'fp-ts/Ord';
 import {
   AWSConfig,
@@ -13,6 +13,7 @@ import {
   FileInfo,
   S3ObjectInfo,
 } from '../types';
+import { ImageIndex } from './AppDB';
 
 export const s3Client = (config: AWSConfig): S3 => {
   const { accessId, secretAccessKey, region } = config;
@@ -160,6 +161,98 @@ export const listObjects = (s3: S3, bucket: string) => (
             objects,
             pointer,
           }) as TE.TaskEither<Error, S3ObjectPage>;
+        })
+      );
+    })
+  );
+};
+export const uploadImage = (s3: S3, bucket: string) => (
+  key: string,
+  image: Blob
+): AppErrorOr<void> =>
+  pipe(
+    TE.tryCatch<Error, unknown>(
+      () =>
+        s3
+          .putObject({
+            Bucket: bucket,
+            Key: key,
+            Body: image,
+            StorageClass: 'STANDARD_IA',
+          })
+          .promise(),
+      E.toError
+    ),
+    TE.map(constVoid)
+  );
+
+export const deleteImage = (s3: S3, bucket: string) => (
+  key: string
+): AppErrorOr<void> =>
+  pipe(
+    TE.tryCatch<Error, unknown>(
+      () =>
+        s3
+          .deleteObject({
+            Bucket: bucket,
+            Key: key,
+          })
+          .promise(),
+      E.toError
+    ),
+    TE.map(constVoid)
+  );
+
+export const listAllImages = (
+  s3: S3,
+  bucket: string,
+  pointer: O.Option<string>
+): AppErrorOr<ImageIndex[]> => {
+  const markder: undefined | string = pipe(
+    pointer,
+    O.filter((x) => x.length > 0),
+    O.toUndefined
+  );
+  return pipe(
+    TE.fromTask(() =>
+      s3
+        .listObjectsV2({
+          Bucket: bucket,
+          MaxKeys: 100,
+          ContinuationToken: markder,
+        })
+        .promise()
+    ),
+    TE.mapLeft((e) => new Error(`Failed to list objects, error is ${e}`)),
+    TE.chain((res) => {
+      return pipe(
+        O.fromNullable(res.Contents),
+        O.fold(() => [], identity),
+        TE.of,
+        TE.chain((contents) => {
+          const nextPointer = O.fromNullable(res.NextContinuationToken);
+
+          const currentPage: ImageIndex[] = pipe(
+            contents,
+            A.filterMap(
+              (x) =>
+                sequenceS(O.option)({
+                  key: O.fromNullable<string>(x.Key),
+                  lastModified: O.fromNullable<number>(1),
+                  state: O.some('ADDED'),
+                }) as O.Option<ImageIndex>
+            )
+          );
+
+          if (O.isSome(nextPointer)) {
+            const nextPage = listAllImages(s3, bucket, nextPointer);
+            return pipe(
+              nextPage,
+              TE.map((x) => [...currentPage, ...x])
+            );
+          }
+
+          return TE.of<Error, ImageIndex[]>(currentPage);
         })
       );
     })

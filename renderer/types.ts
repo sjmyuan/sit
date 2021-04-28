@@ -6,6 +6,7 @@ export * as O from 'fp-ts/Option';
 export * as E from 'fp-ts/Either';
 export * as A from 'fp-ts/Array';
 export * as T from 'fp-ts/Task';
+export * as Ord from 'fp-ts/Ord';
 
 export type AppErrorOr<A> = TE.TaskEither<Error, A>;
 

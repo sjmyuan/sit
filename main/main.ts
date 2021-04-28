@@ -13,6 +13,8 @@ export const openMainWindow = async (
     return Promise.resolve(mainWindow);
   }
 
+  console.log('open main...');
+
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'resources')
     : path.join(__dirname, '../resources');
@@ -40,6 +42,7 @@ export const openMainWindow = async (
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
   mainWindow.webContents.on('did-finish-load', () => {
+    console.log('load main...');
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
@@ -52,6 +55,7 @@ export const openMainWindow = async (
   });
 
   mainWindow.on('closed', () => {
+    console.log('cloase main...');
     mainWindow = null;
   });
 

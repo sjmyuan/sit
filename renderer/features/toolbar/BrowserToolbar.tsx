@@ -6,6 +6,7 @@ import { ChangeEvent } from 'react';
 import { pipe } from 'fp-ts/lib/function';
 import * as A from 'fp-ts/Array';
 import * as TE from 'fp-ts/TaskEither';
+import * as O from 'fp-ts/Option';
 import { InfoContainer } from '../../store-unstated';
 import { FileInfo } from '../../types';
 import { uploadImage } from '../../utils/localImages';

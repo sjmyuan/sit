@@ -39,6 +39,8 @@ const checkForUpdates = async (): Promise<void> => {
 (async () => {
   await app.whenReady();
 
+  console.log('app ready ...');
+
   app.setAboutPanelOptions({ copyright: 'Copyright © Sjmyuan' });
 
   // Ensure the app is in the Applications folder
@@ -88,10 +90,12 @@ const checkForUpdates = async (): Promise<void> => {
 })();
 
 app.on('activate', () => {
+  console.log('active....');
   openMainWindow(false);
 });
 
 app.on('will-quit', () => {
+  console.log('will quit....');
   closeCropperWindow();
   closePreferencesWindow();
   closeMainWindow();

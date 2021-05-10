@@ -7,7 +7,7 @@ import { sequenceS } from 'fp-ts/lib/Apply';
 import Konva from 'konva';
 import { ImageIndex } from './utils/AppDB';
 import { getImageUrl, updateImage } from './utils/localImages';
-import { TE, Resolution, AWSConfig } from './types';
+import { TE, Resolution, AWSConfig, AppErrorOr } from './types';
 import { getFromStorage, saveToStorage } from './utils/localStorage';
 
 export type Point = {
@@ -224,7 +224,38 @@ function useInfo() {
     setError(errorMsg);
   };
 
-  return { info, error, inProgress, startProcess, showInfo, showError };
+  const runTask = (description: String) => <A>(
+    task: AppErrorOr<A>
+  ): AppErrorOr<A> =>
+    pipe(
+      TE.fromIO<Error, void>(() => startProcess()),
+      TE.chain(() => task),
+      TE.fold(
+        (e) =>
+          pipe(
+            TE.fromIO<Error, void>(() =>
+              showError(O.some(`Failed to ${description}`))
+            ),
+            TE.chain(() => TE.left(e))
+          ),
+        (x) =>
+          pipe(
+            TE.fromIO<Error, void>(() =>
+              showInfo(O.some(`Succeed to ${description}`))
+            ),
+            TE.map(() => x)
+          )
+      )
+    );
+  return {
+    info,
+    error,
+    inProgress,
+    startProcess,
+    showInfo,
+    showError,
+    runTask,
+  };
 }
 
 function usePreferences() {

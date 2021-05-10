@@ -12,26 +12,29 @@ import {
   PreferencesContainer,
   InfoContainer,
 } from '../renderer/store-unstated';
+import { ImageContainer } from '../renderer/store/ImageContainer';
 
-//const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
-const AppContainer = ReactHotAppContainer;
+const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
+//const AppContainer = ReactHotAppContainer;
 
 const App = ({ Component, pageProps }: AppProps) => {
   return (
     <InfoContainer.Provider>
-      <PreferencesContainer.Provider>
-        <RectsContainer.Provider>
-          <TextsContainer.Provider>
-            <ShapeContainer.Provider>
-              <AppContainer>
-                <StylesProvider injectFirst>
-                  <Component {...pageProps} />
-                </StylesProvider>
-              </AppContainer>
-            </ShapeContainer.Provider>
-          </TextsContainer.Provider>
-        </RectsContainer.Provider>
-      </PreferencesContainer.Provider>
+      <ImageContainer.Provider>
+        <PreferencesContainer.Provider>
+          <RectsContainer.Provider>
+            <TextsContainer.Provider>
+              <ShapeContainer.Provider>
+                <AppContainer>
+                  <StylesProvider injectFirst>
+                    <Component {...pageProps} />
+                  </StylesProvider>
+                </AppContainer>
+              </ShapeContainer.Provider>
+            </TextsContainer.Provider>
+          </RectsContainer.Provider>
+        </PreferencesContainer.Provider>
+      </ImageContainer.Provider>
     </InfoContainer.Provider>
   );
 };

@@ -43,27 +43,32 @@ export const syncImages = (remoteImages: ImageIndex[]): AppErrorOr<void> => {
     .return(constVoid);
 };
 
-export const addImageIndex = (imageIndex: ImageIndex): AppErrorOr<void> =>
-  pipe(
-    TE.tryCatch<Error, unknown>(() => db.localIndex.put(imageIndex), E.toError),
-    TE.map(constVoid)
-  );
-
-export const uploadImage = (key: string, image: Blob): AppErrorOr<void> =>
+export const addImageIndex = (imageIndexs: ImageIndex[]): AppErrorOr<void> =>
   pipe(
     TE.tryCatch<Error, unknown>(
-      () =>
-        db.localIndex
-          .put({
-            key,
-            lastModified: Date.now(),
-            state: 'ADDING',
-          })
-          .then(() => db.cache.put({ key, image })),
+      () => db.localIndex.bulkPut(imageIndexs),
       E.toError
     ),
     TE.map(constVoid)
   );
+
+export const uploadImage = (
+  key: string,
+  image: Blob
+): AppErrorOr<ImageIndex> => {
+  const imageIndex: ImageIndex = {
+    key,
+    lastModified: Date.now(),
+    state: 'ADDING',
+  };
+  return pipe(
+    addImageIndex([imageIndex]),
+    TE.chain(() =>
+      TE.tryCatch<Error, unknown>(() => db.cache.put({ key, image }), E.toError)
+    ),
+    TE.map(() => imageIndex)
+  );
+};
 
 export const updateImage = (key: string, image: Blob): AppErrorOr<void> =>
   pipe(

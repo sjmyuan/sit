@@ -6,13 +6,11 @@ import { ChangeEvent } from 'react';
 import { pipe } from 'fp-ts/lib/function';
 import * as A from 'fp-ts/Array';
 import * as TE from 'fp-ts/TaskEither';
-import * as O from 'fp-ts/Option';
-import { InfoContainer } from '../../store-unstated';
 import { FileInfo } from '../../types';
-import { uploadImage } from '../../utils/localImages';
+import { ImageContainer } from '../../store/ImageContainer';
 
 const BrowserToolbar = (): React.ReactElement => {
-  const notification = InfoContainer.useContainer();
+  const imageContainer = ImageContainer.useContainer();
   const handleUploadFileImage = (event: ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
     if (files) {
@@ -27,16 +25,9 @@ const BrowserToolbar = (): React.ReactElement => {
         })
       );
 
-      notification.startProcess();
-
-      A.array
-        .traverse(TE.taskEither)(uploadingImages, (file) =>
-          uploadImage(file.name, file.content)
-        )()
-        .then(() => notification.showInfo(O.some('Image uploaded')))
-        .catch(() => {
-          notification.showError(O.some('Failed to upload image'));
-        });
+      A.array.traverse(TE.taskEither)(uploadingImages, (file) =>
+        imageContainer.addImage(file.name, file.content)
+      )();
     }
   };
   return (

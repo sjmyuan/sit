@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { pipe, constVoid } from 'fp-ts/lib/function';
 import { ImageIndex } from '../utils/AppDB';
-import { loadImages, addImageIndex, uploadImage } from '../utils/localImages';
+import {
+  loadImages,
+  addImageIndex,
+  uploadImage,
+  deleteImage as deleteImageInCache,
+} from '../utils/localImages';
 import { TE, A, Ord, AppErrorOr, O } from '../types';
 import { InfoContainer } from '../store-unstated';
 import { createContainer } from 'unstated-next';
@@ -12,7 +17,7 @@ function useImages() {
   const infoState = InfoContainer.useContainer();
 
   const loadAllImageIndexes = () => {
-    infoState.runTask('load images')(
+    return infoState.runTask('load images')(
       pipe(
         loadImages(['ADDING', 'ADDED']),
         TE.map(
@@ -47,11 +52,22 @@ function useImages() {
     );
   };
 
+  const deleteImage = (key: string): AppErrorOr<void> => {
+    return infoState.runTask('delete image')(
+      pipe(
+        deleteImageInCache(key),
+        TE.map(() => setImages(images.filter((x) => x.key != key))),
+        TE.map(constVoid)
+      )
+    );
+  };
+
   return {
     images,
-    loadAllImages: loadAllImageIndexes,
+    loadAllImageIndexes,
     addImageIndexes,
     addImage,
+    deleteImage,
   };
 }
 

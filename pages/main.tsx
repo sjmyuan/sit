@@ -22,6 +22,7 @@ import {
 import Editor from '../renderer/features/canvas/Editor';
 import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
 import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
+import { ImageContainer } from '../renderer/store/ImageContainer';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -58,6 +59,7 @@ const MainPage = (): React.ReactElement => {
   const notification = InfoContainer.useContainer();
   const shapes = ShapeContainer.useContainer();
   const preferences = PreferencesContainer.useContainer();
+  const imageContainer = ImageContainer.useContainer();
   const { inProgress } = notification;
   const classes = useStyles();
   const [isSyncing, toggleSyncing] = useState<boolean>(false);
@@ -73,6 +75,7 @@ const MainPage = (): React.ReactElement => {
       preferences.loadPreferences();
     });
     preferences.loadPreferences();
+    imageContainer.loadAllImageIndexes()();
   }, []);
 
   return (

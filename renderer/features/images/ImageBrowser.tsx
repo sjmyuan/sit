@@ -16,6 +16,7 @@ import * as Ord from 'fp-ts/lib/Ord';
 import Image from './Image';
 import { deleteImage, loadImages } from '../../utils/localImages';
 import { ImageIndex } from '../../utils/AppDB';
+import { ImageContainer } from '../../store/ImageContainer';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -42,25 +43,11 @@ const useStyles = makeStyles(() =>
 
 const ImageBrowser = (): React.ReactElement => {
   const classes = useStyles();
-  const [images, setImages] = useState<ImageIndex[]>([]);
-
-  useEffect(() => {
-    pipe(
-      loadImages(['ADDING', 'ADDED']),
-      TE.map(
-        A.sortBy([
-          Ord.fromCompare<ImageIndex>((x: ImageIndex, y: ImageIndex) =>
-            x.lastModified > y.lastModified ? -1 : 1
-          ),
-        ])
-      ),
-      TE.map(setImages)
-    )();
-  }, []);
+  const imageContainer = ImageContainer.useContainer();
 
   return (
     <ImageList cols={4} gap={8} rowHeight="auto" className={classes.root}>
-      {images.map(({ key }) => (
+      {imageContainer.images.map(({ key }) => (
         <ImageListItem key={key} className={classes.imageItem}>
           <Image imageKey={key} />
           <ImageListItemBar
@@ -70,14 +57,7 @@ const ImageBrowser = (): React.ReactElement => {
                 <IconButton
                   aria-label={`delete ${key}`}
                   className={classes.icon}
-                  onClick={() =>
-                    pipe(
-                      deleteImage(key),
-                      TE.map(() =>
-                        setImages(images.filter((x) => x.key !== key))
-                      )
-                    )()
-                  }
+                  onClick={() => imageContainer.deleteImage(key)()}
                 >
                   <DeleteOutline />
                 </IconButton>

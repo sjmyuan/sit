@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { app, BrowserWindow } from 'electron';
+import { screen, app, BrowserWindow } from 'electron';
 import { loadRoute } from './util/routes';
 
 let mainWindow: BrowserWindow | null = null;
@@ -23,12 +23,18 @@ export const openMainWindow = async (
     return path.join(RESOURCES_PATH, ...paths);
   };
 
+  const activeDisplay = screen.getDisplayNearestPoint(
+    screen.getCursorScreenPoint()
+  );
+
   mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
     height: 728,
     minWidth: 1024,
     minHeight: 728,
+    maxWidth: activeDisplay.bounds.width,
+    maxHeight: activeDisplay.bounds.height,
     center: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
@@ -79,8 +85,6 @@ export const editImageinMainWindow = async (key: string): Promise<void> => {
 
 export const resizeMainWindow = (width: number, height: number) => {
   if (mainWindow) {
-    //const newWidth = Math.max(mainWindow.getSize()[0], width + 30);
-    //const newHeight = Math.max(mainWindow.getSize()[1], height + 30);
     const newWidth = width + 40;
     const newHeight = height + 80;
     mainWindow.setContentSize(newWidth, newHeight);

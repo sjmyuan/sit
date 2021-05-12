@@ -10,8 +10,9 @@ import {
   Alert,
   Box,
 } from '@material-ui/core';
+import MouseTrap from 'mousetrap';
 import { makeStyles, Theme } from '@material-ui/core/styles';
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, clipboard } from 'electron';
 import { CloudDone } from '@material-ui/icons';
 import ImageBrowser from '../renderer/features/images/ImageBrowser';
 import {
@@ -23,6 +24,8 @@ import Editor from '../renderer/features/canvas/Editor';
 import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
 import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
 import { ImageContainer } from '../renderer/store/ImageContainer';
+import { TE, AppErrorOr } from '../renderer/types';
+import { constVoid } from 'fp-ts/lib/function';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -63,6 +66,22 @@ const MainPage = (): React.ReactElement => {
   const { inProgress } = notification;
   const classes = useStyles();
   const [isSyncing, toggleSyncing] = useState<boolean>(false);
+  const [pasting, togglePasting] = useState<boolean>(false);
+
+  const pasteImageFromClipboard = (): AppErrorOr<void> => {
+    const image = clipboard.readImage('clipboard');
+    if (!image.isEmpty()) {
+      const key = `clipboard-${Date.now()}.png`;
+      return imageContainer.addImage(key, new Blob([image.toPNG()]));
+      //.then(() => {
+      //if (O.isSome(shapes.editingImageKey)) {
+      //shapes.setEditingImage(O.some(key));
+      //}
+      //});
+    }
+
+    return TE.of(constVoid());
+  };
 
   useEffect(() => {
     ipcRenderer.on('edit-image', (_, key: any) => {
@@ -74,9 +93,26 @@ const MainPage = (): React.ReactElement => {
     ipcRenderer.on('preferences-changed', () => {
       preferences.loadPreferences();
     });
+  }, []);
+
+  useEffect(() => {
     preferences.loadPreferences();
     imageContainer.loadAllImageIndexes()();
   }, []);
+
+  useEffect(() => {
+    MouseTrap.bind(['ctrl+v', 'command+v'], () => togglePasting(true));
+    return () => {
+      MouseTrap.unbind(['ctrl+v', 'command+v']);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (pasting) {
+      togglePasting(false);
+      pasteImageFromClipboard()();
+    }
+  }, [pasting]);
 
   return (
     <Box sx={{ height: '100%' }}>

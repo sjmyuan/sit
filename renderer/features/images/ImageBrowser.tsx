@@ -9,13 +9,7 @@ import {
   ImageList,
 } from '@material-ui/core';
 import { DeleteOutline } from '@material-ui/icons';
-import { pipe } from 'fp-ts/function';
-import * as TE from 'fp-ts/TaskEither';
-import * as A from 'fp-ts/Array';
-import * as Ord from 'fp-ts/lib/Ord';
 import Image from './Image';
-import { deleteImage, loadImages } from '../../utils/localImages';
-import { ImageIndex } from '../../utils/AppDB';
 import { ImageContainer } from '../../store/ImageContainer';
 
 const useStyles = makeStyles(() =>

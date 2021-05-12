@@ -74,7 +74,7 @@ const Editor = (): React.ReactElement => {
     return () => {
       MouseTrap.unbind(['ctrl+c', 'command+c']);
     };
-  });
+  }, []);
 
   const copyImageToClipboard = async () => {
     clipboard.writeImage(

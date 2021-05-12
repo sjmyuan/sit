@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { pipe, constVoid } from 'fp-ts/lib/function';
+import { createContainer } from 'unstated-next';
 import { ImageIndex } from '../utils/AppDB';
 import {
   loadImages,
@@ -9,7 +10,6 @@ import {
 } from '../utils/localImages';
 import { TE, A, Ord, AppErrorOr, O } from '../types';
 import { InfoContainer } from '../store-unstated';
-import { createContainer } from 'unstated-next';
 
 function useImages() {
   const [images, setImages] = useState<ImageIndex[]>([]);
@@ -27,7 +27,8 @@ function useImages() {
             ),
           ])
         ),
-        TE.map(setImages)
+        TE.map(setImages),
+        TE.map(() => console.log('load image success'))
       )
     );
   };
@@ -43,10 +44,11 @@ function useImages() {
   };
 
   const addImage = (key: string, content: Blob): AppErrorOr<void> => {
+    console.log(images);
     return infoState.runTask('add image')(
       pipe(
         uploadImage(key, content),
-        TE.chain((index) => addImageIndexes([index])),
+        TE.map((index) => setImages([index, ...images])),
         TE.map(constVoid)
       )
     );
@@ -64,6 +66,7 @@ function useImages() {
 
   return {
     images,
+    setImages,
     loadAllImageIndexes,
     addImageIndexes,
     addImage,

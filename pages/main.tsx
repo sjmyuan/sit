@@ -11,6 +11,7 @@ import {
   Box,
 } from '@material-ui/core';
 import MouseTrap from 'mousetrap';
+import { constVoid, pipe } from 'fp-ts/lib/function';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { ipcRenderer, clipboard } from 'electron';
 import { CloudDone } from '@material-ui/icons';
@@ -25,7 +26,6 @@ import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
 import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
 import { ImageContainer } from '../renderer/store/ImageContainer';
 import { TE, AppErrorOr } from '../renderer/types';
-import { constVoid } from 'fp-ts/lib/function';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -72,12 +72,15 @@ const MainPage = (): React.ReactElement => {
     const image = clipboard.readImage('clipboard');
     if (!image.isEmpty()) {
       const key = `clipboard-${Date.now()}.png`;
-      return imageContainer.addImage(key, new Blob([image.toPNG()]));
-      //.then(() => {
-      //if (O.isSome(shapes.editingImageKey)) {
-      //shapes.setEditingImage(O.some(key));
-      //}
-      //});
+      return pipe(
+        imageContainer.addImage(key, new Blob([image.toPNG()])),
+        TE.map(() => {
+          if (O.isSome(shapes.editingImageKey)) {
+            return shapes.setEditingImage(O.some(key));
+          }
+          return constVoid();
+        })
+      );
     }
 
     return TE.of(constVoid());

@@ -27,8 +27,7 @@ function useImages() {
             ),
           ])
         ),
-        TE.map(setImages),
-        TE.map(() => console.log('load image success'))
+        TE.map(setImages)
       )
     );
   };

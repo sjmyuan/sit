@@ -145,6 +145,16 @@ const MainPage = (): React.ReactElement => {
       >
         {O.isNone(shapes.editingImageKey) ? <ImageBrowser /> : <Editor />}
       </Container>
+      <Box
+        sx={{
+          position: 'fixed',
+          left: '0px',
+          right: '0px',
+          bottom: '0px',
+          height: '20px',
+          backgroundColor: 'rgb(217,217,217)',
+        }}
+      ></Box>
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}

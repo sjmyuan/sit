@@ -10,7 +10,7 @@ import {
   hideMainWindow,
   editImageinMainWindow,
   resizeMainWindow,
-  setSyncStatusInMainWindow,
+  sendWorkerEventToMainWindow,
 } from './main';
 import { openWorkerWindow } from './worker';
 import { initializeAppMenu } from './menu';
@@ -38,8 +38,6 @@ const checkForUpdates = async (): Promise<void> => {
 // Prepare the renderer once the app is ready
 (async () => {
   await app.whenReady();
-
-  console.log('app ready ...');
 
   app.setAboutPanelOptions({ copyright: 'Copyright © Sjmyuan' });
 
@@ -82,20 +80,18 @@ const checkForUpdates = async (): Promise<void> => {
     resizeMainWindow(width, height);
   });
 
-  ipcMain.on('sync-status', (_, info) => {
-    setSyncStatusInMainWindow(info);
+  ipcMain.on('worker-event', (_, event) => {
+    sendWorkerEventToMainWindow(event);
   });
 
   checkForUpdates();
 })();
 
 app.on('activate', () => {
-  console.log('active....');
   openMainWindow(false);
 });
 
 app.on('will-quit', () => {
-  console.log('will quit....');
   closeCropperWindow();
   closePreferencesWindow();
   closeMainWindow();

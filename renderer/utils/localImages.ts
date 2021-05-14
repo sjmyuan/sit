@@ -31,7 +31,7 @@ export const syncImages = (remoteImages: ImageIndex[]): AppErrorOr<void> => {
     .doL(({ addedImageInRemote }) =>
       pipe(
         addedImageInRemote,
-        A.traverse(TE.taskEither)((image) => addImageIndex(image))
+        A.traverse(TE.taskEither)((image) => addImageIndex([image]))
       )
     )
     .doL(({ deletedImageInRemote }) =>

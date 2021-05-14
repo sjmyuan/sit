@@ -6,6 +6,7 @@ import { Do } from 'fp-ts-contrib';
 import { S3 } from 'aws-sdk';
 import { pipe, constVoid, Lazy } from 'fp-ts/lib/function';
 import { ipcRenderer } from 'electron';
+import { sequenceS } from 'fp-ts/lib/Apply';
 import { AppErrorOr } from '../renderer/types';
 import {
   loadImages,
@@ -19,22 +20,30 @@ import {
   listAllImages,
 } from '../renderer/utils/aws';
 import { ImageIndex } from '../renderer/utils/AppDB';
-import { sequenceS } from 'fp-ts/lib/Apply';
 import { getFromStorage } from '../renderer/utils/localStorage';
+import {
+  startToSync,
+  successToSync,
+  failedToSync,
+  WorkerEvents,
+  showStepInformation,
+} from '../renderer/events';
+
+const sendEvent = (event: WorkerEvents): AppErrorOr<void> =>
+  TE.fromIO(() => {
+    console.log(event);
+    ipcRenderer.send('worker-event', event);
+  });
 
 const startWoker = (worker: Lazy<AppErrorOr<void>>): AppErrorOr<void> =>
   pipe(
-    TE.fromIO(() => {
-      console.log('starting worker.....');
-      ipcRenderer.send('sync-status', { syncing: true });
-    }),
+    sendEvent(startToSync()),
     TE.chain(() => worker()),
+    TE.chain(() => sendEvent(successToSync())),
     TE.orElse<Error, void, Error>((e: Error) =>
-      TE.fromIO(() => console.log(`Error happend: ${e.message}`))
+      sendEvent(failedToSync(e.message))
     ),
     TE.map(() => {
-      console.log('end worker.....');
-      ipcRenderer.send('sync-status', { syncing: false });
       setTimeout(() => startWoker(worker)(), 60000);
       return constVoid();
     })
@@ -59,6 +68,7 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
 const Worker = (): React.ReactElement => {
   useEffect(() => {
     const worker = Do.Do(TE.taskEither)
+      .do(sendEvent(showStepInformation('Reading configuration...')))
       .bindL('awsConfig', () => {
         return TE.fromOption(() => new Error('No AWS Configuration'))(
           sequenceS(O.option)({
@@ -75,7 +85,9 @@ const Worker = (): React.ReactElement => {
       .bindL('allRemoteImages', ({ s3, awsConfig }) =>
         listAllImages(s3, awsConfig.bucket, O.none)
       )
+      .do(sendEvent(showStepInformation('Syncing remote images...')))
       .doL(({ allRemoteImages }) => syncImages(allRemoteImages))
+      .do(sendEvent(showStepInformation('Syncing local images...')))
       .doL(({ s3, awsConfig }) => syncLocalToS3(s3, awsConfig.bucket))
       .return(constVoid);
 

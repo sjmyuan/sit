@@ -26,6 +26,7 @@ import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
 import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
 import { ImageContainer } from '../renderer/store/ImageContainer';
 import { TE, AppErrorOr } from '../renderer/types';
+import { WorkerEvents } from '../renderer/events';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -67,6 +68,7 @@ const MainPage = (): React.ReactElement => {
   const classes = useStyles();
   const [isSyncing, toggleSyncing] = useState<boolean>(false);
   const [pasting, togglePasting] = useState<boolean>(false);
+  const [workerInfo, setWorkerInfo] = useState<string>('');
 
   const pasteImageFromClipboard = (): AppErrorOr<void> => {
     const image = clipboard.readImage('clipboard');
@@ -90,8 +92,22 @@ const MainPage = (): React.ReactElement => {
     ipcRenderer.on('edit-image', (_, key: any) => {
       shapes.setEditingImage(O.some(key));
     });
-    ipcRenderer.on('sync-status', (_, info: { syncing: boolean }) => {
-      toggleSyncing(info.syncing);
+    ipcRenderer.on('worker-event', (_, event: WorkerEvents) => {
+      if (event._tag === 'start-to-sync') {
+        toggleSyncing(true);
+        setWorkerInfo('Start to sync images....');
+      }
+      if (event._tag === 'success-to-sync') {
+        toggleSyncing(false);
+        setWorkerInfo('Succeed to sync images!');
+      }
+      if (event._tag === 'failed-to-sync') {
+        toggleSyncing(false);
+        setWorkerInfo(event.error);
+      }
+      if (event._tag === 'show-step-information') {
+        setWorkerInfo(event.info);
+      }
     });
     ipcRenderer.on('preferences-changed', () => {
       preferences.loadPreferences();
@@ -153,8 +169,15 @@ const MainPage = (): React.ReactElement => {
           bottom: '0px',
           height: '20px',
           backgroundColor: 'rgb(217,217,217)',
+          display: 'flex',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
         }}
-      ></Box>
+      >
+        <Box sx={{ fontSize: 'x-small', paddingLeft: '10px' }}>
+          {workerInfo}
+        </Box>
+      </Box>
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}

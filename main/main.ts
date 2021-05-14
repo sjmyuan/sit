@@ -92,9 +92,9 @@ export const resizeMainWindow = (width: number, height: number) => {
   }
 };
 
-export const setSyncStatusInMainWindow = (info: { syncing: boolean }) => {
+export const sendWorkerEventToMainWindow = (info: { syncing: boolean }) => {
   if (mainWindow) {
-    mainWindow.webContents.send('sync-status', info);
+    mainWindow.webContents.send('worker-event', info);
   }
 };
 

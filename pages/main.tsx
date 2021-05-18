@@ -27,6 +27,7 @@ import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
 import { ImageContainer } from '../renderer/store/ImageContainer';
 import { TE, AppErrorOr } from '../renderer/types';
 import { WorkerEvents } from '../renderer/events';
+import { ImageIndex } from '../renderer/utils/AppDB';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -68,6 +69,9 @@ const MainPage = (): React.ReactElement => {
   const classes = useStyles();
   const [isSyncing, toggleSyncing] = useState<boolean>(false);
   const [pasting, togglePasting] = useState<boolean>(false);
+  const [croppingImage, setCroppingImage] = useState<O.Option<ImageIndex>>(
+    O.none
+  );
   const [workerInfo, setWorkerInfo] = useState<string>('');
 
   const pasteImageFromClipboard = (): AppErrorOr<void> => {
@@ -89,8 +93,9 @@ const MainPage = (): React.ReactElement => {
   };
 
   useEffect(() => {
-    ipcRenderer.on('edit-image', (_, key: any) => {
-      shapes.setEditingImage(O.some(key));
+    ipcRenderer.on('edit-image', (_, imageIndex: ImageIndex) => {
+      shapes.setEditingImage(O.some(imageIndex.key));
+      setCroppingImage(O.some(imageIndex));
     });
     ipcRenderer.on('worker-event', (_, event: WorkerEvents) => {
       if (event._tag === 'start-to-sync') {
@@ -131,7 +136,12 @@ const MainPage = (): React.ReactElement => {
       togglePasting(false);
       pasteImageFromClipboard()();
     }
-  }, [pasting]);
+
+    if (O.isSome(croppingImage)) {
+      setCroppingImage(O.none);
+      imageContainer.setImages([croppingImage.value, ...imageContainer.images]);
+    }
+  }, [pasting, croppingImage]);
 
   return (
     <Box sx={{ height: '100%' }}>

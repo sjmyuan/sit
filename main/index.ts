@@ -70,9 +70,9 @@ const checkForUpdates = async (): Promise<void> => {
     openCropperWindow();
   });
 
-  ipcMain.on('took-screen-shot', (_, key) => {
+  ipcMain.on('took-screen-shot', (_, imageIndex) => {
     closeCropperWindow();
-    editImageinMainWindow(key);
+    editImageinMainWindow(imageIndex);
   });
 
   ipcMain.on('resize-main-window', (_, info) => {

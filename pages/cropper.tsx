@@ -4,6 +4,8 @@ import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
 import jimp from 'jimp';
 import { uploadImage } from '../renderer/utils/localImages';
+import { pipe } from 'fp-ts/lib/function';
+import { TE } from '../renderer/types';
 
 const getVideo = async () => {
   const sources = await desktopCapturer.getSources({
@@ -88,9 +90,10 @@ const CropperPage = (): React.ReactElement => {
 
       const key = `screenshot-${Date.now()}.png`;
 
-      await uploadImage(key, new Blob([buffer]))();
-
-      ipcRenderer.send('took-screen-shot', key);
+      await pipe(
+        uploadImage(key, new Blob([buffer])),
+        TE.map((index) => ipcRenderer.send('took-screen-shot', index))
+      )();
     }
   };
 

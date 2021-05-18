@@ -68,17 +68,17 @@ export const openMainWindow = async (
   return mainWindow;
 };
 
-export const editImageinMainWindow = async (key: string): Promise<void> => {
+export const editImageinMainWindow = async (imageIndex: any): Promise<void> => {
   if (mainWindow) {
     mainWindow.show();
     mainWindow.focus();
-    mainWindow.webContents.send('edit-image', key);
+    mainWindow.webContents.send('edit-image', imageIndex);
   } else {
     const newMainWindow = await openMainWindow(false);
     newMainWindow.show();
     newMainWindow.focus();
     newMainWindow.webContents.on('did-finish-load', () => {
-      newMainWindow.webContents.send('edit-image', key);
+      newMainWindow.webContents.send('edit-image', imageIndex);
     });
   }
 };

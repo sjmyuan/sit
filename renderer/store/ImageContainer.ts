@@ -43,7 +43,6 @@ function useImages() {
   };
 
   const addImage = (key: string, content: Blob): AppErrorOr<void> => {
-    console.log(images);
     return infoState.runTask('add image')(
       pipe(
         uploadImage(key, content),

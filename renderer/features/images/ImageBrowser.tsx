@@ -47,8 +47,6 @@ const ImageBrowser = (): React.ReactElement => {
     <InfiniteScroll
       dataLength={totalPage * PAGE_SIZE}
       next={() => {
-        console.log('load....');
-        console.log(totalPage);
         setTotalPage(totalPage + 1);
       }}
       hasMore={totalPage * PAGE_SIZE < imageContainer.images.length}

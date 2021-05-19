@@ -29,7 +29,6 @@ const useStyles = makeStyles((theme: Theme) =>
 const getObjectSignedUrl = (awsConfig: O.Option<AWSConfig>) => (
   key: string
 ): AppErrorOr<string> => {
-  console.log(`getting signed url for ${key}`);
   return Do.Do(TE.taskEither)
     .bind(
       'config',

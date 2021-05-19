@@ -12,6 +12,7 @@ import {
   loadImages,
   getImageCache,
   syncImages,
+  updateImageState,
 } from '../renderer/utils/localImages';
 import {
   uploadImage,
@@ -56,10 +57,14 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
         if (image.state === 'ADDING') {
           return pipe(
             getImageCache(image.key),
-            TE.chain((x) => uploadImage(s3, bucket)(image.key, x))
+            TE.chain((x) => uploadImage(s3, bucket)(image.key, x)),
+            TE.chain(() => updateImageState(image.key, 'ADDED'))
           );
         }
-        return deleteImage(s3, bucket)(image.key);
+        return pipe(
+          deleteImage(s3, bucket)(image.key),
+          TE.chain(() => updateImageState(image.key, 'DELETED'))
+        );
       })(images)
     ),
     TE.map(constVoid)

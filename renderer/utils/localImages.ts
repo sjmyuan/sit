@@ -19,30 +19,6 @@ export const loadImages = (states: ImageState[]): AppErrorOr<ImageIndex[]> =>
       .toArray()
   );
 
-export const syncImages = (remoteImages: ImageIndex[]): AppErrorOr<void> => {
-  return Do.Do(TE.taskEither)
-    .bind('localImages', loadImages(['ADDED']))
-    .letL('deletedImageInRemote', ({ localImages }) =>
-      pipe(localImages, A.difference(imageIndexEq)(remoteImages))
-    )
-    .letL('addedImageInRemote', ({ localImages }) =>
-      pipe(remoteImages, A.difference(imageIndexEq)(localImages))
-    )
-    .doL(({ addedImageInRemote }) =>
-      pipe(
-        addedImageInRemote,
-        A.traverse(TE.taskEither)((image) => addImageIndex([image]))
-      )
-    )
-    .doL(({ deletedImageInRemote }) =>
-      pipe(
-        deletedImageInRemote,
-        A.traverse(TE.taskEither)((image) => deleteImage(image.key))
-      )
-    )
-    .return(constVoid);
-};
-
 export const addImageIndex = (imageIndexs: ImageIndex[]): AppErrorOr<void> =>
   pipe(
     TE.tryCatch<Error, unknown>(
@@ -70,27 +46,22 @@ export const uploadImage = (
   );
 };
 
-export const updateImage = (key: string, image: Blob): AppErrorOr<void> =>
-  pipe(
-    TE.tryCatch<Error, unknown>(
-      () =>
-        db.localIndex
-          .update(key, { lastModified: Date.now(), state: 'ADDING' })
-          .then(() => db.cache.update(key, { image })),
-      E.toError
-    ),
-    TE.map(constVoid)
-  );
-
-export const deleteImage = (key: string): AppErrorOr<void> =>
+export const updateImageState = (
+  key: string,
+  state: ImageState
+): AppErrorOr<void> =>
   pipe(
     TE.tryCatch<Error, unknown>(
       () =>
         db.localIndex
           .update(key, {
-            state: 'DELETING',
+            state: state,
           })
-          .then(() => db.cache.delete(key)),
+          .then(() => {
+            if (state === 'DELETED') {
+              db.cache.delete(key);
+            }
+          }),
       E.toError
     ),
     TE.map(constVoid)
@@ -107,3 +78,29 @@ export const getImageUrl = (key: string): AppErrorOr<string> =>
 
 export const getImageCache = (key: string): AppErrorOr<Blob> =>
   TE.fromTask(() => db.cache.get(key).then((imageCache) => imageCache.image));
+
+export const syncImages = (remoteImages: ImageIndex[]): AppErrorOr<void> => {
+  return Do.Do(TE.taskEither)
+    .bind('localImages', loadImages(['ADDED', 'DELETING']))
+    .letL('deletedImageInRemote', ({ localImages }) =>
+      pipe(localImages, A.difference(imageIndexEq)(remoteImages))
+    )
+    .letL('addedImageInRemote', ({ localImages }) =>
+      pipe(remoteImages, A.difference(imageIndexEq)(localImages))
+    )
+    .doL(({ addedImageInRemote }) =>
+      pipe(
+        addedImageInRemote,
+        A.traverse(TE.taskEither)((image) => addImageIndex([image]))
+      )
+    )
+    .doL(({ deletedImageInRemote }) =>
+      pipe(
+        deletedImageInRemote,
+        A.traverse(TE.taskEither)((image) =>
+          updateImageState(image.key, 'DELETED')
+        )
+      )
+    )
+    .return(constVoid);
+};

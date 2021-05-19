@@ -6,9 +6,9 @@ import {
   loadImages,
   addImageIndex,
   uploadImage,
-  deleteImage as deleteImageInCache,
+  updateImageState,
 } from '../utils/localImages';
-import { TE, A, Ord, AppErrorOr, O } from '../types';
+import { TE, A, Ord, AppErrorOr } from '../types';
 import { InfoContainer } from '../store-unstated';
 
 function useImages() {
@@ -55,7 +55,7 @@ function useImages() {
   const deleteImage = (key: string): AppErrorOr<void> => {
     return infoState.runTask('delete image')(
       pipe(
-        deleteImageInCache(key),
+        updateImageState(key, 'DELETING'),
         TE.map(() => setImages(images.filter((x) => x.key != key))),
         TE.map(constVoid)
       )

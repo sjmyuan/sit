@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { remote, ipcRenderer } from 'electron';
 import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
-import { pipe } from 'fp-ts/lib/function';
+import { constVoid, pipe } from 'fp-ts/lib/function';
 import { cacheImage } from '../renderer/utils/localImages';
 import { TE, T } from '../renderer/types';
 import { getVideo, takeShot } from '../renderer/utils/screen';
@@ -60,6 +60,7 @@ const CropperPage = (): React.ReactElement => {
           window.removeEventListener('keyup', handleUserKeyUp);
         };
       }
+      return constVoid();
     });
   }, []);
 

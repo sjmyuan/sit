@@ -16,11 +16,6 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import { ipcRenderer, clipboard } from 'electron';
 import { CloudDone } from '@material-ui/icons';
 import ImageBrowser from '../renderer/features/images/ImageBrowser';
-import {
-  ShapeContainer,
-  InfoContainer,
-  PreferencesContainer,
-} from '../renderer/store-unstated';
 import Editor from '../renderer/features/canvas/Editor';
 import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
 import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
@@ -29,6 +24,9 @@ import { TE, AppErrorOr } from '../renderer/types';
 import { WorkerEvents } from '../renderer/events';
 import { ImageIndex } from '../renderer/utils/AppDB';
 import { getImageCacheUrl } from '../renderer/utils/localImages';
+import { InfoContainer } from '../renderer/store/InfoContainer';
+import { ShapeContainer } from '../renderer/store/ShapesContainer';
+import { PreferencesContainer } from '../renderer/store/PreferencesContainer';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {

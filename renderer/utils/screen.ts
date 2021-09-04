@@ -1,7 +1,7 @@
 import { desktopCapturer } from 'electron';
 import jimp from 'jimp';
 import * as O from 'fp-ts/Option';
-import { Point } from '../store-unstated';
+import { Point } from '../types';
 
 export const getVideo = async (): Promise<MediaStream> => {
   const sources = await desktopCapturer.getSources({

@@ -36,3 +36,23 @@ export type Resolution = {
   width: number;
   height: number;
 };
+
+export type Point = {
+  x: number;
+  y: number;
+};
+
+export type Rect = {
+  id: number;
+  origin: Point;
+  width: number;
+  height: number;
+};
+
+export type Text = {
+  id: number;
+  origin: Point;
+  value: string;
+};
+
+export type MODE = 'RECT' | 'TEXT';

@@ -9,7 +9,7 @@ import {
   updateImageState,
 } from '../utils/localImages';
 import { TE, A, Ord, AppErrorOr } from '../types';
-import { InfoContainer } from '../store-unstated';
+import { InfoContainer } from './InfoContainer';
 
 function useImages() {
   const [images, setImages] = useState<ImageIndex[]>([]);
@@ -56,7 +56,7 @@ function useImages() {
     return infoState.runTask('delete image')(
       pipe(
         updateImageState(key, 'DELETING'),
-        TE.map(() => setImages(images.filter((x) => x.key != key))),
+        TE.map(() => setImages(images.filter((x) => x.key !== key))),
         TE.map(constVoid)
       )
     );
@@ -72,4 +72,5 @@ function useImages() {
   };
 }
 
+// eslint-disable-next-line import/prefer-default-export
 export const ImageContainer = createContainer(useImages);

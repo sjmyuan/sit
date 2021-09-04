@@ -5,14 +5,12 @@ import { AppProps } from 'next/app';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { StylesProvider } from '@material-ui/core';
 import '../renderer/app.global.css';
-import {
-  ShapeContainer,
-  RectsContainer,
-  TextsContainer,
-  PreferencesContainer,
-  InfoContainer,
-} from '../renderer/store-unstated';
 import { ImageContainer } from '../renderer/store/ImageContainer';
+import { InfoContainer } from '../renderer/store/InfoContainer';
+import { PreferencesContainer } from '../renderer/store/PreferencesContainer';
+import { RectsContainer } from '../renderer/store/RectsContainer';
+import { TextsContainer } from '../renderer/store/TextContainer';
+import { ShapeContainer } from '../renderer/store/ShapesContainer';
 
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 

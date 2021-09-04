@@ -4,19 +4,17 @@ import * as T from 'fp-ts/Task';
 import { Box, makeStyles } from '@material-ui/core';
 import { Stage, Layer, Image } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
-import { pipe } from 'fp-ts/lib/function';
+import { constVoid, pipe } from 'fp-ts/lib/function';
 import { ipcRenderer, clipboard, nativeImage } from 'electron';
 import MouseTrap from 'mousetrap';
-import {
-  RectsContainer,
-  ShapeContainer,
-  TextsContainer,
-  InfoContainer,
-} from '../../store-unstated';
 import Rectangle from './Rectangle';
 import TransformerComponent from './TransformerComponent';
 import TextComponent from './TextComponent';
 import TextEditor from './TextEditor';
+import { ShapeContainer } from '../../store/ShapesContainer';
+import { RectsContainer } from '../../store/RectsContainer';
+import { TextsContainer } from '../../store/TextContainer';
+import { InfoContainer } from '../../store/InfoContainer';
 
 const useStyles = makeStyles(() => ({
   konva: {
@@ -39,6 +37,16 @@ const getRelativePointerPosition = (node: KonvaStage) => {
   return transform.point(pos);
 };
 
+const copyImageToClipboard = (stage: KonvaStage) => {
+  clipboard.writeImage(
+    nativeImage.createFromDataURL(
+      stage.toDataURL({
+        mimeType: 'image/png',
+      })
+    )
+  );
+};
+
 const Editor = (): React.ReactElement => {
   const classes = useStyles();
   const shapes = ShapeContainer.useContainer();
@@ -49,10 +57,11 @@ const Editor = (): React.ReactElement => {
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
+  const editingImageUrl = shapes.getEditingImageUrl();
 
   useEffect(() => {
     pipe(
-      shapes.getEditingImageUrl(),
+      editingImageUrl,
       T.map(O.fromEither),
       T.map((url) => {
         if (O.isSome(url)) {
@@ -65,27 +74,20 @@ const Editor = (): React.ReactElement => {
         } else {
           setBackgroundImg(O.none);
         }
+        return constVoid();
       })
     )();
-  }, [shapes.editingImageUrl]);
+  }, [editingImageUrl]);
 
   useEffect(() => {
-    MouseTrap.bind(['ctrl+c', 'command+c'], () => copyImageToClipboard());
+    MouseTrap.bind(['ctrl+c', 'command+c'], () => {
+      copyImageToClipboard(stageRef.current.getStage());
+      notification.showInfo(O.some('Image Copied to Clipboard'));
+    });
     return () => {
       MouseTrap.unbind(['ctrl+c', 'command+c']);
     };
-  }, []);
-
-  const copyImageToClipboard = async () => {
-    clipboard.writeImage(
-      nativeImage.createFromDataURL(
-        stageRef.current.getStage().toDataURL({
-          mimeType: 'image/png',
-        })
-      )
-    );
-    notification.showInfo(O.some('Image Copied to Clipboard'));
-  };
+  }, [notification]);
 
   return (
     <Box
@@ -145,7 +147,7 @@ const Editor = (): React.ReactElement => {
                 pipe(
                   shapes.editingText,
                   O.map((x) => x.id !== text.id),
-                  O.getOrElse(() => true)
+                  O.getOrElse<boolean>(() => true)
                 )
               )
               .map((text) => {

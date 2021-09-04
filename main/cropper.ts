@@ -52,10 +52,7 @@ const openCropperWindow = async (
     screen.getCursorScreenPoint()
   );
 
-  cropperWindow = openCropper(
-    activeDisplay,
-    takeFullScreenShot
-  );
+  cropperWindow = openCropper(activeDisplay, takeFullScreenShot);
 
   if (!takeFullScreenShot) {
     cropperWindow.focus();

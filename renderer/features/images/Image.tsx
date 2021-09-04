@@ -5,9 +5,10 @@ import * as T from 'fp-ts/Task';
 import { Do } from 'fp-ts-contrib';
 import { sequenceS } from 'fp-ts/lib/Apply';
 import { O, TE, AWSConfig, AppErrorOr } from '../../types';
-import { ShapeContainer, PreferencesContainer } from '../../store-unstated';
 import { getImageCacheUrl } from '../../utils/localImages';
 import { s3Client, getSignedUrl } from '../../utils/aws';
+import { ShapeContainer } from '../../store/ShapesContainer';
+import { PreferencesContainer } from '../../store/PreferencesContainer';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

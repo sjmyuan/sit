@@ -3,9 +3,9 @@ import { pipe, constVoid } from 'fp-ts/lib/function';
 import { createContainer } from 'unstated-next';
 import { ImageIndex } from '../utils/AppDB';
 import {
-  loadImages,
+  loadImageIndexes,
   addImageIndex,
-  uploadImage,
+  cacheImage,
   updateImageState,
 } from '../utils/localImages';
 import { TE, A, Ord, AppErrorOr } from '../types';
@@ -19,7 +19,7 @@ function useImages() {
   const loadAllImageIndexes = () => {
     return infoState.runTask('load images')(
       pipe(
-        loadImages(['ADDING', 'ADDED']),
+        loadImageIndexes(['ADDING', 'ADDED']),
         TE.map(
           A.sortBy([
             Ord.fromCompare<ImageIndex>((x: ImageIndex, y: ImageIndex) =>
@@ -45,7 +45,7 @@ function useImages() {
   const addImage = (key: string, content: Blob): AppErrorOr<void> => {
     return infoState.runTask('add image')(
       pipe(
-        uploadImage(key, content),
+        cacheImage(key, content),
         TE.map((index) => setImages([index, ...images])),
         TE.map(constVoid)
       )

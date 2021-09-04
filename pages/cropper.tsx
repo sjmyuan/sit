@@ -3,8 +3,8 @@ import { remote, desktopCapturer, ipcRenderer } from 'electron';
 import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
 import jimp from 'jimp';
-import { uploadImage } from '../renderer/utils/localImages';
 import { pipe } from 'fp-ts/lib/function';
+import { cacheImage } from '../renderer/utils/localImages';
 import { TE } from '../renderer/types';
 
 const getVideo = async () => {
@@ -91,7 +91,7 @@ const CropperPage = (): React.ReactElement => {
       const key = `screenshot-${Date.now()}.png`;
 
       await pipe(
-        uploadImage(key, new Blob([buffer])),
+        cacheImage(key, new Blob([buffer])),
         TE.map((index) => ipcRenderer.send('took-screen-shot', index))
       )();
     }

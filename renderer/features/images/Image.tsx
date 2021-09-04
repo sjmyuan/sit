@@ -6,7 +6,7 @@ import { Do } from 'fp-ts-contrib';
 import { sequenceS } from 'fp-ts/lib/Apply';
 import { O, TE, AWSConfig, AppErrorOr } from '../../types';
 import { ShapeContainer, PreferencesContainer } from '../../store-unstated';
-import { getImageUrl } from '../../utils/localImages';
+import { getImageCacheUrl } from '../../utils/localImages';
 import { s3Client, getSignedUrl } from '../../utils/aws';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -51,7 +51,7 @@ const Image = (props: ImageProps): React.ReactElement => {
   const [src, setSrc] = useState<string>('');
   useEffect(() => {
     pipe(
-      getImageUrl(imageKey),
+      getImageCacheUrl(imageKey),
       TE.orElse(() =>
         getObjectSignedUrl(
           sequenceS(O.option)({

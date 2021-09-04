@@ -9,9 +9,9 @@ import { ipcRenderer } from 'electron';
 import { sequenceS } from 'fp-ts/lib/Apply';
 import { AppErrorOr } from '../renderer/types';
 import {
-  loadImages,
+  loadImageIndexes,
   getImageCache,
-  syncImages,
+  syncImageCaches,
   updateImageState,
 } from '../renderer/utils/localImages';
 import {
@@ -36,7 +36,7 @@ const sendEvent = (event: WorkerEvents): AppErrorOr<void> =>
     ipcRenderer.send('worker-event', event);
   });
 
-const startWoker = (worker: Lazy<AppErrorOr<void>>): AppErrorOr<void> =>
+const startWorker = (worker: Lazy<AppErrorOr<void>>): AppErrorOr<void> =>
   pipe(
     sendEvent(startToSync()),
     TE.chain(() => worker()),
@@ -45,13 +45,13 @@ const startWoker = (worker: Lazy<AppErrorOr<void>>): AppErrorOr<void> =>
       sendEvent(failedToSync(e.message))
     ),
     TE.map(() => {
-      setTimeout(() => startWoker(worker)(), 60000);
+      setTimeout(() => startWorker(worker)(), 60000);
       return constVoid();
     })
   );
 const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
   pipe(
-    loadImages(['ADDING', 'DELETING']),
+    loadImageIndexes(['ADDING', 'DELETING']),
     TE.chain((images) =>
       A.traverse(TE.taskEither)((image: ImageIndex) => {
         if (image.state === 'ADDING') {
@@ -91,12 +91,12 @@ const Worker = (): React.ReactElement => {
         listAllImages(s3, awsConfig.bucket, O.none)
       )
       .do(sendEvent(showStepInformation('Syncing remote images...')))
-      .doL(({ allRemoteImages }) => syncImages(allRemoteImages))
+      .doL(({ allRemoteImages }) => syncImageCaches(allRemoteImages))
       .do(sendEvent(showStepInformation('Syncing local images...')))
       .doL(({ s3, awsConfig }) => syncLocalToS3(s3, awsConfig.bucket))
       .return(constVoid);
 
-    startWoker(() => worker)();
+    startWorker(() => worker)();
   }, []);
   return <div />;
 };

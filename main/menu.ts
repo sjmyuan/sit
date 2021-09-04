@@ -77,7 +77,15 @@ const buildDarwinTemplate = (
         accelerator: 'Shift + Command+ 5',
         click: async () => {
           hideMainWindow();
-          await openCropperWindow();
+          await openCropperWindow(false);
+        },
+      },
+      {
+        label: 'Full Screen Shot',
+        accelerator: 'Shift + Command+ 6',
+        click: async () => {
+          hideMainWindow();
+          await openCropperWindow(true);
         },
       },
       { type: 'separator' },
@@ -277,7 +285,15 @@ export const getTrayMenu = (): Menu => {
       accelerator: 'Shift + Command + 5',
       click: async () => {
         hideMainWindow();
-        await openCropperWindow();
+        await openCropperWindow(false);
+      },
+    },
+    {
+      label: 'Full Screen Shot',
+      accelerator: 'Shift + Command + 6',
+      click: async () => {
+        hideMainWindow();
+        await openCropperWindow(true);
       },
     },
   ];

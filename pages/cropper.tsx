@@ -4,7 +4,7 @@ import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
 import { pipe } from 'fp-ts/lib/function';
 import { cacheImage } from '../renderer/utils/localImages';
-import { TE } from '../renderer/types';
+import { TE, T } from '../renderer/types';
 import { getVideo, takeShot } from '../renderer/utils/screen';
 
 type Point = {
@@ -15,45 +15,53 @@ type Point = {
 const overlayOpacity = 0.5;
 const overlayColor = 'gray';
 
+const takeShotAndCacheImage = async (
+  range: O.Option<[Point, Point]>,
+  stream: MediaStream
+) => {
+  const buffer = await takeShot(range, stream);
+
+  const key = `screenshot-${Date.now()}.png`;
+
+  await pipe(
+    cacheImage(key, new Blob([buffer])),
+    TE.map((index) => ipcRenderer.send('took-screen-shot', index))
+  )();
+};
+
 const CropperPage = (): React.ReactElement => {
   const [videoSrc, setVideoSrc] = useState<O.Option<MediaStream>>(O.none);
   const [startPoint, setStartPoint] = useState<O.Option<Point>>(O.none);
   const [mousePoint, setMousePoint] = useState<Point>({ x: 0, y: 0 });
 
   useEffect(() => {
-    getVideo()
-      .then((src) => setVideoSrc(O.some(src)))
-      .catch((e) => console.log(e));
-  }, []);
+    ipcRenderer.on('cropper-type', (_, takeFullScreenShot: boolean) => {
+      if (takeFullScreenShot) {
+        getVideo()
+          .then((src) => takeShotAndCacheImage(O.none, src))
+          .catch((e) => console.log(e));
+      } else {
+        getVideo()
+          .then((src) => setVideoSrc(O.some(src)))
+          .catch((e) => console.log(e));
 
-  useEffect(() => {
-    const handleUserKeyUp = (event: { ctrlKey: boolean; keyCode: number }) => {
-      const { keyCode } = event;
+        const handleUserKeyUp = (event: {
+          ctrlKey: boolean;
+          keyCode: number;
+        }) => {
+          const { keyCode } = event;
 
-      if (keyCode === 27) {
-        remote.getCurrentWindow().close();
+          if (keyCode === 27) {
+            remote.getCurrentWindow().close();
+          }
+        };
+        window.addEventListener('keyup', handleUserKeyUp);
+        return () => {
+          window.removeEventListener('keyup', handleUserKeyUp);
+        };
       }
-    };
-    window.addEventListener('keyup', handleUserKeyUp);
-    return () => {
-      window.removeEventListener('keyup', handleUserKeyUp);
-    };
+    });
   }, []);
-
-  const takeShotAndCacheImage = async (
-    p1: Point,
-    p2: Point,
-    stream: MediaStream
-  ) => {
-    const buffer = await takeShot(O.some([p1, p2]), stream);
-
-    const key = `screenshot-${Date.now()}.png`;
-
-    await pipe(
-      cacheImage(key, new Blob([buffer])),
-      TE.map((index) => ipcRenderer.send('took-screen-shot', index))
-    )();
-  };
 
   return (
     <Box
@@ -73,7 +81,10 @@ const CropperPage = (): React.ReactElement => {
       }
       onMouseUp={() => {
         if (O.isSome(videoSrc) && O.isSome(startPoint)) {
-          takeShotAndCacheImage(startPoint.value, mousePoint, videoSrc.value);
+          takeShotAndCacheImage(
+            O.some([startPoint.value, mousePoint]),
+            videoSrc.value
+          );
         }
         setStartPoint(O.none);
       }}

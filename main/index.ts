@@ -62,12 +62,17 @@ const checkForUpdates = async (): Promise<void> => {
 
   globalShortcut.register('CommandOrControl + Shift + 5', () => {
     hideMainWindow();
-    openCropperWindow();
+    openCropperWindow(false);
   });
 
-  ipcMain.on('taking-screen-shot', () => {
+  globalShortcut.register('CommandOrControl + Shift + 6', () => {
     hideMainWindow();
-    openCropperWindow();
+    openCropperWindow(true);
+  });
+
+  ipcMain.on('taking-screen-shot', (_, takeFullScreenShot: boolean) => {
+    hideMainWindow();
+    openCropperWindow(takeFullScreenShot);
   });
 
   ipcMain.on('took-screen-shot', (_, imageIndex) => {

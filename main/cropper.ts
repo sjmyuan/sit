@@ -5,9 +5,9 @@ let cropperWindow: BrowserWindow | null = null;
 
 const openCropper = (
   display: Display,
-  activeDisplayId: number
+  takeFullScreenShot: boolean
 ): BrowserWindow => {
-  const { id, bounds } = display;
+  const { bounds } = display;
   const { x, y, width, height } = bounds;
   const cropper = new BrowserWindow({
     x,
@@ -20,7 +20,7 @@ const openCropper = (
     movable: false,
     frame: false,
     transparent: true,
-    show: true,
+    show: !takeFullScreenShot,
     webPreferences: {
       nodeIntegration: true,
     },
@@ -28,21 +28,12 @@ const openCropper = (
 
   loadRoute(cropper, 'cropper');
 
-  cropper.setAlwaysOnTop(true, 'screen-saver', 1);
+  if (!takeFullScreenShot) {
+    cropper.setAlwaysOnTop(true, 'screen-saver', 1);
+  }
 
-  // @TODO: Use 'ready-to-show' event
-  //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
   cropper.webContents.on('did-finish-load', () => {
-    const isActive = activeDisplayId === id;
-    const displayInfo = {
-      isActive,
-      id,
-      x,
-      y,
-      width,
-      height,
-    };
-    cropper.webContents.send('display', displayInfo);
+    cropper.webContents.send('cropper-type', takeFullScreenShot);
   });
 
   cropper.on('closed', () => {
@@ -52,16 +43,23 @@ const openCropper = (
   return cropper;
 };
 
-const openCropperWindow = async (): Promise<void> => {
+const openCropperWindow = async (
+  takeFullScreenShot: boolean
+): Promise<void> => {
   if (cropperWindow) cropperWindow.destroy();
 
   const activeDisplay = screen.getDisplayNearestPoint(
     screen.getCursorScreenPoint()
   );
 
-  cropperWindow = openCropper(activeDisplay, activeDisplay.id);
+  cropperWindow = openCropper(
+    activeDisplay,
+    takeFullScreenShot
+  );
 
-  cropperWindow.focus();
+  if (!takeFullScreenShot) {
+    cropperWindow.focus();
+  }
 };
 
 const closeCropperWindow = (): void => {

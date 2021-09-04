@@ -43,14 +43,15 @@ type ImageProps = {
   imageKey: string;
 };
 
-const Image = (props: ImageProps) => {
+const Image = (props: ImageProps): React.ReactElement => {
+  const { imageKey } = props;
   const classes = useStyles();
   const shapes = ShapeContainer.useContainer();
   const preferences = PreferencesContainer.useContainer();
   const [src, setSrc] = useState<string>('');
   useEffect(() => {
     pipe(
-      getImageUrl(props.imageKey),
+      getImageUrl(imageKey),
       TE.orElse(() =>
         getObjectSignedUrl(
           sequenceS(O.option)({
@@ -59,21 +60,27 @@ const Image = (props: ImageProps) => {
             bucket: preferences.bucket,
             region: preferences.region,
           })
-        )(props.imageKey)
+        )(imageKey)
       ),
       TE.fold(
         (e) => T.of(console.log(`image url error ${e.message}`)),
         (url) => T.of(setSrc(url))
       )
     )();
-  }, [props.imageKey]);
+  }, [
+    imageKey,
+    preferences.accessId,
+    preferences.secretAccessKey,
+    preferences.bucket,
+    preferences.region,
+  ]);
   return (
     <div>
       <img
         src={src}
-        key={props.imageKey}
+        key={imageKey}
         alt=""
-        onDoubleClick={() => shapes.setEditingImage(O.some(props.imageKey))}
+        onDoubleClick={() => shapes.setEditingImage(O.some(src))}
         role="presentation"
         className={classes.image}
       />

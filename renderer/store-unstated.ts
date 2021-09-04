@@ -115,7 +115,7 @@ function useShapes() {
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
   const [selectedShape, setSelectedShape] = useState<O.Option<string>>(O.none);
   const [editingText, setEditingText] = useState<O.Option<Text>>(O.none);
-  const [editingImageKey, setEditingImageKey] = useState<O.Option<string>>(
+  const [editingImageUrl, setEditingImageUrl] = useState<O.Option<string>>(
     O.none
   );
   const [stage, setStage] = useState<O.Option<Konva.Stage>>(O.none);
@@ -174,19 +174,18 @@ function useShapes() {
 
   const getEditingImageUrl = () =>
     pipe(
-      editingImageKey,
-      TE.fromOption(() => new Error('There is no editing image')),
-      TE.chain(getImageUrl)
+      editingImageUrl,
+      TE.fromOption(() => new Error('There is no editing image'))
     );
 
-  const setEditingImage = (key: O.Option<string>) => {
+  const setEditingImage = (url: O.Option<string>) => {
     rectState.clear();
     textState.clear();
     toggleDrawing(false);
     setSelectedShape(O.none);
     setMode('RECT');
     setEditingText(O.none);
-    setEditingImageKey(key);
+    setEditingImageUrl(url);
   };
 
   return {
@@ -202,7 +201,7 @@ function useShapes() {
     onSelect,
     getSelectedShape,
     setEditingImage,
-    editingImageKey,
+    editingImageKey: editingImageUrl,
     getEditingImageUrl,
   };
 }

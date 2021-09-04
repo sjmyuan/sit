@@ -16,7 +16,6 @@ function useShapes() {
   const [editingImageUrl, setEditingImageUrl] = useState<O.Option<string>>(
     O.none
   );
-  const [stage, setStage] = useState<O.Option<Konva.Stage>>(O.none);
 
   const endToEdit = () => {
     if (O.isSome(editingText)) {

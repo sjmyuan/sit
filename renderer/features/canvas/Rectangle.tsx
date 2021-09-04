@@ -1,8 +1,9 @@
+/* eslint-disable react/destructuring-assignment */
 import React from 'react';
-import { Rect } from '../../store-unstated';
 import { Rect as ReactKonvaRect } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import Konva from 'konva';
+import { Rect } from '../../types';
 
 type RectangleProps = {
   rect: Rect;
@@ -10,7 +11,7 @@ type RectangleProps = {
   onSelected: (name: string) => void;
 };
 
-const Rectangle = (props: RectangleProps) => {
+const Rectangle = (props: RectangleProps): React.ReactElement => {
   const name = `rect-${props.rect.id}`;
   const handleChange = (e: KonvaEventObject<any>) => {
     const rect = e.target as Konva.Rect;

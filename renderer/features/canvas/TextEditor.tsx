@@ -27,7 +27,9 @@ const useStyles = makeStyles<Theme, Point, string>(() => ({
   },
 }));
 
-const TextEditor = (props: { getRelativePos: () => Point }) => {
+const TextEditor = (props: {
+  getRelativePos: () => Point;
+}): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
   const { editingText } = shapes;
   const classes = useStyles(

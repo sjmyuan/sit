@@ -6,7 +6,7 @@ import { pipe, constVoid } from 'fp-ts/lib/function';
 import { sequenceS } from 'fp-ts/lib/Apply';
 import Konva from 'konva';
 import { ImageIndex } from './utils/AppDB';
-import { getImageUrl, updateImage } from './utils/localImages';
+import { getImageCacheUrl, updateImage } from './utils/localImages';
 import { TE, Resolution, AWSConfig, AppErrorOr } from './types';
 import { getFromStorage, saveToStorage } from './utils/localStorage';
 
@@ -201,7 +201,7 @@ function useShapes() {
     onSelect,
     getSelectedShape,
     setEditingImage,
-    editingImageKey: editingImageUrl,
+    editingImageUrl,
     getEditingImageUrl,
   };
 }

@@ -28,6 +28,7 @@ import { ImageContainer } from '../renderer/store/ImageContainer';
 import { TE, AppErrorOr } from '../renderer/types';
 import { WorkerEvents } from '../renderer/events';
 import { ImageIndex } from '../renderer/utils/AppDB';
+import { getImageCacheUrl } from '../renderer/utils/localImages';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -80,9 +81,10 @@ const MainPage = (): React.ReactElement => {
       const key = `clipboard-${Date.now()}.png`;
       return pipe(
         imageContainer.addImage(key, new Blob([image.toPNG()])),
-        TE.map(() => {
-          if (O.isSome(shapes.editingImageKey)) {
-            return shapes.setEditingImage(O.some(key));
+        TE.chain((_) => getImageCacheUrl(key)),
+        TE.map((url: string) => {
+          if (O.isSome(shapes.editingImageUrl)) {
+            return shapes.setEditingImage(O.some(url));
           }
           return constVoid();
         })
@@ -94,8 +96,15 @@ const MainPage = (): React.ReactElement => {
 
   useEffect(() => {
     ipcRenderer.on('edit-image', (_, imageIndex: ImageIndex) => {
-      shapes.setEditingImage(O.some(imageIndex.key));
-      setCroppingImage(O.some(imageIndex));
+      pipe(
+        getImageCacheUrl(imageIndex.key),
+        TE.chain((url) =>
+          TE.fromIO(() => {
+            shapes.setEditingImage(O.some(url));
+            setCroppingImage(O.some(imageIndex));
+          })
+        )
+      )();
     });
     ipcRenderer.on('worker-event', (_, event: WorkerEvents) => {
       if (event._tag === 'start-to-sync') {
@@ -154,7 +163,7 @@ const MainPage = (): React.ReactElement => {
               <CloudDone />
             )}
           </Box>
-          {O.isNone(shapes.editingImageKey) ? (
+          {O.isNone(shapes.editingImageUrl) ? (
             <BrowserToolbar />
           ) : (
             <EditorToolbar />
@@ -169,7 +178,7 @@ const MainPage = (): React.ReactElement => {
         }}
         maxWidth="xl"
       >
-        {O.isNone(shapes.editingImageKey) ? <ImageBrowser /> : <Editor />}
+        {O.isNone(shapes.editingImageUrl) ? <ImageBrowser /> : <Editor />}
       </Container>
       <Box
         sx={{

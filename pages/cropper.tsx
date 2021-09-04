@@ -1,32 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { remote, desktopCapturer, ipcRenderer } from 'electron';
+import { remote, ipcRenderer } from 'electron';
 import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
-import jimp from 'jimp';
 import { pipe } from 'fp-ts/lib/function';
 import { cacheImage } from '../renderer/utils/localImages';
 import { TE } from '../renderer/types';
-
-const getVideo = async () => {
-  const sources = await desktopCapturer.getSources({
-    types: ['screen'],
-  });
-
-  const stream = await (navigator.mediaDevices as any).getUserMedia({
-    audio: false,
-    video: {
-      mandatory: {
-        chromeMediaSource: 'desktop',
-        chromeMediaSourceId: sources[0].id,
-        minWidth: window.screen.width,
-        maxWidth: window.screen.width,
-        minHeight: window.screen.height,
-        maxHeight: window.screen.height,
-      },
-    },
-  });
-  return stream;
-};
+import { getVideo, takeShot } from '../renderer/utils/screen';
 
 type Point = {
   x: number;
@@ -61,40 +40,19 @@ const CropperPage = (): React.ReactElement => {
     };
   }, []);
 
-  const takeShot = async (p1: Point, p2: Point, stream: MediaStream) => {
-    const left = Math.min(p1.x, p2.x);
-    const top = Math.min(p1.y, p2.y);
-    const right = Math.max(p1.x, p2.x);
-    const bottom = Math.max(p1.y, p2.y);
+  const takeShotAndCacheImage = async (
+    p1: Point,
+    p2: Point,
+    stream: MediaStream
+  ) => {
+    const buffer = await takeShot(O.some([p1, p2]), stream);
 
-    const track = stream.getVideoTracks()[0];
-    const imageCapture = new ImageCapture(track);
-    const bitmap = await imageCapture.grabFrame();
-    const canvas = document.createElement('canvas');
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
-    const context = canvas.getContext('2d');
-    if (context) {
-      context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
-      const imageBlob = await new Promise((resolve, reject) =>
-        canvas.toBlob((blob) =>
-          blob
-            ? resolve(blob)
-            : reject(new Error('Can not get blog from canvas'))
-        )
-      );
-      const arrayBuffer = await (imageBlob as Blob).arrayBuffer();
-      const Jimp = await jimp.read(Buffer.from(arrayBuffer));
-      Jimp.crop(left, top, right - left, bottom - top);
-      const buffer = await Jimp.getBufferAsync(jimp.MIME_PNG);
+    const key = `screenshot-${Date.now()}.png`;
 
-      const key = `screenshot-${Date.now()}.png`;
-
-      await pipe(
-        cacheImage(key, new Blob([buffer])),
-        TE.map((index) => ipcRenderer.send('took-screen-shot', index))
-      )();
-    }
+    await pipe(
+      cacheImage(key, new Blob([buffer])),
+      TE.map((index) => ipcRenderer.send('took-screen-shot', index))
+    )();
   };
 
   return (
@@ -115,7 +73,7 @@ const CropperPage = (): React.ReactElement => {
       }
       onMouseUp={() => {
         if (O.isSome(videoSrc) && O.isSome(startPoint)) {
-          takeShot(startPoint.value, mousePoint, videoSrc.value);
+          takeShotAndCacheImage(startPoint.value, mousePoint, videoSrc.value);
         }
         setStartPoint(O.none);
       }}

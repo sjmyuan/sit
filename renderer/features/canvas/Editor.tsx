@@ -58,26 +58,21 @@ const Editor = (): React.ReactElement => {
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
-  const editingImageUrl = shapes.getEditingImageUrl();
+  const editingImageUrl = O.getOrElse<string>(() => '')(
+    shapes.getEditingImageUrl()
+  );
 
   useEffect(() => {
-    pipe(
-      editingImageUrl,
-      T.map(O.fromEither),
-      T.map((url) => {
-        if (O.isSome(url)) {
-          const image = new window.Image();
-          image.src = url.value;
-          image.addEventListener('load', () => {
-            setBackgroundImg(O.some(image));
-            ipcRenderer.send('resize-main-window', [image.width, image.height]);
-          });
-        } else {
-          setBackgroundImg(O.none);
-        }
-        return constVoid();
-      })
-    )();
+    if (editingImageUrl === '') {
+      setBackgroundImg(O.none);
+    } else {
+      const image = new window.Image();
+      image.src = editingImageUrl;
+      image.addEventListener('load', () => {
+        setBackgroundImg(O.some(image));
+        ipcRenderer.send('resize-main-window', [image.width, image.height]);
+      });
+    }
   }, [editingImageUrl]);
 
   useEffect(() => {

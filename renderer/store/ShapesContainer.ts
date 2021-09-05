@@ -85,11 +85,7 @@ function useShapes() {
     }
   };
 
-  const getEditingImageUrl = () =>
-    pipe(
-      editingImageUrl,
-      TE.fromOption(() => new Error('There is no editing image'))
-    );
+  const getEditingImageUrl = () => editingImageUrl;
 
   const setEditingImage = (url: O.Option<string>) => {
     rectState.clear();

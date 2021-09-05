@@ -7,11 +7,17 @@ import {
   addImageIndex,
   cacheImage,
   updateImageState,
+  getImageCacheUrl,
 } from '../utils/localImages';
-import { TE, A, Ord, AppErrorOr } from '../types';
+import { TE, A, Ord, AppErrorOr, O, AWSConfig } from '../types';
 import { InfoContainer } from './InfoContainer';
+import { PreferencesContainer } from './PreferencesContainer';
+import { Do } from 'fp-ts-contrib';
+import { getSignedUrl, s3Client } from '../utils/aws';
+import preferences from '../../pages/preferences';
 
 function useImages() {
+  const preferences = PreferencesContainer.useContainer();
   const [images, setImages] = useState<ImageIndex[]>([]);
 
   const infoState = InfoContainer.useContainer();
@@ -62,6 +68,26 @@ function useImages() {
     );
   };
 
+  const getImageUrl = (key: string): AppErrorOr<string> => {
+    return pipe(
+      getImageCacheUrl(key),
+      TE.orElse(() =>
+        Do.Do(TE.taskEither)
+          .bind(
+            'config',
+            TE.fromOption<Error>(() => new Error('No AWS Configuration'))(
+              preferences.getPrivateImageServerConfig()
+            )
+          )
+          .letL('s3', ({ config }) => s3Client(config))
+          .bindL('url', ({ s3, config }) =>
+            getSignedUrl(s3, config.bucket)(key)
+          )
+          .return<string>(({ url }) => url)
+      )
+    );
+  };
+
   return {
     images,
     setImages,
@@ -69,6 +95,7 @@ function useImages() {
     addImageIndexes,
     addImage,
     deleteImage,
+    getImageUrl,
   };
 }
 

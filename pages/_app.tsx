@@ -17,8 +17,8 @@ const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 const App = ({ Component, pageProps }: AppProps) => {
   return (
     <InfoContainer.Provider>
-      <ImageContainer.Provider>
-        <PreferencesContainer.Provider>
+      <PreferencesContainer.Provider>
+        <ImageContainer.Provider>
           <RectsContainer.Provider>
             <TextsContainer.Provider>
               <ShapeContainer.Provider>
@@ -30,8 +30,8 @@ const App = ({ Component, pageProps }: AppProps) => {
               </ShapeContainer.Provider>
             </TextsContainer.Provider>
           </RectsContainer.Provider>
-        </PreferencesContainer.Provider>
-      </ImageContainer.Provider>
+        </ImageContainer.Provider>
+      </PreferencesContainer.Provider>
     </InfoContainer.Provider>
   );
 };

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Tabs, Tab, Box, Typography } from '@material-ui/core';
 import AWSSetting from '../renderer/features/settings/AWSSetting';
 import ImageSetting from '../renderer/features/settings/ImageSetting';
-import { PreferencesContainer } from '../renderer/store-unstated';
+import { PreferencesContainer } from '../renderer/store/PreferencesContainer';
 
 interface TabPanelProps {
   // eslint-disable-next-line react/require-default-props

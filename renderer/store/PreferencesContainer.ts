@@ -1,7 +1,8 @@
+import { sequenceS } from 'fp-ts/lib/Apply';
 import { pipe } from 'fp-ts/lib/function';
 import { useState } from 'react';
 import { createContainer } from 'unstated-next';
-import { O, Resolution } from '../types';
+import { AWSConfig, O, Resolution } from '../types';
 import { getFromStorage, saveToStorage } from '../utils/localStorage';
 
 function usePreferences() {
@@ -67,6 +68,15 @@ function usePreferences() {
     );
   };
 
+  const getPrivateImageServerConfig = (): O.Option<AWSConfig> => {
+    return sequenceS(O.option)({
+      accessId,
+      secretAccessKey,
+      bucket,
+      region,
+    });
+  };
+
   return {
     accessId,
     setAndSaveAccessId,
@@ -79,6 +89,7 @@ function usePreferences() {
     resolution,
     setAndSaveResolution,
     loadPreferences,
+    getPrivateImageServerConfig,
   };
 }
 

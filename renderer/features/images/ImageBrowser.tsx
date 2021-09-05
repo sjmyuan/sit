@@ -8,10 +8,13 @@ import {
   Box,
   ImageList,
 } from '@material-ui/core';
-import { DeleteOutline } from '@material-ui/icons';
+import { DeleteOutline, CloudDownloadOutlined } from '@material-ui/icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Image from './Image';
 import { ImageContainer } from '../../store/ImageContainer';
+import { ImageIndex } from '../../utils/AppDB';
+import { O, TE } from '../../types';
+import { constVoid, pipe } from 'fp-ts/lib/function';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -43,6 +46,19 @@ const ImageBrowser = (): React.ReactElement => {
   const imageContainer = ImageContainer.useContainer();
   const [totalPage, setTotalPage] = useState<number>(1);
 
+  const downloadImage = (key: string) => {
+    pipe(
+      imageContainer.getImageUrl(key),
+      TE.map((url) => {
+        const a = document.createElement('a');
+        a.setAttribute('download', key);
+        a.setAttribute('href', url);
+        a.click();
+        return constVoid();
+      })
+    )();
+  };
+
   return (
     <InfiniteScroll
       dataLength={totalPage * PAGE_SIZE}
@@ -68,6 +84,13 @@ const ImageBrowser = (): React.ReactElement => {
                       onClick={() => imageContainer.deleteImage(key)()}
                     >
                       <DeleteOutline />
+                    </IconButton>
+                    <IconButton
+                      aria-label={`download ${key}`}
+                      className={classes.icon}
+                      onClick={() => downloadImage(key)}
+                    >
+                      <CloudDownloadOutlined />
                     </IconButton>
                   </Box>
                 }

@@ -10,7 +10,7 @@ import {
 import * as O from 'fp-ts/Option';
 import { pipe, constant, identity } from 'fp-ts/lib/function';
 import { regions } from '../../constants/regions.json';
-import { PreferencesContainer } from '../../store-unstated';
+import { PreferencesContainer } from '../../store/PreferencesContainer';
 
 const AWSSetting = (): React.ReactElement => {
   const preferences = PreferencesContainer.useContainer();

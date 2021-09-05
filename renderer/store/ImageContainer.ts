@@ -3,15 +3,21 @@ import { pipe, constVoid } from 'fp-ts/lib/function';
 import { createContainer } from 'unstated-next';
 import { ImageIndex } from '../utils/AppDB';
 import {
-  loadImages,
+  loadImageIndexes,
   addImageIndex,
-  uploadImage,
+  cacheImage,
   updateImageState,
+  getImageCacheUrl,
 } from '../utils/localImages';
-import { TE, A, Ord, AppErrorOr } from '../types';
-import { InfoContainer } from '../store-unstated';
+import { TE, A, Ord, AppErrorOr, O, AWSConfig } from '../types';
+import { InfoContainer } from './InfoContainer';
+import { PreferencesContainer } from './PreferencesContainer';
+import { Do } from 'fp-ts-contrib';
+import { getSignedUrl, s3Client } from '../utils/aws';
+import preferences from '../../pages/preferences';
 
 function useImages() {
+  const preferences = PreferencesContainer.useContainer();
   const [images, setImages] = useState<ImageIndex[]>([]);
 
   const infoState = InfoContainer.useContainer();
@@ -19,7 +25,7 @@ function useImages() {
   const loadAllImageIndexes = () => {
     return infoState.runTask('load images')(
       pipe(
-        loadImages(['ADDING', 'ADDED']),
+        loadImageIndexes(['ADDING', 'ADDED']),
         TE.map(
           A.sortBy([
             Ord.fromCompare<ImageIndex>((x: ImageIndex, y: ImageIndex) =>
@@ -45,7 +51,7 @@ function useImages() {
   const addImage = (key: string, content: Blob): AppErrorOr<void> => {
     return infoState.runTask('add image')(
       pipe(
-        uploadImage(key, content),
+        cacheImage(key, content),
         TE.map((index) => setImages([index, ...images])),
         TE.map(constVoid)
       )
@@ -56,8 +62,28 @@ function useImages() {
     return infoState.runTask('delete image')(
       pipe(
         updateImageState(key, 'DELETING'),
-        TE.map(() => setImages(images.filter((x) => x.key != key))),
+        TE.map(() => setImages(images.filter((x) => x.key !== key))),
         TE.map(constVoid)
+      )
+    );
+  };
+
+  const getImageUrl = (key: string): AppErrorOr<string> => {
+    return pipe(
+      getImageCacheUrl(key),
+      TE.orElse(() =>
+        Do.Do(TE.taskEither)
+          .bind(
+            'config',
+            TE.fromOption<Error>(() => new Error('No AWS Configuration'))(
+              preferences.getPrivateImageServerConfig()
+            )
+          )
+          .letL('s3', ({ config }) => s3Client(config))
+          .bindL('url', ({ s3, config }) =>
+            getSignedUrl(s3, config.bucket)(key)
+          )
+          .return<string>(({ url }) => url)
       )
     );
   };
@@ -69,7 +95,9 @@ function useImages() {
     addImageIndexes,
     addImage,
     deleteImage,
+    getImageUrl,
   };
 }
 
+// eslint-disable-next-line import/prefer-default-export
 export const ImageContainer = createContainer(useImages);

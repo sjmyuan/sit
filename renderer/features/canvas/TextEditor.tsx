@@ -2,8 +2,10 @@ import React from 'react';
 import * as O from 'fp-ts/Option';
 import * as A from 'fp-ts/Array';
 import { makeStyles, Theme } from '@material-ui/core';
-import { ShapeContainer, Point } from '../../store-unstated';
 import { pipe } from 'fp-ts/lib/function';
+import { ShapeContainer } from '../../store/ShapesContainer';
+import { Point } from '../../types';
+
 const useStyles = makeStyles<Theme, Point, string>(() => ({
   textEditor: {
     position: 'absolute',
@@ -25,9 +27,11 @@ const useStyles = makeStyles<Theme, Point, string>(() => ({
   },
 }));
 
-const TextEditor = (props: { getRelativePos: () => Point }) => {
+const TextEditor = (props: {
+  getRelativePos: () => Point;
+}): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
-  const editingText = shapes.editingText;
+  const { editingText } = shapes;
   const classes = useStyles(
     pipe(
       editingText,
@@ -48,12 +52,11 @@ const TextEditor = (props: { getRelativePos: () => Point }) => {
     );
 
   if (O.isNone(editingText)) {
-    return <React.Fragment />;
+    return <></>;
   }
 
   return (
     <textarea
-      autoFocus
       cols={getCols(editingText.value.value)}
       rows={getRows(editingText.value.value)}
       value={editingText.value.value}

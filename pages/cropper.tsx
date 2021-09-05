@@ -1,32 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { remote, desktopCapturer, ipcRenderer } from 'electron';
+import { remote, ipcRenderer } from 'electron';
 import { Box } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
-import jimp from 'jimp';
-import { uploadImage } from '../renderer/utils/localImages';
-import { pipe } from 'fp-ts/lib/function';
-import { TE } from '../renderer/types';
-
-const getVideo = async () => {
-  const sources = await desktopCapturer.getSources({
-    types: ['screen'],
-  });
-
-  const stream = await (navigator.mediaDevices as any).getUserMedia({
-    audio: false,
-    video: {
-      mandatory: {
-        chromeMediaSource: 'desktop',
-        chromeMediaSourceId: sources[0].id,
-        minWidth: window.screen.width,
-        maxWidth: window.screen.width,
-        minHeight: window.screen.height,
-        maxHeight: window.screen.height,
-      },
-    },
-  });
-  return stream;
-};
+import { constVoid, pipe } from 'fp-ts/lib/function';
+import { cacheImage } from '../renderer/utils/localImages';
+import { TE, T } from '../renderer/types';
+import { getVideo, takeShot } from '../renderer/utils/screen';
 
 type Point = {
   x: number;
@@ -36,66 +15,54 @@ type Point = {
 const overlayOpacity = 0.5;
 const overlayColor = 'gray';
 
+const takeShotAndCacheImage = async (
+  range: O.Option<[Point, Point]>,
+  stream: MediaStream
+) => {
+  const buffer = await takeShot(range, stream);
+
+  const key = `screenshot-${Date.now()}.png`;
+
+  await pipe(
+    cacheImage(key, new Blob([buffer])),
+    TE.map((index) => ipcRenderer.send('took-screen-shot', index))
+  )();
+};
+
 const CropperPage = (): React.ReactElement => {
   const [videoSrc, setVideoSrc] = useState<O.Option<MediaStream>>(O.none);
   const [startPoint, setStartPoint] = useState<O.Option<Point>>(O.none);
   const [mousePoint, setMousePoint] = useState<Point>({ x: 0, y: 0 });
 
   useEffect(() => {
-    getVideo()
-      .then((src) => setVideoSrc(O.some(src)))
-      .catch((e) => console.log(e));
-  }, []);
+    ipcRenderer.on('cropper-type', (_, takeFullScreenShot: boolean) => {
+      if (takeFullScreenShot) {
+        getVideo()
+          .then((src) => takeShotAndCacheImage(O.none, src))
+          .catch((e) => console.log(e));
+      } else {
+        getVideo()
+          .then((src) => setVideoSrc(O.some(src)))
+          .catch((e) => console.log(e));
 
-  useEffect(() => {
-    const handleUserKeyUp = (event: { ctrlKey: boolean; keyCode: number }) => {
-      const { keyCode } = event;
+        const handleUserKeyUp = (event: {
+          ctrlKey: boolean;
+          keyCode: number;
+        }) => {
+          const { keyCode } = event;
 
-      if (keyCode === 27) {
-        remote.getCurrentWindow().close();
+          if (keyCode === 27) {
+            remote.getCurrentWindow().close();
+          }
+        };
+        window.addEventListener('keyup', handleUserKeyUp);
+        return () => {
+          window.removeEventListener('keyup', handleUserKeyUp);
+        };
       }
-    };
-    window.addEventListener('keyup', handleUserKeyUp);
-    return () => {
-      window.removeEventListener('keyup', handleUserKeyUp);
-    };
+      return constVoid();
+    });
   }, []);
-
-  const takeShot = async (p1: Point, p2: Point, stream: MediaStream) => {
-    const left = Math.min(p1.x, p2.x);
-    const top = Math.min(p1.y, p2.y);
-    const right = Math.max(p1.x, p2.x);
-    const bottom = Math.max(p1.y, p2.y);
-
-    const track = stream.getVideoTracks()[0];
-    const imageCapture = new ImageCapture(track);
-    const bitmap = await imageCapture.grabFrame();
-    const canvas = document.createElement('canvas');
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
-    const context = canvas.getContext('2d');
-    if (context) {
-      context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
-      const imageBlob = await new Promise((resolve, reject) =>
-        canvas.toBlob((blob) =>
-          blob
-            ? resolve(blob)
-            : reject(new Error('Can not get blog from canvas'))
-        )
-      );
-      const arrayBuffer = await (imageBlob as Blob).arrayBuffer();
-      const Jimp = await jimp.read(Buffer.from(arrayBuffer));
-      Jimp.crop(left, top, right - left, bottom - top);
-      const buffer = await Jimp.getBufferAsync(jimp.MIME_PNG);
-
-      const key = `screenshot-${Date.now()}.png`;
-
-      await pipe(
-        uploadImage(key, new Blob([buffer])),
-        TE.map((index) => ipcRenderer.send('took-screen-shot', index))
-      )();
-    }
-  };
 
   return (
     <Box
@@ -115,7 +82,10 @@ const CropperPage = (): React.ReactElement => {
       }
       onMouseUp={() => {
         if (O.isSome(videoSrc) && O.isSome(startPoint)) {
-          takeShot(startPoint.value, mousePoint, videoSrc.value);
+          takeShotAndCacheImage(
+            O.some([startPoint.value, mousePoint]),
+            videoSrc.value
+          );
         }
         setStartPoint(O.none);
       }}

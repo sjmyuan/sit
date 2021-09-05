@@ -11,7 +11,9 @@ const imageIndexEq = Eq.fromEquals(
   (x: ImageIndex, y: ImageIndex) => x.key === y.key
 );
 
-export const loadImages = (states: ImageState[]): AppErrorOr<ImageIndex[]> =>
+export const loadImageIndexes = (
+  states: ImageState[]
+): AppErrorOr<ImageIndex[]> =>
   TE.fromTask(() =>
     db.localIndex
       .where('state')
@@ -19,16 +21,16 @@ export const loadImages = (states: ImageState[]): AppErrorOr<ImageIndex[]> =>
       .toArray()
   );
 
-export const addImageIndex = (imageIndexs: ImageIndex[]): AppErrorOr<void> =>
+export const addImageIndex = (imageIndexes: ImageIndex[]): AppErrorOr<void> =>
   pipe(
     TE.tryCatch<Error, unknown>(
-      () => db.localIndex.bulkPut(imageIndexs),
+      () => db.localIndex.bulkPut(imageIndexes),
       E.toError
     ),
     TE.map(constVoid)
   );
 
-export const uploadImage = (
+export const cacheImage = (
   key: string,
   image: Blob
 ): AppErrorOr<ImageIndex> => {
@@ -55,9 +57,10 @@ export const updateImageState = (
       () =>
         db.localIndex
           .update(key, {
-            state: state,
+            state,
           })
           .then(() => {
+            // eslint-disable-next-line promise/always-return
             if (state === 'DELETED') {
               db.cache.delete(key);
             }
@@ -67,7 +70,7 @@ export const updateImageState = (
     TE.map(constVoid)
   );
 
-export const getImageUrl = (key: string): AppErrorOr<string> =>
+export const getImageCacheUrl = (key: string): AppErrorOr<string> =>
   TE.tryCatch(
     () =>
       db.cache
@@ -79,9 +82,11 @@ export const getImageUrl = (key: string): AppErrorOr<string> =>
 export const getImageCache = (key: string): AppErrorOr<Blob> =>
   TE.fromTask(() => db.cache.get(key).then((imageCache) => imageCache.image));
 
-export const syncImages = (remoteImages: ImageIndex[]): AppErrorOr<void> => {
+export const syncImageCaches = (
+  remoteImages: ImageIndex[]
+): AppErrorOr<void> => {
   return Do.Do(TE.taskEither)
-    .bind('localImages', loadImages(['ADDED', 'DELETING']))
+    .bind('localImages', loadImageIndexes(['ADDED', 'DELETING']))
     .letL('deletedImageInRemote', ({ localImages }) =>
       pipe(localImages, A.difference(imageIndexEq)(remoteImages))
     )

@@ -5,22 +5,20 @@ import { AppProps } from 'next/app';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { StylesProvider } from '@material-ui/core';
 import '../renderer/app.global.css';
-import {
-  ShapeContainer,
-  RectsContainer,
-  TextsContainer,
-  PreferencesContainer,
-  InfoContainer,
-} from '../renderer/store-unstated';
 import { ImageContainer } from '../renderer/store/ImageContainer';
+import { InfoContainer } from '../renderer/store/InfoContainer';
+import { PreferencesContainer } from '../renderer/store/PreferencesContainer';
+import { RectsContainer } from '../renderer/store/RectsContainer';
+import { TextsContainer } from '../renderer/store/TextContainer';
+import { ShapeContainer } from '../renderer/store/ShapesContainer';
 
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
 const App = ({ Component, pageProps }: AppProps) => {
   return (
     <InfoContainer.Provider>
-      <ImageContainer.Provider>
-        <PreferencesContainer.Provider>
+      <PreferencesContainer.Provider>
+        <ImageContainer.Provider>
           <RectsContainer.Provider>
             <TextsContainer.Provider>
               <ShapeContainer.Provider>
@@ -32,8 +30,8 @@ const App = ({ Component, pageProps }: AppProps) => {
               </ShapeContainer.Provider>
             </TextsContainer.Provider>
           </RectsContainer.Provider>
-        </PreferencesContainer.Provider>
-      </ImageContainer.Provider>
+        </ImageContainer.Provider>
+      </PreferencesContainer.Provider>
     </InfoContainer.Provider>
   );
 };

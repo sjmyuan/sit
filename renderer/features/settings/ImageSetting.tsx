@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 import * as O from 'fp-ts/Option';
 import { Resolution } from '../../types';
-import { PreferencesContainer } from '../../store-unstated';
+import { PreferencesContainer } from '../../store/PreferencesContainer';
 
 const availableResolutions: Resolution[] = [
   { width: 480, height: 320 },

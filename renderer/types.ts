@@ -43,16 +43,22 @@ export type Point = {
 };
 
 export type Rect = {
+  readonly _tag: 'rect';
   id: number;
+  name: string;
   origin: Point;
   width: number;
   height: number;
 };
 
 export type Text = {
+  readonly _tag: 'text';
   id: number;
+  name: string;
   origin: Point;
   value: string;
 };
+
+export type SitShape = Rect | Text;
 
 export type MODE = 'RECT' | 'TEXT';

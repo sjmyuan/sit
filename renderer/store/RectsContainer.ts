@@ -9,24 +9,26 @@ function useRects(initialState: Rect[] = []) {
   const startToDraw = (point: Point) =>
     setNewRect(
       O.some({
+        _tag: 'rect',
+        name: `rect-${rects.length + 1}`,
         id: rects.length + 1,
         origin: point,
         width: 0,
         height: 0,
       })
     );
-  const drawing = (point: Point) =>
+  const drawing = (point: Point) => {
     setNewRect(
       pipe(
         newRect,
         O.map((rect) => ({
-          id: rect.id,
-          origin: rect.origin,
+          ...rect,
           width: point.x - rect.origin.x,
           height: point.y - rect.origin.y,
         }))
       )
     );
+  };
 
   const endToDraw = () => {
     if (O.isSome(newRect)) {
@@ -47,6 +49,10 @@ function useRects(initialState: Rect[] = []) {
     );
   };
 
+  const deleteRect = (rect: Rect) => {
+    setRects(rects.filter((x) => x.id !== rect.id));
+  };
+
   const clear = () => setRects([]);
 
   return {
@@ -56,6 +62,7 @@ function useRects(initialState: Rect[] = []) {
     endToDraw,
     update,
     clear,
+    deleteRect,
   };
 }
 

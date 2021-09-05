@@ -8,11 +8,10 @@ import { Rect } from '../../types';
 type RectangleProps = {
   rect: Rect;
   onTransform: (rect: Rect) => void;
-  onSelected: (name: string) => void;
+  onSelected: (rect: Rect) => void;
 };
 
 const Rectangle = (props: RectangleProps): React.ReactElement => {
-  const name = `rect-${props.rect.id}`;
   const handleChange = (e: KonvaEventObject<any>) => {
     const rect = e.target as Konva.Rect;
     // take a look into width and height properties
@@ -20,7 +19,7 @@ const Rectangle = (props: RectangleProps): React.ReactElement => {
     // while transforming
     // so we need to adjust that properties to width and height
     props.onTransform({
-      id: props.rect.id,
+      ...props.rect,
       origin: { x: rect.x(), y: rect.y() },
       width: rect.width() * rect.scaleX(),
       height: rect.height() * rect.scaleY(),
@@ -28,7 +27,7 @@ const Rectangle = (props: RectangleProps): React.ReactElement => {
   };
   const handleMouseDown = (e: KonvaEventObject<any>) => {
     e.currentTarget.preventDefault();
-    props.onSelected(name);
+    props.onSelected(props.rect);
   };
   return (
     <ReactKonvaRect
@@ -43,7 +42,7 @@ const Rectangle = (props: RectangleProps): React.ReactElement => {
       // otherwise Transformer will change it
       scaleX={1}
       scaleY={1}
-      name={name}
+      name={props.rect.name}
       strokeScaleEnabled={false}
       // save state on dragend or transformend
       onDragEnd={handleChange}

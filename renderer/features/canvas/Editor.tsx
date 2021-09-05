@@ -50,6 +50,7 @@ const copyImageToClipboard = (stage: KonvaStage) => {
 const Editor = (): React.ReactElement => {
   const classes = useStyles();
   const shapes = ShapeContainer.useContainer();
+  const selectedShape = shapes.getSelectedShape();
   const rects = RectsContainer.useContainer();
   const texts = TextsContainer.useContainer();
   const notification = InfoContainer.useContainer();
@@ -84,10 +85,14 @@ const Editor = (): React.ReactElement => {
       copyImageToClipboard(stageRef.current.getStage());
       notification.showInfo(O.some('Image Copied to Clipboard'));
     });
+    MouseTrap.bind(['delete', 'backspace'], () => {
+      shapes.deleteSelectedShape();
+    });
     return () => {
       MouseTrap.unbind(['ctrl+c', 'command+c']);
+      MouseTrap.unbind(['delete', 'backspace']);
     };
-  }, [notification]);
+  });
 
   return (
     <Box
@@ -133,9 +138,9 @@ const Editor = (): React.ReactElement => {
             {rects.getAllRects().map((rect) => {
               return (
                 <Rectangle
-                  key={`rect-${rect.id}`}
+                  key={rect.name}
                   rect={rect}
-                  onSelected={(name) => shapes.onSelect(name)}
+                  onSelected={() => shapes.onSelect(rect)}
                   onTransform={(transformedRect) =>
                     rects.update(transformedRect)
                   }
@@ -153,8 +158,9 @@ const Editor = (): React.ReactElement => {
               .map((text) => {
                 return (
                   <TextComponent
-                    key={`text-${text.id}`}
+                    key={text.name}
                     text={text}
+                    onSelected={() => shapes.onSelect(text)}
                     onChange={texts.update}
                     startToEdit={shapes.startToEdit}
                   />
@@ -162,9 +168,11 @@ const Editor = (): React.ReactElement => {
               })}
           </Layer>
           <Layer>
-            <TransformerComponent
-              selectedShapeName={shapes.getSelectedShape()}
-            />
+            {O.isSome(selectedShape) ? (
+              <TransformerComponent selectedShape={selectedShape.value} />
+            ) : (
+              <></>
+            )}
           </Layer>
         </Stage>
       ) : (

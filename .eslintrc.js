@@ -12,6 +12,7 @@ module.exports = {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
     '@typescript-eslint/no-var-requires': 'off',
+    'react/destructuring-assignment': 'off',
     'prettier/prettier': [
       'error',
       {

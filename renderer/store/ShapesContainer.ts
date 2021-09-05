@@ -1,8 +1,7 @@
 import { pipe } from 'fp-ts/lib/function';
-import Konva from 'konva';
 import { useState } from 'react';
 import { createContainer } from 'unstated-next';
-import { O, TE, MODE, Point, Text } from '../types';
+import { O, TE, MODE, Point, Text, SitShape } from '../types';
 import { RectsContainer } from './RectsContainer';
 import { TextsContainer } from './TextContainer';
 
@@ -11,7 +10,9 @@ function useShapes() {
   const textState = TextsContainer.useContainer();
   const [currentMode, setMode] = useState<MODE>('RECT');
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
-  const [selectedShape, setSelectedShape] = useState<O.Option<string>>(O.none);
+  const [selectedShape, setSelectedShape] = useState<O.Option<SitShape>>(
+    O.none
+  );
   const [editingText, setEditingText] = useState<O.Option<Text>>(O.none);
   const [editingImageUrl, setEditingImageUrl] = useState<O.Option<string>>(
     O.none
@@ -65,9 +66,24 @@ function useShapes() {
     );
   };
 
-  const onSelect = (name: string) => setSelectedShape(O.some(name));
+  const onSelect = (shape: SitShape) => setSelectedShape(O.some(shape));
 
-  const getSelectedShape = () => O.getOrElse(() => '')(selectedShape);
+  const getSelectedShape = () => selectedShape;
+
+  const deleteSelectedShape = () => {
+    if (O.isSome(selectedShape)) {
+      const shape = selectedShape.value;
+      // eslint-disable-next-line no-underscore-dangle
+      if (shape._tag === 'rect') {
+        rectState.deleteRect(shape);
+        // eslint-disable-next-line no-underscore-dangle
+      } else if (shape._tag === 'text') {
+        textState.deleteText(shape);
+      }
+
+      setSelectedShape(O.none);
+    }
+  };
 
   const getEditingImageUrl = () =>
     pipe(
@@ -100,6 +116,7 @@ function useShapes() {
     setEditingImage,
     editingImageUrl,
     getEditingImageUrl,
+    deleteSelectedShape,
   };
 }
 

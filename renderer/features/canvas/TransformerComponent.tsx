@@ -1,9 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import { Transformer } from 'react-konva';
 import Konva from 'konva';
+import { KonvaEventListener } from 'konva/types/Node';
+import { SitShape } from '../../types';
 
 type TransformerComponentProps = {
-  selectedShapeName: string;
+  selectedShape: SitShape;
 };
 
 const TransformerComponent = (props: TransformerComponentProps) => {
@@ -11,10 +13,10 @@ const TransformerComponent = (props: TransformerComponentProps) => {
   const checkNode = () => {
     const transformer = transformerRef.current;
     const stage = transformer.getStage();
-    const { selectedShapeName } = props;
+    const { selectedShape } = props;
 
-    const selectedNode = stage.findOne('.' + selectedShapeName);
-    if (transformer.findOne('.' + selectedShapeName)) {
+    const selectedNode = stage.findOne(`.${selectedShape.name}`);
+    if (transformer.findOne(`.${selectedShape.name}`)) {
       return;
     }
 
@@ -45,7 +47,7 @@ const TransformerComponent = (props: TransformerComponentProps) => {
 
   useEffect(() => {
     checkNode();
-  }, [props.selectedShapeName]);
+  }, [props.selectedShape]);
   return (
     <Transformer ref={transformerRef} keepRatio={false} rotateEnabled={false} />
   );

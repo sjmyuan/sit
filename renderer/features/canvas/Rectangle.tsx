@@ -25,8 +25,8 @@ const Rectangle = (props: RectangleProps): React.ReactElement => {
       height: rect.height() * rect.scaleY(),
     });
   };
-  const handleMouseDown = (e: KonvaEventObject<any>) => {
-    e.currentTarget.preventDefault();
+  const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
+    e.cancelBubble = true;
     props.onSelected(props.rect);
   };
   return (

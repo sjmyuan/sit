@@ -114,14 +114,12 @@ const Editor = (): React.ReactElement => {
           onMouseMove={(e) => {
             shapes.drawing(getRelativePointerPosition(e.target.getStage()));
           }}
+          onMouseDown={(e) => {
+            shapes.startToDraw(getRelativePointerPosition(e.target.getStage()));
+          }}
         >
           <Layer>
             <Image
-              onMouseDown={(e) => {
-                shapes.startToDraw(
-                  getRelativePointerPosition(e.target.getStage())
-                );
-              }}
               x={0}
               y={0}
               width={backgroundImg.value.width}

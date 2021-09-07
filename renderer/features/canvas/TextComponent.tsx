@@ -12,7 +12,7 @@ type TextProps = {
 
 const TextComponent = (props: TextProps): React.ReactElement => {
   const handleMouseDown = (e: KonvaEventObject<any>) => {
-    e.currentTarget.preventDefault();
+    e.cancelBubble = true;
     props.onSelected(props.text);
   };
   return (
@@ -20,7 +20,9 @@ const TextComponent = (props: TextProps): React.ReactElement => {
       stroke="rgb(220,50,105)"
       fill="rgb(220,50,105)"
       fontSize={30}
+      fontFamily="Calibri"
       fontWeight="bold"
+      verticalAlign="middle"
       name={props.text.name}
       text={props.text.value}
       x={props.text.origin.x}

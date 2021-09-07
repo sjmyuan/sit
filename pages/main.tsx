@@ -172,7 +172,8 @@ const MainPage = (): React.ReactElement => {
         sx={{
           marginTop: '10px',
           marginBottom: '10px',
-          minHeight: 'calc(100% - (84px))',
+          minHeight: 'calc(100% - (104px))',
+          display: 'flex',
         }}
         maxWidth="xl"
       >

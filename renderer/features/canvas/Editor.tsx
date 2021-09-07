@@ -21,6 +21,7 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'white',
   },
 }));
 
@@ -93,7 +94,7 @@ const Editor = (): React.ReactElement => {
     <Box
       sx={{
         minHeight: '580px',
-        p: 2,
+        p: 0,
         backgroundColor: 'rgb(116,116,116)',
         display: 'flex',
         justifyContent: 'center',

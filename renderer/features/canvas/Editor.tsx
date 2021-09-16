@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
 import * as T from 'fp-ts/Task';
-import { Box, makeStyles } from '@material-ui/core';
-import { Stage, Layer, Image } from 'react-konva';
+import { Box, debounce, makeStyles } from '@material-ui/core';
+import { Stage, Layer, Image, Rect as ReactKonvaRect } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { constVoid, pipe } from 'fp-ts/lib/function';
 import { ipcRenderer, clipboard, nativeImage } from 'electron';
@@ -56,6 +56,9 @@ const Editor = (): React.ReactElement => {
   const texts = TextsContainer.useContainer();
   const notification = InfoContainer.useContainer();
   const stageRef = useRef<Stage>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [stageSize, setStageSize] = useState<[number, number]>([400, 400]);
+  const [imageSize, setImageSize] = useState<[number, number]>([100, 100]);
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
@@ -71,6 +74,7 @@ const Editor = (): React.ReactElement => {
       image.src = editingImageUrl;
       image.addEventListener('load', () => {
         setBackgroundImg(O.some(image));
+        setImageSize([image.width, image.height]);
         ipcRenderer.send('resize-main-window', [image.width, image.height]);
       });
     }
@@ -84,14 +88,25 @@ const Editor = (): React.ReactElement => {
     MouseTrap.bind(['delete', 'backspace'], () => {
       shapes.deleteSelectedShape();
     });
+    const debouncedHandleResize = debounce(function handleResize() {
+      setStageSize([
+        containerRef.current.getBoundingClientRect().width,
+        containerRef.current.getBoundingClientRect().height,
+      ]);
+    }, 1000);
+
+    window.addEventListener('resize', debouncedHandleResize);
+
     return () => {
       MouseTrap.unbind(['ctrl+c', 'command+c']);
       MouseTrap.unbind(['delete', 'backspace']);
+      window.removeEventListener('resize', debouncedHandleResize);
     };
-  });
+  }, []);
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         minHeight: '580px',
         p: 0,
@@ -107,8 +122,8 @@ const Editor = (): React.ReactElement => {
         <Stage
           ref={stageRef}
           className={classes.konva}
-          width={backgroundImg.value.width}
-          height={backgroundImg.value.height}
+          width={stageSize[0]}
+          height={stageSize[1]}
           onMouseUp={() => {
             shapes.endToDraw();
           }}
@@ -120,11 +135,22 @@ const Editor = (): React.ReactElement => {
           }}
         >
           <Layer>
-            <Image
+            <ReactKonvaRect
               x={0}
               y={0}
-              width={backgroundImg.value.width}
-              height={backgroundImg.value.height}
+              width={stageSize[0]}
+              height={stageSize[1]}
+              strokeWidth={0}
+              fill="rgb(116,116,116)"
+              name="paper"
+            />
+          </Layer>
+          <Layer>
+            <Image
+              x={(stageSize[0] - imageSize[0]) / 2}
+              y={(stageSize[1] - imageSize[1]) / 2}
+              width={imageSize[0]}
+              height={imageSize[1]}
               image={O.toUndefined(backgroundImg)}
             />
           </Layer>
@@ -173,8 +199,8 @@ const Editor = (): React.ReactElement => {
         <Stage
           ref={stageRef}
           className={classes.konva}
-          width={400}
-          height={400}
+          width={stageSize[0]}
+          height={stageSize[1]}
         />
       )}
       <TextEditor

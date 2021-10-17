@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
-import * as T from 'fp-ts/Task';
 import { Box, debounce, makeStyles } from '@material-ui/core';
 import { Stage, Layer, Image, Rect as ReactKonvaRect } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
-import { constVoid, pipe } from 'fp-ts/lib/function';
+import { Rect as KonvaRect } from 'konva/types/shapes/Rect';
+import { pipe } from 'fp-ts/lib/function';
 import { ipcRenderer, clipboard, nativeImage } from 'electron';
 import MouseTrap from 'mousetrap';
 import Rectangle from './Rectangle';
@@ -12,8 +12,6 @@ import TransformerComponent from './TransformerComponent';
 import TextComponent from './TextComponent';
 import TextEditor from './TextEditor';
 import { ShapeContainer } from '../../store/ShapesContainer';
-import { RectsContainer } from '../../store/RectsContainer';
-import { TextsContainer } from '../../store/TextContainer';
 import { InfoContainer } from '../../store/InfoContainer';
 
 const useStyles = makeStyles(() => ({
@@ -25,7 +23,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const getRelativePointerPosition = (node: KonvaStage) => {
+const getRelativePointerPosition = (node: KonvaRect) => {
   // the function will return pointer position relative to the passed node
   const transform = node.getAbsoluteTransform().copy();
   // to detect relative position we need to invert transform
@@ -52,13 +50,11 @@ const Editor = (): React.ReactElement => {
   const classes = useStyles();
   const shapes = ShapeContainer.useContainer();
   const selectedShape = shapes.getSelectedShape();
-  const rects = RectsContainer.useContainer();
-  const texts = TextsContainer.useContainer();
   const notification = InfoContainer.useContainer();
   const stageRef = useRef<Stage>(null);
+  const drawingAreaRef = useRef<KonvaRect>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [stageSize, setStageSize] = useState<[number, number]>([400, 400]);
-  const [imageSize, setImageSize] = useState<[number, number]>([100, 100]);
+  const [imageOrigin, setImageOrigin] = useState<[number, number]>([0, 0]);
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
@@ -74,7 +70,7 @@ const Editor = (): React.ReactElement => {
       image.src = editingImageUrl;
       image.addEventListener('load', () => {
         setBackgroundImg(O.some(image));
-        setImageSize([image.width, image.height]);
+        shapes.updateDrawingAreaSize([image.width, image.height]);
         ipcRenderer.send('resize-main-window', [image.width, image.height]);
       });
     }
@@ -88,12 +84,13 @@ const Editor = (): React.ReactElement => {
     MouseTrap.bind(['delete', 'backspace'], () => {
       shapes.deleteSelectedShape();
     });
+
     const debouncedHandleResize = debounce(function handleResize() {
-      setStageSize([
+      shapes.updateStageSize([
         containerRef.current.getBoundingClientRect().width,
         containerRef.current.getBoundingClientRect().height,
       ]);
-    }, 1000);
+    }, 500);
 
     window.addEventListener('resize', debouncedHandleResize);
 
@@ -102,7 +99,7 @@ const Editor = (): React.ReactElement => {
       MouseTrap.unbind(['delete', 'backspace']);
       window.removeEventListener('resize', debouncedHandleResize);
     };
-  }, []);
+  }, [shapes.stageSize]);
 
   return (
     <Box
@@ -122,52 +119,61 @@ const Editor = (): React.ReactElement => {
         <Stage
           ref={stageRef}
           className={classes.konva}
-          width={stageSize[0]}
-          height={stageSize[1]}
+          width={shapes.stageSize[0]}
+          height={shapes.stageSize[1]}
           onMouseUp={() => {
             shapes.endToDraw();
           }}
-          onMouseMove={(e) => {
-            shapes.drawing(getRelativePointerPosition(e.target.getStage()));
+          onMouseMove={() => {
+            shapes.drawing(getRelativePointerPosition(drawingAreaRef.current));
           }}
-          onMouseDown={(e) => {
-            shapes.startToDraw(getRelativePointerPosition(e.target.getStage()));
+          onMouseDown={() => {
+            shapes.startToDraw(
+              getRelativePointerPosition(drawingAreaRef.current)
+            );
           }}
         >
           <Layer>
             <ReactKonvaRect
               x={0}
               y={0}
-              width={stageSize[0]}
-              height={stageSize[1]}
+              width={shapes.stageSize[0]}
+              height={shapes.stageSize[1]}
               strokeWidth={0}
               fill="rgb(116,116,116)"
-              name="paper"
+              name="full-paper"
             />
-          </Layer>
-          <Layer>
+            <ReactKonvaRect
+              ref={drawingAreaRef}
+              x={shapes.drawingAreaOrigin[0]}
+              y={shapes.drawingAreaOrigin[1]}
+              width={shapes.drawingAreaSize[0]}
+              height={shapes.drawingAreaSize[1]}
+              strokeWidth={0}
+              fill="white"
+              name="drawing-area"
+            />
             <Image
-              x={(stageSize[0] - imageSize[0]) / 2}
-              y={(stageSize[1] - imageSize[1]) / 2}
-              width={imageSize[0]}
-              height={imageSize[1]}
+              x={imageOrigin[0] + shapes.drawingAreaOrigin[0]}
+              y={imageOrigin[1] + shapes.drawingAreaOrigin[1]}
+              width={backgroundImg.value.width}
+              height={backgroundImg.value.height}
               image={O.toUndefined(backgroundImg)}
             />
-          </Layer>
-          <Layer>
-            {rects.getAllRects().map((rect) => {
+            {shapes.getAllRects().map((rect) => {
               return (
                 <Rectangle
                   key={rect.name}
                   rect={rect}
                   onSelected={() => shapes.onSelect(rect)}
                   onTransform={(transformedRect) =>
-                    rects.update(transformedRect)
+                    shapes.updateShape(transformedRect)
                   }
                 />
               );
             })}
-            {texts.texts
+            {shapes
+              .getAllTexts()
               .filter((text) =>
                 pipe(
                   shapes.editingText,
@@ -181,13 +187,11 @@ const Editor = (): React.ReactElement => {
                     key={text.name}
                     text={text}
                     onSelected={() => shapes.onSelect(text)}
-                    onChange={texts.update}
+                    onChange={shapes.updateShape}
                     startToEdit={shapes.startToEdit}
                   />
                 );
               })}
-          </Layer>
-          <Layer>
             {O.isSome(selectedShape) ? (
               <TransformerComponent selectedShape={selectedShape.value} />
             ) : (
@@ -199,8 +203,8 @@ const Editor = (): React.ReactElement => {
         <Stage
           ref={stageRef}
           className={classes.konva}
-          width={stageSize[0]}
-          height={stageSize[1]}
+          width={shapes.stageSize[0]}
+          height={shapes.stageSize[1]}
         />
       )}
       <TextEditor

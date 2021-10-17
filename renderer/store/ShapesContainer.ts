@@ -1,3 +1,4 @@
+import console from 'console';
 import { pipe } from 'fp-ts/lib/function';
 import { useState } from 'react';
 import { createContainer } from 'unstated-next';
@@ -17,6 +18,17 @@ function useShapes() {
   const [editingImageUrl, setEditingImageUrl] = useState<O.Option<string>>(
     O.none
   );
+  const [stageSize, setStageSize] = useState<[number, number]>([400, 400]);
+
+  const [drawingAreaSize, setDrawingAreaSize] = useState<[number, number]>([
+    100,
+    100,
+  ]);
+
+  const [drawingAreaOrigin, setDrawingAreaOrigin] = useState<[number, number]>([
+    0,
+    0,
+  ]);
 
   const endToEdit = () => {
     if (O.isSome(editingText)) {
@@ -97,6 +109,76 @@ function useShapes() {
     setEditingImageUrl(url);
   };
 
+  const getAllRects = () =>
+    rectState.getAllRects().map((rect) => ({
+      ...rect,
+      origin: {
+        x: rect.origin.x + drawingAreaOrigin[0],
+        y: rect.origin.y + drawingAreaOrigin[1],
+      },
+    }));
+
+  const getAllTexts = () =>
+    textState.texts.map((text) => ({
+      ...text,
+      origin: {
+        x: text.origin.x + drawingAreaOrigin[0],
+        y: text.origin.y + drawingAreaOrigin[1],
+      },
+    }));
+
+  const updateShape = (shape: SitShape) => {
+    // eslint-disable-next-line no-underscore-dangle
+    if (shape._tag === 'text') {
+      textState.update(shape);
+    }
+
+    // eslint-disable-next-line no-underscore-dangle
+    if (shape._tag === 'rect') {
+      rectState.update(shape);
+    }
+  };
+
+  const updateDrawingAreaSize = (size: [number, number]) => {
+    setDrawingAreaSize(() => {
+      const [drawingAreaWidth, drawingAreaHeight] = size;
+      const [stageWidth, stageHeight] = stageSize;
+      const newDrawingAreaOrigin: [number, number] = [
+        (stageWidth - drawingAreaWidth) / 2,
+        (stageHeight - drawingAreaHeight) / 2,
+      ];
+
+      console.log('============drwingarea');
+      console.log(`stage ${stageSize}`);
+      console.log(`drawingArea ${drawingAreaSize}`);
+      console.log(`newAreaSize ${size}`);
+      console.log(`origin ${newDrawingAreaOrigin}`);
+
+      setDrawingAreaOrigin(newDrawingAreaOrigin);
+      return size;
+    });
+  };
+
+  const updateStageSize = (size: [number, number]) => {
+    setStageSize(() => {
+      const [drawingAreaWidth, drawingAreaHeight] = drawingAreaSize;
+      const [stageWidth, stageHeight] = size;
+      const newDrawingAreaOrigin: [number, number] = [
+        (stageWidth - drawingAreaWidth) / 2,
+        (stageHeight - drawingAreaHeight) / 2,
+      ];
+
+      console.log('============stage');
+      console.log(`stage ${stageSize}`);
+      console.log(`new stage size ${size}`);
+      console.log(`drawingArea ${drawingAreaSize}`);
+      console.log(`origin ${newDrawingAreaOrigin}`);
+
+      setDrawingAreaOrigin(newDrawingAreaOrigin);
+      return size;
+    });
+  };
+
   return {
     currentMode,
     setMode,
@@ -113,6 +195,15 @@ function useShapes() {
     editingImageUrl,
     getEditingImageUrl,
     deleteSelectedShape,
+    stageSize,
+    updateStageSize,
+    drawingAreaSize,
+    updateDrawingAreaSize,
+    drawingAreaOrigin,
+    setDrawingAreaOrigin,
+    getAllRects,
+    getAllTexts,
+    updateShape,
   };
 }
 

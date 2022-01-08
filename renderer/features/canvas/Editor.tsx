@@ -70,11 +70,23 @@ const Editor = (): React.ReactElement => {
       image.src = editingImageUrl;
       image.addEventListener('load', () => {
         setBackgroundImg(O.some(image));
-        shapes.updateDrawingAreaSize([image.width, image.height]);
         ipcRenderer.send('resize-main-window', [image.width, image.height]);
       });
     }
   }, [editingImageUrl]);
+
+  useEffect(() => {
+    if (O.isSome(backgroundImg)) {
+      shapes.setDrawingAreaSize([
+        backgroundImg.value.width,
+        backgroundImg.value.height,
+      ]);
+    }
+  }, [backgroundImg]);
+
+  useEffect(() => {
+    shapes.resetDrawingAreaOrigin();
+  }, [shapes.stageSize, shapes.drawingAreaSize]);
 
   useEffect(() => {
     MouseTrap.bind(['ctrl+c', 'command+c'], () => {
@@ -86,7 +98,7 @@ const Editor = (): React.ReactElement => {
     });
 
     const debouncedHandleResize = debounce(function handleResize() {
-      shapes.updateStageSize([
+      shapes.setStageSize([
         containerRef.current.getBoundingClientRect().width,
         containerRef.current.getBoundingClientRect().height,
       ]);

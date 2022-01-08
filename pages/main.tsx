@@ -171,7 +171,7 @@ const MainPage = (): React.ReactElement => {
       <Container
         sx={{
           marginTop: '10px',
-          marginBottom: '10px',
+          marginBottom: '30px',
           minHeight: 'calc(100% - (104px))',
           display: 'flex',
         }}

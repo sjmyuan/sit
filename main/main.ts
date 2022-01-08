@@ -88,7 +88,7 @@ export const resizeMainWindow = (width: number, height: number) => {
     const minWidth = width + 160;
     const [oldWidth] = mainWindow.getContentSize();
     const newWidth = oldWidth < minWidth ? minWidth : oldWidth;
-    const newHeight = Math.floor((newWidth * height) / width);
+    const newHeight = Math.floor((newWidth * height) / width) + 84;
     mainWindow.setContentSize(newWidth, newHeight);
   }
 };

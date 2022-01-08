@@ -26,8 +26,8 @@ function useShapes() {
   ]);
 
   const [drawingAreaOrigin, setDrawingAreaOrigin] = useState<[number, number]>([
-    0,
-    0,
+    150,
+    150,
   ]);
 
   const endToEdit = () => {
@@ -139,44 +139,20 @@ function useShapes() {
     }
   };
 
-  const updateDrawingAreaSize = (size: [number, number]) => {
-    setDrawingAreaSize(() => {
-      const [drawingAreaWidth, drawingAreaHeight] = size;
-      const [stageWidth, stageHeight] = stageSize;
-      const newDrawingAreaOrigin: [number, number] = [
-        (stageWidth - drawingAreaWidth) / 2,
-        (stageHeight - drawingAreaHeight) / 2,
-      ];
+  const resetDrawingAreaOrigin = () => {
+    const [drawingAreaWidth, drawingAreaHeight] = drawingAreaSize;
+    const [stageWidth, stageHeight] = stageSize;
+    const newDrawingAreaOrigin: [number, number] = [
+      (stageWidth - drawingAreaWidth) / 2,
+      (stageHeight - drawingAreaHeight) / 2,
+    ];
 
-      console.log('============drwingarea');
-      console.log(`stage ${stageSize}`);
-      console.log(`drawingArea ${drawingAreaSize}`);
-      console.log(`newAreaSize ${size}`);
-      console.log(`origin ${newDrawingAreaOrigin}`);
+    console.log('============reset origin');
+    console.log(`stage ${stageSize}`);
+    console.log(`drawingArea ${drawingAreaSize}`);
+    console.log(`origin ${newDrawingAreaOrigin}`);
 
-      setDrawingAreaOrigin(newDrawingAreaOrigin);
-      return size;
-    });
-  };
-
-  const updateStageSize = (size: [number, number]) => {
-    setStageSize(() => {
-      const [drawingAreaWidth, drawingAreaHeight] = drawingAreaSize;
-      const [stageWidth, stageHeight] = size;
-      const newDrawingAreaOrigin: [number, number] = [
-        (stageWidth - drawingAreaWidth) / 2,
-        (stageHeight - drawingAreaHeight) / 2,
-      ];
-
-      console.log('============stage');
-      console.log(`stage ${stageSize}`);
-      console.log(`new stage size ${size}`);
-      console.log(`drawingArea ${drawingAreaSize}`);
-      console.log(`origin ${newDrawingAreaOrigin}`);
-
-      setDrawingAreaOrigin(newDrawingAreaOrigin);
-      return size;
-    });
+    setDrawingAreaOrigin(newDrawingAreaOrigin);
   };
 
   return {
@@ -196,11 +172,11 @@ function useShapes() {
     getEditingImageUrl,
     deleteSelectedShape,
     stageSize,
-    updateStageSize,
+    setStageSize,
     drawingAreaSize,
-    updateDrawingAreaSize,
+    setDrawingAreaSize,
     drawingAreaOrigin,
-    setDrawingAreaOrigin,
+    resetDrawingAreaOrigin,
     getAllRects,
     getAllTexts,
     updateShape,

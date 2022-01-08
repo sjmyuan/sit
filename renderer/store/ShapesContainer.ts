@@ -47,6 +47,16 @@ function useShapes() {
     }
   };
 
+  const getEditingText = () => {
+    return pipe(
+      editingText,
+      O.map((x) => ({
+        ...x,
+        origin: fromDrawingAreaToStage(x.origin),
+      }))
+    );
+  };
+
   const startToDraw = (point: Point) => {
     const drawingAreaPoint = fromStageToDrawingArea(point);
     if (O.isSome(editingText)) {
@@ -79,7 +89,9 @@ function useShapes() {
   };
 
   const startToEdit = (text: Text) => {
-    setEditingText(O.some(text));
+    setEditingText(
+      O.some({ ...text, origin: fromStageToDrawingArea(text.origin) })
+    );
   };
 
   const editing = (value: string) => {
@@ -193,7 +205,7 @@ function useShapes() {
     startToDraw,
     drawing,
     endToDraw,
-    editingText,
+    getEditingText,
     startToEdit,
     editing,
     endToEdit,

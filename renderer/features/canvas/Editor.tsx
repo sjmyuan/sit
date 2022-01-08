@@ -200,7 +200,7 @@ const Editor = (): React.ReactElement => {
               .getAllTexts()
               .filter((text) =>
                 pipe(
-                  shapes.editingText,
+                  shapes.getEditingText(),
                   O.map((x) => x.id !== text.id),
                   O.getOrElse<boolean>(() => true)
                 )

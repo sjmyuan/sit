@@ -35,7 +35,7 @@ const TextEditor = (props: {
   getRelativePos: () => Point;
 }): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
-  const { editingText } = shapes;
+  const editingText = shapes.getEditingText();
   const classes = useStyles(
     pipe(
       editingText,

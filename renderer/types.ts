@@ -42,6 +42,12 @@ export type Point = {
   y: number;
 };
 
+export type Area = {
+  origin: Point;
+  topLeft: Point;
+  bottomRight: Point;
+};
+
 export type Rect = {
   readonly _tag: 'rect';
   id: number;

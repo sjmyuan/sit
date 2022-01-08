@@ -13,6 +13,7 @@ import TextComponent from './TextComponent';
 import TextEditor from './TextEditor';
 import { ShapeContainer } from '../../store/ShapesContainer';
 import { InfoContainer } from '../../store/InfoContainer';
+import { Point } from '../../types';
 
 const useStyles = makeStyles(() => ({
   konva: {
@@ -23,7 +24,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const getRelativePointerPosition = (node: KonvaRect) => {
+const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
   const transform = node.getAbsoluteTransform().copy();
   // to detect relative position we need to invert transform
@@ -32,7 +33,7 @@ const getRelativePointerPosition = (node: KonvaRect) => {
   // get pointer (say mouse or touch) position
   const pos = node.getStage().getPointerPosition();
 
-  // now we find relative point
+  // now we find relative point to the left top
   return transform.point(pos);
 };
 
@@ -55,6 +56,7 @@ const Editor = (): React.ReactElement => {
   const drawingAreaRef = useRef<KonvaRect>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [imageOrigin, setImageOrigin] = useState<[number, number]>([0, 0]);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
@@ -77,16 +79,24 @@ const Editor = (): React.ReactElement => {
 
   useEffect(() => {
     if (O.isSome(backgroundImg)) {
-      shapes.setDrawingAreaSize([
-        backgroundImg.value.width,
-        backgroundImg.value.height,
-      ]);
+      shapes.setDrawingArea({
+        ...shapes.drawingArea,
+        topLeft: { x: 0, y: 0 },
+        bottomRight: {
+          x: backgroundImg.value.width,
+          y: backgroundImg.value.height,
+        },
+      });
+
+      setIsInitialized(true);
     }
   }, [backgroundImg]);
 
   useEffect(() => {
-    shapes.resetDrawingAreaOrigin();
-  }, [shapes.stageSize, shapes.drawingAreaSize]);
+    if (isInitialized) {
+      shapes.updateDrawingAreaOrigin();
+    }
+  }, [shapes.stageSize, isInitialized]);
 
   useEffect(() => {
     MouseTrap.bind(['ctrl+c', 'command+c'], () => {
@@ -136,13 +146,11 @@ const Editor = (): React.ReactElement => {
           onMouseUp={() => {
             shapes.endToDraw();
           }}
-          onMouseMove={() => {
-            shapes.drawing(getRelativePointerPosition(drawingAreaRef.current));
+          onMouseMove={(e) => {
+            shapes.drawing(getRelativePointerPosition(e.target.getStage()));
           }}
-          onMouseDown={() => {
-            shapes.startToDraw(
-              getRelativePointerPosition(drawingAreaRef.current)
-            );
+          onMouseDown={(e) => {
+            shapes.startToDraw(getRelativePointerPosition(e.target.getStage()));
           }}
         >
           <Layer>
@@ -157,17 +165,21 @@ const Editor = (): React.ReactElement => {
             />
             <ReactKonvaRect
               ref={drawingAreaRef}
-              x={shapes.drawingAreaOrigin[0]}
-              y={shapes.drawingAreaOrigin[1]}
-              width={shapes.drawingAreaSize[0]}
-              height={shapes.drawingAreaSize[1]}
+              x={shapes.drawingArea.topLeft.x + shapes.drawingArea.origin.x}
+              y={shapes.drawingArea.topLeft.y + shapes.drawingArea.origin.y}
+              width={
+                shapes.drawingArea.bottomRight.x - shapes.drawingArea.topLeft.x
+              }
+              height={
+                shapes.drawingArea.bottomRight.y - shapes.drawingArea.topLeft.y
+              }
               strokeWidth={0}
               fill="white"
               name="drawing-area"
             />
             <Image
-              x={imageOrigin[0] + shapes.drawingAreaOrigin[0]}
-              y={imageOrigin[1] + shapes.drawingAreaOrigin[1]}
+              x={imageOrigin[0] + shapes.drawingArea.origin.x}
+              y={imageOrigin[1] + shapes.drawingArea.origin.y}
               width={backgroundImg.value.width}
               height={backgroundImg.value.height}
               image={O.toUndefined(backgroundImg)}

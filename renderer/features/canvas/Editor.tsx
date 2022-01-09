@@ -39,15 +39,15 @@ const getRelativePointerPosition = (node: KonvaStage) => {
 
 const copyImageToClipboard = (
   stage: KonvaStage,
-  topeLeft: Point,
+  topLeft: Point,
   width: number,
   height: number
 ) => {
   clipboard.writeImage(
     nativeImage.createFromDataURL(
       stage.toDataURL({
-        x: topeLeft.x,
-        y: topeLeft.y,
+        x: topLeft.x,
+        y: topLeft.y,
         width,
         height,
         mimeType: 'image/png',
@@ -70,6 +70,8 @@ const Editor = (): React.ReactElement => {
   const editingImageUrl = O.getOrElse<string>(() => '')(
     shapes.getEditingImageUrl()
   );
+
+  const [needCopy, setNeedCopy] = useState<boolean>(false);
 
   const drawingAreaTopLeft = getAbsolutePosition(
     shapes.drawingArea.origin,
@@ -107,7 +109,7 @@ const Editor = (): React.ReactElement => {
   }, [backgroundImg]);
 
   useEffect(() => {
-    MouseTrap.bind(['ctrl+c', 'command+c'], () => {
+    if (needCopy) {
       copyImageToClipboard(
         stageRef.current.getStage(),
         drawingAreaTopLeft,
@@ -115,6 +117,13 @@ const Editor = (): React.ReactElement => {
         drawingAreaSize.height
       );
       notification.showInfo(O.some('Image Copied to Clipboard'));
+      setNeedCopy(false);
+    }
+  }, [needCopy]);
+
+  useEffect(() => {
+    MouseTrap.bind(['ctrl+c', 'command+c'], () => {
+      setNeedCopy(true); // can not fetch latest state in event listener, so do this workaround
     });
     MouseTrap.bind(['delete', 'backspace'], () => {
       shapes.deleteSelectedShape();

@@ -85,11 +85,7 @@ export const editImageinMainWindow = async (imageIndex: any): Promise<void> => {
 
 export const resizeMainWindow = (width: number, height: number) => {
   if (mainWindow) {
-    const minWidth = width + 160;
-    const [oldWidth] = mainWindow.getContentSize();
-    const newWidth = oldWidth < minWidth ? minWidth : oldWidth;
-    const newHeight = Math.floor((newWidth * height) / width) + 84;
-    mainWindow.setContentSize(newWidth, newHeight);
+    mainWindow.setContentSize(width + 160, height + 84);
   }
 };
 

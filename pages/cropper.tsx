@@ -44,24 +44,17 @@ const CropperPage = (): React.ReactElement => {
         getVideo()
           .then((src) => setVideoSrc(O.some(src)))
           .catch((e) => console.log(e));
-
-        const handleUserKeyUp = (event: {
-          ctrlKey: boolean;
-          keyCode: number;
-        }) => {
-          const { keyCode } = event;
-
-          if (keyCode === 27) {
-            remote.getCurrentWindow().close();
-          }
-        };
-        window.addEventListener('keyup', handleUserKeyUp);
-        return () => {
-          window.removeEventListener('keyup', handleUserKeyUp);
-        };
       }
       return constVoid();
     });
+
+    const handleUserKeyUp = (event: { ctrlKey: boolean; keyCode: number }) => {
+      remote.getCurrentWindow().close();
+    };
+    window.addEventListener('keyup', handleUserKeyUp);
+    return () => {
+      window.removeEventListener('keyup', handleUserKeyUp);
+    };
   }, []);
 
   return (
@@ -80,9 +73,9 @@ const CropperPage = (): React.ReactElement => {
       onMouseDown={({ clientX, clientY }) =>
         setStartPoint(O.some({ x: clientX, y: clientY }))
       }
-      onMouseUp={() => {
+      onMouseUp={async () => {
         if (O.isSome(videoSrc) && O.isSome(startPoint)) {
-          takeShotAndCacheImage(
+          await takeShotAndCacheImage(
             O.some([startPoint.value, mousePoint]),
             videoSrc.value
           );

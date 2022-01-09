@@ -1,6 +1,6 @@
 import console from 'console';
 import { pipe } from 'fp-ts/lib/function';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createContainer } from 'unstated-next';
 import { O, TE, MODE, Point, Text, SitShape, Area } from '../types';
 import { RectsContainer } from './RectsContainer';
@@ -21,10 +21,20 @@ function useShapes() {
   const [stageSize, setStageSize] = useState<[number, number]>([400, 400]);
 
   const [drawingArea, setDrawingArea] = useState<Area>({
-    origin: { x: 150, y: 150 },
+    origin: { x: 200, y: 200 },
     topLeft: { x: 0, y: 0 },
-    bottomRight: { x: 100, y: 100 },
+    bottomRight: { x: -1, y: -1 },
   });
+
+  useEffect(() => {
+    updateDrawingAreaRect();
+  }, [rectState.rects, textState.texts]);
+
+  useEffect(() => {
+    if (drawingArea.bottomRight.x != -1) {
+      updateDrawingAreaOrigin();
+    }
+  }, [stageSize]);
 
   const fromStageToDrawingArea = (point: Point) => {
     return {
@@ -38,25 +48,6 @@ function useShapes() {
       x: point.x + drawingArea.origin.x,
       y: point.y + drawingArea.origin.y,
     };
-  };
-
-  const endToEdit = () => {
-    if (O.isSome(editingText)) {
-      textState.update(editingText.value);
-      setEditingText(O.none);
-    }
-
-    updateDrawingAreaRect();
-  };
-
-  const getEditingText = () => {
-    return pipe(
-      editingText,
-      O.map((x) => ({
-        ...x,
-        origin: fromDrawingAreaToStage(x.origin),
-      }))
-    );
   };
 
   const startToDraw = (point: Point) => {
@@ -88,8 +79,6 @@ function useShapes() {
     if (currentMode === 'RECT') {
       rectState.endToDraw();
     }
-
-    updateDrawingAreaRect();
   };
 
   const startToEdit = (text: Text) => {
@@ -103,6 +92,23 @@ function useShapes() {
       editingText,
       O.map((x) => ({ ...x, value })),
       setEditingText
+    );
+  };
+
+  const endToEdit = () => {
+    if (O.isSome(editingText)) {
+      textState.update(editingText.value);
+      setEditingText(O.none);
+    }
+  };
+
+  const getEditingText = () => {
+    return pipe(
+      editingText,
+      O.map((x) => ({
+        ...x,
+        origin: fromDrawingAreaToStage(x.origin),
+      }))
     );
   };
 
@@ -171,8 +177,6 @@ function useShapes() {
     if (drawingAreaShape._tag === 'rect') {
       rectState.update(drawingAreaShape);
     }
-
-    updateDrawingAreaRect();
   };
 
   /**
@@ -256,7 +260,6 @@ function useShapes() {
     setStageSize,
     setDrawingArea,
     drawingArea,
-    updateDrawingAreaOrigin,
     getAllRects,
     getAllTexts,
     updateShape,

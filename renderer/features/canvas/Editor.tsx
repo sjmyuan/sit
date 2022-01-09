@@ -13,7 +13,7 @@ import TextComponent from './TextComponent';
 import TextEditor from './TextEditor';
 import { ShapeContainer } from '../../store/ShapesContainer';
 import { InfoContainer } from '../../store/InfoContainer';
-import { Point } from '../../types';
+import { Area, getAbsolutePosition, getSize, Point } from '../../types';
 
 const useStyles = makeStyles(() => ({
   konva: {
@@ -37,10 +37,19 @@ const getRelativePointerPosition = (node: KonvaStage) => {
   return transform.point(pos);
 };
 
-const copyImageToClipboard = (stage: KonvaStage) => {
+const copyImageToClipboard = (
+  stage: KonvaStage,
+  topeLeft: Point,
+  width: number,
+  height: number
+) => {
   clipboard.writeImage(
     nativeImage.createFromDataURL(
       stage.toDataURL({
+        x: topeLeft.x,
+        y: topeLeft.y,
+        width,
+        height,
         mimeType: 'image/png',
       })
     )
@@ -55,12 +64,20 @@ const Editor = (): React.ReactElement => {
   const stageRef = useRef<Stage>(null);
   const drawingAreaRef = useRef<KonvaRect>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
   const editingImageUrl = O.getOrElse<string>(() => '')(
     shapes.getEditingImageUrl()
+  );
+
+  const drawingAreaTopLeft = getAbsolutePosition(
+    shapes.drawingArea.origin,
+    shapes.drawingArea.topLeft
+  );
+  const drawingAreaSize = getSize(
+    shapes.drawingArea.topLeft,
+    shapes.drawingArea.bottomRight
   );
 
   useEffect(() => {
@@ -86,20 +103,17 @@ const Editor = (): React.ReactElement => {
           y: backgroundImg.value.height,
         },
       });
-
-      setIsInitialized(true);
     }
   }, [backgroundImg]);
 
   useEffect(() => {
-    if (isInitialized) {
-      shapes.updateDrawingAreaOrigin();
-    }
-  }, [shapes.stageSize, isInitialized]);
-
-  useEffect(() => {
     MouseTrap.bind(['ctrl+c', 'command+c'], () => {
-      copyImageToClipboard(stageRef.current.getStage());
+      copyImageToClipboard(
+        stageRef.current.getStage(),
+        drawingAreaTopLeft,
+        drawingAreaSize.width,
+        drawingAreaSize.height
+      );
       notification.showInfo(O.some('Image Copied to Clipboard'));
     });
     MouseTrap.bind(['delete', 'backspace'], () => {
@@ -164,14 +178,10 @@ const Editor = (): React.ReactElement => {
             />
             <ReactKonvaRect
               ref={drawingAreaRef}
-              x={shapes.drawingArea.topLeft.x + shapes.drawingArea.origin.x}
-              y={shapes.drawingArea.topLeft.y + shapes.drawingArea.origin.y}
-              width={
-                shapes.drawingArea.bottomRight.x - shapes.drawingArea.topLeft.x
-              }
-              height={
-                shapes.drawingArea.bottomRight.y - shapes.drawingArea.topLeft.y
-              }
+              x={drawingAreaTopLeft.x}
+              y={drawingAreaTopLeft.y}
+              width={drawingAreaSize.width}
+              height={drawingAreaSize.height}
               strokeWidth={0}
               fill="white"
               name="drawing-area"

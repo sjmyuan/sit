@@ -66,6 +66,7 @@ function useRects(initialState: Rect[] = []) {
     update,
     clear,
     deleteRect,
+    rects,
   };
 }
 

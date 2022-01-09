@@ -143,7 +143,7 @@ const Editor = (): React.ReactElement => {
       MouseTrap.unbind(['delete', 'backspace']);
       window.removeEventListener('resize', debouncedHandleResize);
     };
-  }, [shapes.stageSize]);
+  }, []);
 
   return (
     <Box

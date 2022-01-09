@@ -55,7 +55,6 @@ const Editor = (): React.ReactElement => {
   const stageRef = useRef<Stage>(null);
   const drawingAreaRef = useRef<KonvaRect>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [imageOrigin, setImageOrigin] = useState<[number, number]>([0, 0]);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
@@ -178,8 +177,8 @@ const Editor = (): React.ReactElement => {
               name="drawing-area"
             />
             <Image
-              x={imageOrigin[0] + shapes.drawingArea.origin.x}
-              y={imageOrigin[1] + shapes.drawingArea.origin.y}
+              x={shapes.drawingArea.origin.x}
+              y={shapes.drawingArea.origin.y}
               width={backgroundImg.value.width}
               height={backgroundImg.value.height}
               image={O.toUndefined(backgroundImg)}

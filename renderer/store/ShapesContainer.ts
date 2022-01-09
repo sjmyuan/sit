@@ -45,6 +45,8 @@ function useShapes() {
       textState.update(editingText.value);
       setEditingText(O.none);
     }
+
+    updateDrawingAreaRect();
   };
 
   const getEditingText = () => {
@@ -86,6 +88,8 @@ function useShapes() {
     if (currentMode === 'RECT') {
       rectState.endToDraw();
     }
+
+    updateDrawingAreaRect();
   };
 
   const startToEdit = (text: Text) => {
@@ -143,10 +147,6 @@ function useShapes() {
       origin: fromDrawingAreaToStage(rect.origin),
     }));
 
-    console.log('-----------------------');
-    console.log(`original rects: ${JSON.stringify(originalRect)}`);
-    console.log(`transformed rects: ${JSON.stringify(transformedRect)}`);
-    console.log(`drawing area: ${JSON.stringify(drawingArea)}`);
     return transformedRect;
   };
 
@@ -162,10 +162,6 @@ function useShapes() {
       origin: fromStageToDrawingArea(shape.origin),
     };
 
-    console.log(`shape before transform:${JSON.stringify(shape)}`);
-    console.log(`shape after transform:${JSON.stringify(drawingAreaShape)}`);
-    console.log(`drawingArea:${JSON.stringify(drawingArea)}`);
-
     // eslint-disable-next-line no-underscore-dangle
     if (drawingAreaShape._tag === 'text') {
       textState.update(drawingAreaShape);
@@ -175,6 +171,8 @@ function useShapes() {
     if (drawingAreaShape._tag === 'rect') {
       rectState.update(drawingAreaShape);
     }
+
+    updateDrawingAreaRect();
   };
 
   /**
@@ -201,14 +199,41 @@ function useShapes() {
       y: origin.y + (newDrawingAreaOffset[1] - oldDrawingAreaOffset[1]),
     };
 
-    console.log('===============update origin');
-    console.log(`drawingArea:${JSON.stringify(drawingArea)}`);
-    console.log(`stageSize:${stageSize}`);
-    console.log(`oldDrawingAreaOffset:${oldDrawingAreaOffset}`);
-    console.log(`newDrawingAreaOffset:${newDrawingAreaOffset}`);
-    console.log(`newDrawingAreaOrigin:${JSON.stringify(newDrawingAreaOrigin)}`);
-
     setDrawingArea({ ...drawingArea, origin: newDrawingAreaOrigin });
+  };
+
+  const updateDrawingAreaRect = () => {
+    const { topLeft, bottomRight } = drawingArea;
+    let minX = topLeft.x;
+    let minY = topLeft.y;
+    let maxX = bottomRight.x;
+    let maxY = bottomRight.y;
+
+    rectState.getAllRects().forEach((rect) => {
+      const rectTopLeft = rect.origin;
+      const rectBottomRight = {
+        x: rectTopLeft.x + rect.width,
+        y: rectTopLeft.y + rect.height,
+      };
+
+      minX = minX < rectTopLeft.x ? minX : rectTopLeft.x;
+      minY = minY < rectTopLeft.y ? minY : rectTopLeft.y;
+      maxX = maxX > rectBottomRight.x ? maxX : rectBottomRight.x;
+      maxY = maxY > rectBottomRight.y ? maxY : rectBottomRight.y;
+    });
+
+    textState.texts.forEach((text) => {
+      minX = minX < text.origin.x ? minX : text.origin.x;
+      minY = minY < text.origin.y ? minY : text.origin.y;
+      maxX = maxX > text.origin.x ? maxX : text.origin.x;
+      maxY = maxY > text.origin.y ? maxY : text.origin.y;
+    });
+
+    setDrawingArea({
+      ...drawingArea,
+      topLeft: { x: minX, y: minY },
+      bottomRight: { x: maxX, y: maxY },
+    });
   };
 
   return {

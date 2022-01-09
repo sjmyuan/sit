@@ -18,6 +18,7 @@ const Rectangle = (props: RectangleProps): React.ReactElement => {
     // by default Transformer will change scaleX and scaleY
     // while transforming
     // so we need to adjust that properties to width and height
+    console.log(`transform rect: ${JSON.stringify(rect)}`);
     props.onTransform({
       ...props.rect,
       origin: { x: rect.x(), y: rect.y() },

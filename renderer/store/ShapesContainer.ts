@@ -136,11 +136,19 @@ function useShapes() {
     setEditingImageUrl(url);
   };
 
-  const getAllRects = () =>
-    rectState.getAllRects().map((rect) => ({
+  const getAllRects = () => {
+    const originalRect = rectState.getAllRects();
+    const transformedRect = originalRect.map((rect) => ({
       ...rect,
       origin: fromDrawingAreaToStage(rect.origin),
     }));
+
+    console.log('-----------------------');
+    console.log(`original rects: ${JSON.stringify(originalRect)}`);
+    console.log(`transformed rects: ${JSON.stringify(transformedRect)}`);
+    console.log(`drawing area: ${JSON.stringify(drawingArea)}`);
+    return transformedRect;
+  };
 
   const getAllTexts = () =>
     textState.texts.map((text) => ({
@@ -153,6 +161,10 @@ function useShapes() {
       ...shape,
       origin: fromStageToDrawingArea(shape.origin),
     };
+
+    console.log(`shape before transform:${JSON.stringify(shape)}`);
+    console.log(`shape after transform:${JSON.stringify(drawingAreaShape)}`);
+    console.log(`drawingArea:${JSON.stringify(drawingArea)}`);
 
     // eslint-disable-next-line no-underscore-dangle
     if (drawingAreaShape._tag === 'text') {

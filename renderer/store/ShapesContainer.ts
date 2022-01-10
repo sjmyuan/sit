@@ -2,7 +2,7 @@ import console from 'console';
 import { pipe } from 'fp-ts/lib/function';
 import { useEffect, useState } from 'react';
 import { createContainer } from 'unstated-next';
-import { O, TE, MODE, Point, Text, SitShape, Area } from '../types';
+import { O, TE, MODE, Point, Text, SitShape, Area, getSize } from '../types';
 import { RectsContainer } from './RectsContainer';
 import { TextsContainer } from './TextContainer';
 
@@ -26,15 +26,40 @@ function useShapes() {
     bottomRight: { x: -1, y: -1 },
   });
 
+  const [backgroundImg, setBackgroundImg] = useState<
+    O.Option<HTMLImageElement>
+  >(O.none);
+
+  const [initialized, setInitialized] = useState<boolean>(false);
+
   useEffect(() => {
-    updateDrawingAreaRect();
+    if (O.isSome(backgroundImg)) {
+      setDrawingArea({
+        origin: {
+          x: (stageSize[0] - backgroundImg.value.width) / 2,
+          y: (stageSize[1] - backgroundImg.value.height) / 2,
+        },
+        topLeft: { x: 0, y: 0 },
+        bottomRight: {
+          x: backgroundImg.value.width,
+          y: backgroundImg.value.height,
+        },
+      });
+      setInitialized(true);
+    }
+  }, [backgroundImg]);
+
+  useEffect(() => {
+    if (initialized) {
+      updateDrawingAreaRect();
+    }
   }, [rectState.rects, textState.texts]);
 
   useEffect(() => {
-    if (drawingArea.bottomRight.x != -1) {
+    if (initialized) {
       updateDrawingAreaOrigin();
     }
-  }, [stageSize]);
+  }, [stageSize, initialized]);
 
   const fromStageToDrawingArea = (point: Point) => {
     return {
@@ -263,6 +288,8 @@ function useShapes() {
     getAllRects,
     getAllTexts,
     updateShape,
+    backgroundImg,
+    setBackgroundImg,
   };
 }
 

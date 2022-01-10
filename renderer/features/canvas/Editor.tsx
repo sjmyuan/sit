@@ -64,9 +64,6 @@ const Editor = (): React.ReactElement => {
   const stageRef = useRef<Stage>(null);
   const drawingAreaRef = useRef<KonvaRect>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [backgroundImg, setBackgroundImg] = useState<
-    O.Option<HTMLImageElement>
-  >(O.none);
   const editingImageUrl = O.getOrElse<string>(() => '')(
     shapes.getEditingImageUrl()
   );
@@ -84,29 +81,16 @@ const Editor = (): React.ReactElement => {
 
   useEffect(() => {
     if (editingImageUrl === '') {
-      setBackgroundImg(O.none);
+      shapes.setBackgroundImg(O.none);
     } else {
       const image = new window.Image();
       image.src = editingImageUrl;
       image.addEventListener('load', () => {
-        setBackgroundImg(O.some(image));
+        shapes.setBackgroundImg(O.some(image));
         ipcRenderer.send('resize-main-window', [image.width, image.height]);
       });
     }
   }, [editingImageUrl]);
-
-  useEffect(() => {
-    if (O.isSome(backgroundImg)) {
-      shapes.setDrawingArea({
-        ...shapes.drawingArea,
-        topLeft: { x: 0, y: 0 },
-        bottomRight: {
-          x: backgroundImg.value.width,
-          y: backgroundImg.value.height,
-        },
-      });
-    }
-  }, [backgroundImg]);
 
   useEffect(() => {
     if (needCopy) {
@@ -159,7 +143,7 @@ const Editor = (): React.ReactElement => {
         overflow: 'scroll',
       }}
     >
-      {O.isSome(backgroundImg) ? (
+      {O.isSome(shapes.backgroundImg) ? (
         <Stage
           ref={stageRef}
           className={classes.konva}
@@ -198,9 +182,9 @@ const Editor = (): React.ReactElement => {
             <Image
               x={shapes.drawingArea.origin.x}
               y={shapes.drawingArea.origin.y}
-              width={backgroundImg.value.width}
-              height={backgroundImg.value.height}
-              image={O.toUndefined(backgroundImg)}
+              width={shapes.backgroundImg.value.width}
+              height={shapes.backgroundImg.value.height}
+              image={O.toUndefined(shapes.backgroundImg)}
             />
             {shapes.getAllRects().map((rect) => {
               return (

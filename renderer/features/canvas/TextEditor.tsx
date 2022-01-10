@@ -9,18 +9,22 @@ import { Point } from '../../types';
 const useStyles = makeStyles<Theme, Point, string>(() => ({
   textEditor: {
     position: 'absolute',
-    left: (props) => `${props.x}px`,
+    left: (props) => `${props.x - 1}px`,
     top: (props) => `${props.y}px`,
     borderLeft: '1px solid red',
     borderRight: '1px solid red',
+    borderTop: '0px solid red',
+    borderBottom: '0px solid red',
     padding: '0px',
     margin: '0px',
-    overflow: 'hidden',
+    overflow: 'visible',
     background: 'none',
     outline: 'none',
+    lineHeight: '1',
     resize: 'none',
     fontSize: '30px',
     fontWeight: 'bold',
+    fontFamily: 'Calibri',
     transformOrigin: 'left top',
     color: 'rgb(220,50,105)',
     zIndex: 100,
@@ -31,7 +35,7 @@ const TextEditor = (props: {
   getRelativePos: () => Point;
 }): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
-  const { editingText } = shapes;
+  const editingText = shapes.getEditingText();
   const classes = useStyles(
     pipe(
       editingText,

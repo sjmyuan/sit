@@ -32,7 +32,9 @@ function useRects(initialState: Rect[] = []) {
 
   const endToDraw = () => {
     if (O.isSome(newRect)) {
-      setRects([...rects, newRect.value]);
+      if (newRect.value.width > 0 && newRect.value.height > 0) {
+        setRects([...rects, newRect.value]);
+      }
       setNewRect(O.none);
     }
   };
@@ -45,7 +47,8 @@ function useRects(initialState: Rect[] = []) {
     pipe(
       rects,
       A.filter((x) => x.id !== rect.id),
-      (x) => [...x, rect]
+      (x) => [...x, rect],
+      setRects
     );
   };
 
@@ -63,6 +66,7 @@ function useRects(initialState: Rect[] = []) {
     update,
     clear,
     deleteRect,
+    rects,
   };
 }
 

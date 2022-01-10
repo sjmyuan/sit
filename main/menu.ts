@@ -9,12 +9,13 @@ import { is } from 'electron-util';
 
 import { openCropperWindow } from './cropper';
 import { hideMainWindow } from './main';
-import { openPreferencesWindow } from './preferences';
+// import { openPreferencesWindow } from './preferences';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
   submenu?: DarwinMenuItemConstructorOptions[] | Menu;
 }
+
 const setupDevelopmentEnvironment = (mainWindow: BrowserWindow): void => {
   mainWindow.webContents.on('context-menu', (_, props) => {
     const { x, y } = props;
@@ -39,12 +40,12 @@ const buildDarwinTemplate = (
         label: 'About Sit',
         selector: 'orderFrontStandardAboutPanel:',
       },
-      { type: 'separator' },
-      {
-        label: 'Preferences…',
-        accelerator: 'Command+,',
-        click: () => openPreferencesWindow(),
-      },
+      // { type: 'separator' },
+      // {
+      //   label: 'Preferences…',
+      //   accelerator: 'Command+,',
+      //   click: () => openPreferencesWindow(),
+      // },
       { type: 'separator' },
       { label: 'Services', submenu: [] },
       { type: 'separator' },
@@ -74,7 +75,7 @@ const buildDarwinTemplate = (
     submenu: [
       {
         label: 'Screen Shot',
-        accelerator: 'Shift + Command+ 5',
+        accelerator: 'Shift+Command+5',
         click: async () => {
           hideMainWindow();
           await openCropperWindow(false);
@@ -82,7 +83,7 @@ const buildDarwinTemplate = (
       },
       {
         label: 'Full Screen Shot',
-        accelerator: 'Shift + Command+ 6',
+        accelerator: 'Shift+Command+6',
         click: async () => {
           hideMainWindow();
           await openCropperWindow(true);
@@ -171,7 +172,7 @@ const buildDarwinTemplate = (
   };
 
   const subMenuView = is.development ? subMenuViewDev : subMenuViewProd;
-  const subMenuView1 = subMenuView ? subMenuViewDev : subMenuView;
+  const subMenuView1 = is.development ? subMenuViewDev : subMenuView;
 
   return [subMenuAbout, subMenuEdit, subMenuView1, subMenuWindow, subMenuHelp];
 };
@@ -182,10 +183,6 @@ const buildDefaultTemplate = (
     {
       label: '&File',
       submenu: [
-        {
-          label: '&Open',
-          accelerator: 'Ctrl+O',
-        },
         {
           label: '&Close',
           accelerator: 'Ctrl+W',
@@ -256,14 +253,6 @@ const buildDefaultTemplate = (
   return templateDefault;
 };
 
-export class MenuBuilder {
-  mainWindow: BrowserWindow;
-
-  constructor(mainWindow: BrowserWindow) {
-    this.mainWindow = mainWindow;
-  }
-}
-
 export const initializeAppMenu = (mainWindow: BrowserWindow): Menu => {
   if (process.env.NODE_ENV === 'development') {
     setupDevelopmentEnvironment(mainWindow);
@@ -282,7 +271,7 @@ export const getTrayMenu = (): Menu => {
   const template = [
     {
       label: 'Screen Shot',
-      accelerator: 'Shift + Command + 5',
+      accelerator: 'Shift+Command+5',
       click: async () => {
         hideMainWindow();
         await openCropperWindow(false);
@@ -290,7 +279,7 @@ export const getTrayMenu = (): Menu => {
     },
     {
       label: 'Full Screen Shot',
-      accelerator: 'Shift + Command + 6',
+      accelerator: 'Shift+Command+6',
       click: async () => {
         hideMainWindow();
         await openCropperWindow(true);

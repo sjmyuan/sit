@@ -1,5 +1,7 @@
 import * as TE from 'fp-ts/TaskEither';
 import * as O from 'fp-ts/Option';
+import { relative } from 'path';
+import { MarkChatReadTwoTone } from '@material-ui/icons';
 
 export * as TE from 'fp-ts/TaskEither';
 export * as O from 'fp-ts/Option';
@@ -42,6 +44,12 @@ export type Point = {
   y: number;
 };
 
+export type Area = {
+  origin: Point;
+  topLeft: Point;
+  bottomRight: Point;
+};
+
 export type Rect = {
   readonly _tag: 'rect';
   id: number;
@@ -57,6 +65,31 @@ export type Text = {
   name: string;
   origin: Point;
   value: string;
+};
+
+export const getSize = (topLeft: Point, bottomRight: Point) => ({
+  width: Math.abs(bottomRight.x - topLeft.x),
+  height: Math.abs(bottomRight.y - topLeft.y),
+});
+
+export const getAbsolutePosition = (
+  coordinate: Point,
+  relativePosition: Point
+) => {
+  return {
+    x: coordinate.x + relativePosition.x,
+    y: coordinate.y + relativePosition.y,
+  };
+};
+
+export const getRelativePosition = (
+  coordinate: Point,
+  absolutePosition: Point
+) => {
+  return {
+    x: absolutePosition.x - coordinate.x,
+    y: absolutePosition.y - coordinate.y,
+  };
 };
 
 export type SitShape = Rect | Text;

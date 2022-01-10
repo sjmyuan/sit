@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
-import * as T from 'fp-ts/Task';
-import { Box, makeStyles } from '@material-ui/core';
-import { Stage, Layer, Image } from 'react-konva';
+import { Box, debounce, makeStyles } from '@material-ui/core';
+import { Stage, Layer, Image, Rect as ReactKonvaRect } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
-import { constVoid, pipe } from 'fp-ts/lib/function';
+import { Rect as KonvaRect } from 'konva/types/shapes/Rect';
+import { pipe } from 'fp-ts/lib/function';
 import { ipcRenderer, clipboard, nativeImage } from 'electron';
 import MouseTrap from 'mousetrap';
 import Rectangle from './Rectangle';
@@ -12,15 +12,15 @@ import TransformerComponent from './TransformerComponent';
 import TextComponent from './TextComponent';
 import TextEditor from './TextEditor';
 import { ShapeContainer } from '../../store/ShapesContainer';
-import { RectsContainer } from '../../store/RectsContainer';
-import { TextsContainer } from '../../store/TextContainer';
 import { InfoContainer } from '../../store/InfoContainer';
+import { Area, getAbsolutePosition, getSize, Point } from '../../types';
 
 const useStyles = makeStyles(() => ({
   konva: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'white',
   },
 }));
 
@@ -33,14 +33,23 @@ const getRelativePointerPosition = (node: KonvaStage) => {
   // get pointer (say mouse or touch) position
   const pos = node.getStage().getPointerPosition();
 
-  // now we find relative point
+  // now we find relative point to the left top
   return transform.point(pos);
 };
 
-const copyImageToClipboard = (stage: KonvaStage) => {
+const copyImageToClipboard = (
+  stage: KonvaStage,
+  topLeft: Point,
+  width: number,
+  height: number
+) => {
   clipboard.writeImage(
     nativeImage.createFromDataURL(
       stage.toDataURL({
+        x: topLeft.x,
+        y: topLeft.y,
+        width,
+        height,
         mimeType: 'image/png',
       })
     )
@@ -51,49 +60,81 @@ const Editor = (): React.ReactElement => {
   const classes = useStyles();
   const shapes = ShapeContainer.useContainer();
   const selectedShape = shapes.getSelectedShape();
-  const rects = RectsContainer.useContainer();
-  const texts = TextsContainer.useContainer();
   const notification = InfoContainer.useContainer();
   const stageRef = useRef<Stage>(null);
-  const [backgroundImg, setBackgroundImg] = useState<
-    O.Option<HTMLImageElement>
-  >(O.none);
+  const drawingAreaRef = useRef<KonvaRect>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const editingImageUrl = O.getOrElse<string>(() => '')(
     shapes.getEditingImageUrl()
   );
 
+  const [needCopy, setNeedCopy] = useState<boolean>(false);
+
+  const drawingAreaTopLeft = getAbsolutePosition(
+    shapes.drawingArea.origin,
+    shapes.drawingArea.topLeft
+  );
+  const drawingAreaSize = getSize(
+    shapes.drawingArea.topLeft,
+    shapes.drawingArea.bottomRight
+  );
+
   useEffect(() => {
     if (editingImageUrl === '') {
-      setBackgroundImg(O.none);
+      shapes.setBackgroundImg(O.none);
     } else {
       const image = new window.Image();
       image.src = editingImageUrl;
       image.addEventListener('load', () => {
-        setBackgroundImg(O.some(image));
+        shapes.setBackgroundImg(O.some(image));
         ipcRenderer.send('resize-main-window', [image.width, image.height]);
       });
     }
   }, [editingImageUrl]);
 
   useEffect(() => {
-    MouseTrap.bind(['ctrl+c', 'command+c'], () => {
-      copyImageToClipboard(stageRef.current.getStage());
+    if (needCopy) {
+      copyImageToClipboard(
+        stageRef.current.getStage(),
+        drawingAreaTopLeft,
+        drawingAreaSize.width,
+        drawingAreaSize.height
+      );
       notification.showInfo(O.some('Image Copied to Clipboard'));
+      setNeedCopy(false);
+    }
+  }, [needCopy]);
+
+  useEffect(() => {
+    MouseTrap.bind(['ctrl+c', 'command+c'], () => {
+      setNeedCopy(true); // can not fetch latest state in event listener, so do this workaround
     });
     MouseTrap.bind(['delete', 'backspace'], () => {
       shapes.deleteSelectedShape();
     });
+
+    const debouncedHandleResize = debounce(function handleResize() {
+      shapes.setStageSize([
+        containerRef.current.getBoundingClientRect().width,
+        containerRef.current.getBoundingClientRect().height,
+      ]);
+    }, 500);
+
+    window.addEventListener('resize', debouncedHandleResize);
+
     return () => {
       MouseTrap.unbind(['ctrl+c', 'command+c']);
       MouseTrap.unbind(['delete', 'backspace']);
+      window.removeEventListener('resize', debouncedHandleResize);
     };
-  });
+  }, []);
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         minHeight: '580px',
-        p: 2,
+        p: 0,
         backgroundColor: 'rgb(116,116,116)',
         display: 'flex',
         justifyContent: 'center',
@@ -102,50 +143,66 @@ const Editor = (): React.ReactElement => {
         overflow: 'scroll',
       }}
     >
-      {O.isSome(backgroundImg) ? (
+      {O.isSome(shapes.backgroundImg) ? (
         <Stage
           ref={stageRef}
           className={classes.konva}
-          width={backgroundImg.value.width}
-          height={backgroundImg.value.height}
+          width={shapes.stageSize[0]}
+          height={shapes.stageSize[1]}
           onMouseUp={() => {
             shapes.endToDraw();
           }}
           onMouseMove={(e) => {
             shapes.drawing(getRelativePointerPosition(e.target.getStage()));
           }}
+          onMouseDown={(e) => {
+            shapes.startToDraw(getRelativePointerPosition(e.target.getStage()));
+          }}
         >
           <Layer>
-            <Image
-              onMouseDown={(e) => {
-                shapes.startToDraw(
-                  getRelativePointerPosition(e.target.getStage())
-                );
-              }}
+            <ReactKonvaRect
               x={0}
               y={0}
-              width={backgroundImg.value.width}
-              height={backgroundImg.value.height}
-              image={O.toUndefined(backgroundImg)}
+              width={shapes.stageSize[0]}
+              height={shapes.stageSize[1]}
+              strokeWidth={0}
+              fill="rgb(116,116,116)"
+              name="full-paper"
             />
-          </Layer>
-          <Layer>
-            {rects.getAllRects().map((rect) => {
+            <ReactKonvaRect
+              ref={drawingAreaRef}
+              x={drawingAreaTopLeft.x}
+              y={drawingAreaTopLeft.y}
+              width={drawingAreaSize.width}
+              height={drawingAreaSize.height}
+              strokeWidth={0}
+              fill="white"
+              name="drawing-area"
+            />
+            <Image
+              x={shapes.drawingArea.origin.x}
+              y={shapes.drawingArea.origin.y}
+              width={shapes.backgroundImg.value.width}
+              height={shapes.backgroundImg.value.height}
+              image={O.toUndefined(shapes.backgroundImg)}
+            />
+            {shapes.getAllRects().map((rect) => {
               return (
                 <Rectangle
                   key={rect.name}
                   rect={rect}
                   onSelected={() => shapes.onSelect(rect)}
                   onTransform={(transformedRect) =>
-                    rects.update(transformedRect)
+                    shapes.updateShape(transformedRect)
                   }
                 />
               );
             })}
-            {texts.texts
+            {shapes
+              .getAllTexts()
               .filter((text) =>
                 pipe(
-                  shapes.editingText,
+                  shapes.getEditingText(),
                   O.map((x) => x.id !== text.id),
                   O.getOrElse<boolean>(() => true)
                 )
@@ -156,13 +213,11 @@ const Editor = (): React.ReactElement => {
                     key={text.name}
                     text={text}
                     onSelected={() => shapes.onSelect(text)}
-                    onChange={texts.update}
+                    onChange={shapes.updateShape}
                     startToEdit={shapes.startToEdit}
                   />
                 );
               })}
-          </Layer>
-          <Layer>
             {O.isSome(selectedShape) ? (
               <TransformerComponent selectedShape={selectedShape.value} />
             ) : (
@@ -174,8 +229,8 @@ const Editor = (): React.ReactElement => {
         <Stage
           ref={stageRef}
           className={classes.konva}
-          width={400}
-          height={400}
+          width={shapes.stageSize[0]}
+          height={shapes.stageSize[1]}
         />
       )}
       <TextEditor

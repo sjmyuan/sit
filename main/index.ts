@@ -60,12 +60,12 @@ const checkForUpdates = async (): Promise<void> => {
   initializeAppMenu(mainWindow);
   await openWorkerWindow();
 
-  globalShortcut.register('CommandOrControl + Shift + 5', () => {
+  globalShortcut.register('CommandOrControl+Shift+5', () => {
     hideMainWindow();
     openCropperWindow(false);
   });
 
-  globalShortcut.register('CommandOrControl + Shift + 6', () => {
+  globalShortcut.register('CommandOrControl+Shift+6', () => {
     hideMainWindow();
     openCropperWindow(true);
   });

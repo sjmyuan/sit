@@ -72,7 +72,7 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
 
 const Worker = (): React.ReactElement => {
   useEffect(() => {
-    const _ = Do.Do(TE.taskEither)
+    Do.Do(TE.taskEither)
       .do(sendEvent(showStepInformation('Reading configuration...')))
       .bindL('awsConfig', () => {
         return TE.fromOption(() => new Error('No AWS Configuration'))(

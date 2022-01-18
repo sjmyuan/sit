@@ -73,25 +73,6 @@ const MainPage = (): React.ReactElement => {
   );
   const [workerInfo, setWorkerInfo] = useState<string>('');
 
-  const pasteImageFromClipboard = (): AppErrorOr<void> => {
-    const image = clipboard.readImage('clipboard');
-    if (!image.isEmpty()) {
-      const key = `clipboard-${Date.now()}.png`;
-      return pipe(
-        imageContainer.addImage(key, new Blob([image.toPNG()])),
-        TE.chain((_) => getImageCacheUrl(key)),
-        TE.map((url: string) => {
-          if (O.isSome(shapes.editingImageUrl)) {
-            return shapes.setEditingImage(O.some(url));
-          }
-          return constVoid();
-        })
-      );
-    }
-
-    return TE.of(constVoid());
-  };
-
   useEffect(() => {
     ipcRenderer.on('edit-image', (_, imageIndex: ImageIndex) => {
       pipe(
@@ -124,12 +105,12 @@ const MainPage = (): React.ReactElement => {
     ipcRenderer.on('preferences-changed', () => {
       preferences.loadPreferences();
     });
-  }, []);
+  }, [preferences, shapes]);
 
   useEffect(() => {
     preferences.loadPreferences();
     imageContainer.loadAllImageIndexes()();
-  }, []);
+  }, [preferences, imageContainer]);
 
   useEffect(() => {
     MouseTrap.bind(['ctrl+v', 'command+v'], () => togglePasting(true));
@@ -139,6 +120,25 @@ const MainPage = (): React.ReactElement => {
   }, []);
 
   useEffect(() => {
+    const pasteImageFromClipboard = (): AppErrorOr<void> => {
+      const image = clipboard.readImage('clipboard');
+      if (!image.isEmpty()) {
+        const key = `clipboard-${Date.now()}.png`;
+        return pipe(
+          imageContainer.addImage(key, new Blob([image.toPNG()])),
+          TE.chain((_) => getImageCacheUrl(key)),
+          TE.map((url: string) => {
+            if (O.isSome(shapes.editingImageUrl)) {
+              return shapes.setEditingImage(O.some(url));
+            }
+            return constVoid();
+          })
+        );
+      }
+
+      return TE.of(constVoid());
+    };
+
     if (pasting) {
       togglePasting(false);
       pasteImageFromClipboard()();
@@ -148,7 +148,7 @@ const MainPage = (): React.ReactElement => {
       setCroppingImage(O.none);
       imageContainer.setImages([croppingImage.value, ...imageContainer.images]);
     }
-  }, [pasting, croppingImage]);
+  }, [pasting, croppingImage, imageContainer, shapes]);
 
   return (
     <Box sx={{ height: '100%' }}>

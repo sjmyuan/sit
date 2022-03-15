@@ -1,7 +1,5 @@
 import * as TE from 'fp-ts/TaskEither';
 import * as O from 'fp-ts/Option';
-import { relative } from 'path';
-import { MarkChatReadTwoTone } from '@material-ui/icons';
 
 export * as TE from 'fp-ts/TaskEither';
 export * as O from 'fp-ts/Option';

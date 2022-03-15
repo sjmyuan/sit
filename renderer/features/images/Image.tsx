@@ -1,26 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { pipe } from 'fp-ts/lib/function';
 import { O, T, TE } from '../../types';
 import { ShapeContainer } from '../../store/ShapesContainer';
 import { ImageContainer } from '../../store/ImageContainer';
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    image: {
-      maxWidth: '100%',
-      maxHeight: '100%',
-    },
-    paper: {
-      position: 'absolute',
-      backgroundColor: theme.palette.background.paper,
-      boxShadow: theme.shadows[5],
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    },
-  })
-);
+import { css } from '@emotion/css';
 
 type ImageProps = {
   imageKey: string;
@@ -28,7 +11,6 @@ type ImageProps = {
 
 const Image = (props: ImageProps): React.ReactElement => {
   const { imageKey } = props;
-  const classes = useStyles();
   const shapes = ShapeContainer.useContainer();
   const images = ImageContainer.useContainer();
   const [src, setSrc] = useState<string>('');
@@ -45,12 +27,15 @@ const Image = (props: ImageProps): React.ReactElement => {
   return (
     <div>
       <img
+        className={css`
+          max-width: '100%';
+          max-height: '100%';
+        `}
         src={src}
         key={imageKey}
         alt=""
         onDoubleClick={() => shapes.setEditingImage(O.some(src))}
         role="presentation"
-        className={classes.image}
       />
     </div>
   );

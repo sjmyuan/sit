@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
-    "module": "CommonJS",
+    "target": "es5",
+    "module": "esnext",
     "lib": [
       "dom",
+      "dom.iterable",
       "esnext"
     ],
-    "outDir": "dist/main",
     "declaration": false,
     "declarationMap": false,
     "noEmit": false,
@@ -29,6 +29,7 @@
     "incremental": true
   },
   "exclude": [
+    "node_modules",
     "test",
     "release",
     "dist",
@@ -36,7 +37,11 @@
     "dll"
   ],
   "include": [
+    "next-env.d.ts",
     "common.d.ts",
-    "main/**/*.ts"
+    "main/**/*.ts",
+    "renderer/**/*.ts",
+    "renderer/**/*.tsx",
+    "pages/**/*.tsx"
   ]
 }

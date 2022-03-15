@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Tabs, Tab, Box, Typography } from '@material-ui/core';
+import { Tabs, Tab, Box } from '@mui/material';
 import AWSSetting from '../renderer/features/settings/AWSSetting';
 import ImageSetting from '../renderer/features/settings/ImageSetting';
 import { PreferencesContainer } from '../renderer/store/PreferencesContainer';

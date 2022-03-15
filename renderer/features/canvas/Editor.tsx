@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import * as O from 'fp-ts/Option';
-import { Box, debounce, makeStyles } from '@material-ui/core';
+import { Box, debounce } from '@mui/material';
 import { Stage, Layer, Image, Rect as ReactKonvaRect } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { Rect as KonvaRect } from 'konva/types/shapes/Rect';
@@ -13,16 +13,8 @@ import TextComponent from './TextComponent';
 import TextEditor from './TextEditor';
 import { ShapeContainer } from '../../store/ShapesContainer';
 import { InfoContainer } from '../../store/InfoContainer';
-import { Area, getAbsolutePosition, getSize, Point } from '../../types';
-
-const useStyles = makeStyles(() => ({
-  konva: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-  },
-}));
+import { getAbsolutePosition, getSize, Point } from '../../types';
+import { css } from '@emotion/css';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -34,7 +26,7 @@ const getRelativePointerPosition = (node: KonvaStage) => {
   const pos = node.getStage().getPointerPosition();
 
   // now we find relative point to the left top
-  return transform.point(pos);
+  return !!pos ? transform.point(pos) : { x: 0, y: 0 };
 };
 
 const copyImageToClipboard = (
@@ -57,11 +49,10 @@ const copyImageToClipboard = (
 };
 
 const Editor = (): React.ReactElement => {
-  const classes = useStyles();
   const shapes = ShapeContainer.useContainer();
   const selectedShape = shapes.getSelectedShape();
   const notification = InfoContainer.useContainer();
-  const stageRef = useRef<Stage>(null);
+  const stageRef = useRef<KonvaStage>(null);
   const drawingAreaRef = useRef<KonvaRect>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const editingImageUrl = O.getOrElse<string>(() => '')(
@@ -93,7 +84,7 @@ const Editor = (): React.ReactElement => {
   }, [editingImageUrl]);
 
   useEffect(() => {
-    if (needCopy) {
+    if (needCopy && stageRef.current) {
       copyImageToClipboard(
         stageRef.current.getStage(),
         drawingAreaTopLeft,
@@ -114,10 +105,12 @@ const Editor = (): React.ReactElement => {
     });
 
     const debouncedHandleResize = debounce(function handleResize() {
-      shapes.setStageSize([
-        containerRef.current.getBoundingClientRect().width,
-        containerRef.current.getBoundingClientRect().height,
-      ]);
+      if (containerRef.current) {
+        shapes.setStageSize([
+          containerRef.current.getBoundingClientRect().width,
+          containerRef.current.getBoundingClientRect().height,
+        ]);
+      }
     }, 500);
 
     window.addEventListener('resize', debouncedHandleResize);
@@ -145,18 +138,25 @@ const Editor = (): React.ReactElement => {
     >
       {O.isSome(shapes.backgroundImg) ? (
         <Stage
+          className={css`
+            display: 'flex';
+            justify-content: 'center';
+            align-items: 'center';
+            background-color: 'white';
+          `}
           ref={stageRef}
-          className={classes.konva}
           width={shapes.stageSize[0]}
           height={shapes.stageSize[1]}
           onMouseUp={() => {
             shapes.endToDraw();
           }}
           onMouseMove={(e) => {
-            shapes.drawing(getRelativePointerPosition(e.target.getStage()));
+            const stage = e.target.getStage();
+            stage && shapes.drawing(getRelativePointerPosition(stage));
           }}
           onMouseDown={(e) => {
-            shapes.startToDraw(getRelativePointerPosition(e.target.getStage()));
+            const stage = e.target.getStage();
+            stage && shapes.startToDraw(getRelativePointerPosition(stage));
           }}
         >
           <Layer>
@@ -227,16 +227,25 @@ const Editor = (): React.ReactElement => {
         </Stage>
       ) : (
         <Stage
+          className={css`
+            display: 'flex';
+            justify-content: 'center';
+            align-items: 'center';
+            background-color: 'white';
+          `}
           ref={stageRef}
-          className={classes.konva}
           width={shapes.stageSize[0]}
           height={shapes.stageSize[1]}
         />
       )}
       <TextEditor
         getRelativePos={() => ({
-          x: stageRef.current.getStage().container().offsetLeft,
-          y: stageRef.current.getStage().container().offsetTop,
+          x: stageRef.current
+            ? stageRef.current.getStage().container().offsetLeft
+            : -1,
+          y: stageRef.current
+            ? stageRef.current.getStage().container().offsetTop
+            : -1,
         })}
       />
     </Box>

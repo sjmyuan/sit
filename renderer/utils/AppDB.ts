@@ -1,11 +1,11 @@
 import Dexie from 'dexie';
 
 export class AppDB extends Dexie {
-  cache: Dexie.Table<ImageCache, string>;
+  cache!: Dexie.Table<ImageCache, string>;
 
-  localIndex: Dexie.Table<ImageIndex, string>;
+  localIndex!: Dexie.Table<ImageIndex, string>;
 
-  remoteIndex: Dexie.Table<ImageIndex, string>;
+  remoteIndex!: Dexie.Table<ImageIndex, string>;
 
   constructor() {
     super('AppDB');

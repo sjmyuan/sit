@@ -1,8 +1,7 @@
-import console from 'console';
 import { pipe } from 'fp-ts/lib/function';
 import { useEffect, useState } from 'react';
 import { createContainer } from 'unstated-next';
-import { O, TE, MODE, Point, Text, SitShape, Area, getSize } from '../types';
+import { O, MODE, Point, Text, SitShape, Area } from '../types';
 import { RectsContainer } from './RectsContainer';
 import { TextsContainer } from './TextContainer';
 

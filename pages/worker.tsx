@@ -70,7 +70,7 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
     TE.map(constVoid)
   );
 
-const Worker = (): React.ReactElement => {
+export default function () {
   useEffect(() => {
     Do.Do(TE.taskEither)
       .do(sendEvent(showStepInformation('Reading configuration...')))
@@ -98,7 +98,7 @@ const Worker = (): React.ReactElement => {
 
     // startWorker(() => worker)();
   }, []);
-  return <div />;
-};
+  return <div>Worker</div>;
+}
 
-export default Worker;
+// export default MWorker;

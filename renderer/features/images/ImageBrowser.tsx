@@ -1,48 +1,22 @@
 /* eslint-disable react/jsx-wrap-multilines */
 import React, { useState } from 'react';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
 import {
   ImageListItem,
   ImageListItemBar,
   IconButton,
   Box,
   ImageList,
-} from '@material-ui/core';
-import { DeleteOutline, CloudDownloadOutlined } from '@material-ui/icons';
+} from '@mui/material';
+import { DeleteOutline, CloudDownloadOutlined } from '@mui/icons-material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Image from './Image';
 import { ImageContainer } from '../../store/ImageContainer';
-import { ImageIndex } from '../../utils/AppDB';
-import { O, TE } from '../../types';
+import { TE } from '../../types';
 import { constVoid, pipe } from 'fp-ts/lib/function';
-
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      overflow: 'hidden',
-    },
-    imageItem: {
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      overflow: 'hidden',
-      position: 'relative',
-      minHeight: '164px',
-    },
-    imageBar: {
-      height: '30px',
-    },
-    icon: {
-      color: 'rgba(255, 255, 255, 0.54)',
-      padding: '6px',
-    },
-  })
-);
 
 const PAGE_SIZE = 20;
 
 const ImageBrowser = (): React.ReactElement => {
-  const classes = useStyles();
   const imageContainer = ImageContainer.useContainer();
   const [totalPage, setTotalPage] = useState<number>(1);
 
@@ -68,26 +42,42 @@ const ImageBrowser = (): React.ReactElement => {
       hasMore={totalPage * PAGE_SIZE < imageContainer.images.length}
       loader={<h4>Loading...</h4>}
     >
-      <ImageList cols={4} gap={8} rowHeight="auto" className={classes.root}>
+      <ImageList sx={{ overflow: 'hidden' }} cols={4} gap={8} rowHeight="auto">
         {imageContainer.images
           .slice(0, totalPage * PAGE_SIZE)
           .map(({ key }) => (
-            <ImageListItem key={key} className={classes.imageItem}>
+            <ImageListItem
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                overflow: 'hidden',
+                position: 'relative',
+                minHeight: '164px',
+              }}
+              key={key}
+            >
               <Image imageKey={key} />
               <ImageListItemBar
-                className={classes.imageBar}
+                sx={{ height: '30px' }}
                 actionIcon={
                   <Box>
                     <IconButton
+                      sx={{
+                        color: 'rgba(255, 255, 255, 0.54)',
+                        padding: '6px',
+                      }}
                       aria-label={`delete ${key}`}
-                      className={classes.icon}
                       onClick={() => imageContainer.deleteImage(key)()}
                     >
                       <DeleteOutline />
                     </IconButton>
                     <IconButton
+                      sx={{
+                        color: 'rgba(255, 255, 255, 0.54)',
+                        padding: '6px',
+                      }}
                       aria-label={`download ${key}`}
-                      className={classes.icon}
                       onClick={() => downloadImage(key)}
                     >
                       <CloudDownloadOutlined />

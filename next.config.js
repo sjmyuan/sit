@@ -1,13 +1,12 @@
-exports.webpack = (config) =>
+module.exports.webpack = (config) =>
   Object.assign(config, {
-    target: 'electron-renderer',
-    devtool: 'cheap-module-source-map',
-    plugins: config.plugins.filter(
-      (p) => p.constructor.name !== 'UglifyJsPlugin'
-    ),
+    // target: 'electron11.5-renderer',
+    resolve: {
+      fallback: { fs: false },
+    },
   });
 
-exports.exportPathMap = () => ({
+module.exports.exportPathMap = () => ({
   '/cropper': { page: '/cropper' },
   '/main': { page: '/main' },
   '/preferences': { page: '/preferences' },

@@ -1,14 +1,19 @@
-module.exports.webpack = (config) =>
-  Object.assign(config, {
-    // target: 'electron11.5-renderer',
-    resolve: {
-      fallback: { fs: false },
-    },
-  });
+module.exports = {
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // config.resolve.fallback.fs = false;
+      config.target = 'electron-renderer';
+    }
 
-module.exports.exportPathMap = () => ({
-  '/cropper': { page: '/cropper' },
-  '/main': { page: '/main' },
-  '/preferences': { page: '/preferences' },
-  '/worker': { page: '/worker' },
-});
+    // config.target = 'electron-renderer';
+
+    return config;
+  },
+
+  exportPathMap: () => ({
+    '/cropper': { page: '/cropper' },
+    '/main': { page: '/main' },
+    '/preferences': { page: '/preferences' },
+    '/worker': { page: '/worker' },
+  }),
+};

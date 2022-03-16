@@ -44,6 +44,8 @@ const checkForUpdates = async (): Promise<void> => {
   // Ensure the app is in the Applications folder
   enforceMacOSAppLocation();
 
+  console.log('is.development++++', is.development);
+
   if (is.development) {
     await prepareNext('./');
   } else {

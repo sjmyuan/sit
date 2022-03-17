@@ -26,7 +26,7 @@ const getRelativePointerPosition = (node: KonvaStage) => {
   const pos = node.getStage().getPointerPosition();
 
   // now we find relative point to the left top
-  return !!pos ? transform.point(pos) : { x: 0, y: 0 };
+  return pos ? transform.point(pos) : { x: 0, y: 0 };
 };
 
 const copyImageToClipboard = (
@@ -139,10 +139,10 @@ const Editor = (): React.ReactElement => {
       {O.isSome(shapes.backgroundImg) ? (
         <Stage
           className={css`
-            display: 'flex';
-            justify-content: 'center';
-            align-items: 'center';
-            background-color: 'white';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
           `}
           ref={stageRef}
           width={shapes.stageSize[0]}
@@ -228,10 +228,10 @@ const Editor = (): React.ReactElement => {
       ) : (
         <Stage
           className={css`
-            display: 'flex';
-            justify-content: 'center';
-            align-items: 'center';
-            background-color: 'white';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
           `}
           ref={stageRef}
           width={shapes.stageSize[0]}
@@ -239,14 +239,15 @@ const Editor = (): React.ReactElement => {
         />
       )}
       <TextEditor
-        getRelativePos={() => ({
-          x: stageRef.current
-            ? stageRef.current.getStage().container().offsetLeft
-            : -1,
-          y: stageRef.current
-            ? stageRef.current.getStage().container().offsetTop
-            : -1,
-        })}
+        getRelativePos={() =>
+          stageRef.current
+            ? {
+                x: stageRef.current.getStage().container().offsetLeft,
+
+                y: stageRef.current.getStage().container().offsetTop,
+              }
+            : { x: -1, y: -1 }
+        }
       />
     </Box>
   );

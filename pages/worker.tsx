@@ -70,13 +70,13 @@ const syncLocalToS3 = (s3: S3, bucket: string): AppErrorOr<void> =>
     TE.map(constVoid)
   );
 
-export default function () {
+const Worker = () => {
   useEffect(() => {
-    Do.Do(TE.taskEither)
+    Do.Do(TE.Monad)
       .do(sendEvent(showStepInformation('Reading configuration...')))
       .bindL('awsConfig', () => {
         return TE.fromOption(() => new Error('No AWS Configuration'))(
-          sequenceS(O.option)({
+          sequenceS(O.Monad)({
             accessId: O.fromEither(getFromStorage<string>('access_id')),
             secretAccessKey: O.fromEither(
               getFromStorage<string>('secret_access_key')
@@ -99,6 +99,6 @@ export default function () {
     // startWorker(() => worker)();
   }, []);
   return <div>Worker</div>;
-}
+};
 
-// export default MWorker;
+export default Worker;

@@ -36,25 +36,25 @@ const TextEditor = (props: {
   return (
     <textarea
       className={css`
-        position: 'absolute';
+        position: absolute;
         left: ${position.x - 1}px;
         top: ${position.y}px;
-        border-left: '1px solid red';
-        border-right: '1px solid red';
-        border-top: '0px solid red';
-        border-bottom: '0px solid red';
-        padding: '0px';
-        margin: '0px';
-        overflow: 'visible';
-        background: 'none';
-        outline: 'none';
-        line-height: '1';
-        resize: 'none';
-        fontsize: '30px';
-        font-weight: 'bold';
-        font-family: 'Calibri';
-        transform-origin: 'left top';
-        color: 'rgb(220,50,105)';
+        border-left: 1px solid red;
+        border-right: 1px solid red;
+        border-top: 0px solid red;
+        border-bottom: 0px solid red;
+        padding: 0px;
+        margin: 0px;
+        overflow: visible;
+        background: none;
+        outline: none;
+        line-height: 1;
+        resize: none;
+        font-size: 30px;
+        font-weight: bold;
+        font-family: Calibri;
+        transform-origin: left top;
+        color: rgb(220, 50, 105);
         z-index: 100;
       `}
       cols={getCols(editingText.value.value)}

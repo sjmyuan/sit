@@ -90,6 +90,23 @@ export const getRelativePosition = (
   };
 };
 
+export const getTopLeftAndBottomRight = (rect: Rect) => {
+  const left = rect.origin.x;
+  const top = rect.origin.y;
+  const right = rect.origin.x + rect.width;
+  const bottom = rect.origin.y + rect.height;
+
+  const realLeft = left < right ? left : right;
+  const realRight = left < right ? right : left;
+  const realTop = top < bottom ? top : bottom;
+  const realBottom = top < bottom ? bottom : top;
+
+  return {
+    topLeft: { x: realLeft, y: realTop },
+    bottomRight: { x: realRight, y: realBottom },
+  };
+};
+
 export type SitShape = Rect | Text;
 
 export type MODE = 'RECT' | 'TEXT';

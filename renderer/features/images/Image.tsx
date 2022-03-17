@@ -28,8 +28,8 @@ const Image = (props: ImageProps): React.ReactElement => {
     <div>
       <img
         className={css`
-          max-width: '100%';
-          max-height: '100%';
+          max-width: 100%;
+          max-height: 100%;
         `}
         src={src}
         key={imageKey}

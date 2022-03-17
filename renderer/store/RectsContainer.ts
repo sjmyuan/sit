@@ -10,7 +10,7 @@ function useRects(initialState: Rect[] = []) {
     setNewRect(
       O.some({
         _tag: 'rect',
-        name: `rect-${rects.length + 1}`,
+        name: `rect-drawing-${rects.length + 1}`,
         id: rects.length + 1,
         origin: point,
         width: 0,
@@ -32,8 +32,14 @@ function useRects(initialState: Rect[] = []) {
 
   const endToDraw = () => {
     if (O.isSome(newRect)) {
-      if (newRect.value.width > 0 && newRect.value.height > 0) {
-        setRects([...rects, newRect.value]);
+      if (
+        Math.abs(newRect.value.width) > 0 &&
+        Math.abs(newRect.value.height) > 0
+      ) {
+        setRects([
+          ...rects,
+          { ...newRect.value, name: `rect-${newRect.value.id}` },
+        ]);
       }
       setNewRect(O.none);
     }

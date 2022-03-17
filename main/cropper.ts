@@ -23,6 +23,7 @@ const openCropper = (
     show: !takeFullScreenShot,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
     },
   });
 

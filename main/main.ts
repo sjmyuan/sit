@@ -40,6 +40,7 @@ export const openMainWindow = async (
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false,
+      contextIsolation: false,
     },
   });
 

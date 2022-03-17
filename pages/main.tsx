@@ -72,12 +72,12 @@ const MainPage = (): React.ReactElement => {
     ipcRenderer.on('preferences-changed', () => {
       preferences.loadPreferences();
     });
-  }, [preferences, shapes]);
+  }, []);
 
   useEffect(() => {
     preferences.loadPreferences();
     imageContainer.loadAllImageIndexes()();
-  }, [preferences, imageContainer]);
+  }, []);
 
   useEffect(() => {
     MouseTrap.bind(['ctrl+v', 'command+v'], () => togglePasting(true));
@@ -115,7 +115,7 @@ const MainPage = (): React.ReactElement => {
       setCroppingImage(O.none);
       imageContainer.setImages([croppingImage.value, ...imageContainer.images]);
     }
-  }, [pasting, croppingImage, imageContainer, shapes]);
+  }, [pasting, croppingImage]);
 
   return (
     <Box sx={{ height: '100%' }}>

@@ -72,19 +72,19 @@ const MainPage = (): React.ReactElement => {
     ipcRenderer.on('preferences-changed', () => {
       preferences.loadPreferences();
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     preferences.loadPreferences();
     imageContainer.loadAllImageIndexes()();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     MouseTrap.bind(['ctrl+v', 'command+v'], () => togglePasting(true));
     return () => {
       MouseTrap.unbind(['ctrl+v', 'command+v']);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const pasteImageFromClipboard = (): AppErrorOr<void> => {
@@ -115,7 +115,7 @@ const MainPage = (): React.ReactElement => {
       setCroppingImage(O.none);
       imageContainer.setImages([croppingImage.value, ...imageContainer.images]);
     }
-  }, [pasting, croppingImage]);
+  }, [pasting, croppingImage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box sx={{ height: '100%' }}>

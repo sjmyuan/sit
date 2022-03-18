@@ -75,17 +75,29 @@ export const getImageCacheUrl = (key: string): AppErrorOr<string> =>
     () =>
       db.cache
         .get(key)
-        .then((imageCache) => URL.createObjectURL(imageCache.image)),
+        .then((imageCache) =>
+          imageCache
+            ? Promise.resolve(URL.createObjectURL(imageCache.image))
+            : Promise.reject('null image cache')
+        ),
     E.toError
   );
 
 export const getImageCache = (key: string): AppErrorOr<Blob> =>
-  TE.fromTask(() => db.cache.get(key).then((imageCache) => imageCache.image));
+  TE.fromTask(() =>
+    db.cache
+      .get(key)
+      .then((imageCache) =>
+        imageCache
+          ? Promise.resolve(imageCache.image)
+          : Promise.reject('null image cache')
+      )
+  );
 
 export const syncImageCaches = (
   remoteImages: ImageIndex[]
 ): AppErrorOr<void> => {
-  return Do.Do(TE.taskEither)
+  return Do.Do(TE.Monad)
     .bind('localImages', loadImageIndexes(['ADDED', 'DELETING']))
     .letL('deletedImageInRemote', ({ localImages }) =>
       pipe(localImages, A.difference(imageIndexEq)(remoteImages))
@@ -96,15 +108,13 @@ export const syncImageCaches = (
     .doL(({ addedImageInRemote }) =>
       pipe(
         addedImageInRemote,
-        A.traverse(TE.taskEither)((image) => addImageIndex([image]))
+        A.traverse(TE.Monad)((image) => addImageIndex([image]))
       )
     )
     .doL(({ deletedImageInRemote }) =>
       pipe(
         deletedImageInRemote,
-        A.traverse(TE.taskEither)((image) =>
-          updateImageState(image.key, 'DELETED')
-        )
+        A.traverse(TE.Monad)((image) => updateImageState(image.key, 'DELETED'))
       )
     )
     .return(constVoid);

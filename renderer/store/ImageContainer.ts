@@ -9,12 +9,11 @@ import {
   updateImageState,
   getImageCacheUrl,
 } from '../utils/localImages';
-import { TE, A, Ord, AppErrorOr, O, AWSConfig } from '../types';
+import { TE, A, Ord, AppErrorOr } from '../types';
 import { InfoContainer } from './InfoContainer';
 import { PreferencesContainer } from './PreferencesContainer';
 import { Do } from 'fp-ts-contrib';
 import { getSignedUrl, s3Client } from '../utils/aws';
-import preferences from '../../pages/preferences';
 
 function useImages() {
   const preferences = PreferencesContainer.useContainer();

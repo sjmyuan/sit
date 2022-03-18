@@ -39,7 +39,7 @@ export const openMainWindow = async (
     icon: getAssetPath('icon.png'),
     webPreferences: {
       nodeIntegration: true,
-      webSecurity: false,
+      contextIsolation: false,
     },
   });
 

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import type { NextPage } from 'next';
 import { remote, ipcRenderer } from 'electron';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import * as O from 'fp-ts/Option';
 import { constVoid, pipe } from 'fp-ts/lib/function';
 import { cacheImage } from '../renderer/utils/localImages';
-import { TE, T } from '../renderer/types';
+import { TE } from '../renderer/types';
 import { getVideo, takeShot } from '../renderer/utils/screen';
 
 type Point = {
@@ -29,7 +30,7 @@ const takeShotAndCacheImage = async (
   )();
 };
 
-const CropperPage = (): React.ReactElement => {
+const CropperPage: NextPage = () => {
   const [videoSrc, setVideoSrc] = useState<O.Option<MediaStream>>(O.none);
   const [startPoint, setStartPoint] = useState<O.Option<Point>>(O.none);
   const [mousePoint, setMousePoint] = useState<Point>({ x: 0, y: 0 });
@@ -48,7 +49,7 @@ const CropperPage = (): React.ReactElement => {
       return constVoid();
     });
 
-    const handleUserKeyUp = (event: { ctrlKey: boolean; keyCode: number }) => {
+    const handleUserKeyUp = (_: { ctrlKey: boolean; keyCode: number }) => {
       remote.getCurrentWindow().close();
     };
     window.addEventListener('keyup', handleUserKeyUp);

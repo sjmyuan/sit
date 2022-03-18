@@ -22,7 +22,7 @@ export const openPreferencesWindow = async (): Promise<BrowserWindow> => {
     title: 'Preferences',
     webPreferences: {
       nodeIntegration: true,
-      webSecurity: false,
+      contextIsolation: false,
     },
   });
 

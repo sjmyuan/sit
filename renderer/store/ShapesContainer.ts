@@ -1,8 +1,15 @@
-import console from 'console';
 import { pipe } from 'fp-ts/lib/function';
 import { useEffect, useState } from 'react';
 import { createContainer } from 'unstated-next';
-import { O, TE, MODE, Point, Text, SitShape, Area, getSize } from '../types';
+import {
+  O,
+  MODE,
+  Point,
+  Text,
+  SitShape,
+  Area,
+  getTopLeftAndBottomRight,
+} from '../types';
 import { RectsContainer } from './RectsContainer';
 import { TextsContainer } from './TextContainer';
 
@@ -239,11 +246,8 @@ function useShapes() {
     let maxY = bottomRight.y;
 
     rectState.getAllRects().forEach((rect) => {
-      const rectTopLeft = rect.origin;
-      const rectBottomRight = {
-        x: rectTopLeft.x + rect.width,
-        y: rectTopLeft.y + rect.height,
-      };
+      const { topLeft: rectTopLeft, bottomRight: rectBottomRight } =
+        getTopLeftAndBottomRight(rect);
 
       minX = minX < rectTopLeft.x ? minX : rectTopLeft.x;
       minY = minY < rectTopLeft.y ? minY : rectTopLeft.y;

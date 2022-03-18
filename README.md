@@ -2,7 +2,7 @@
 
 A simple image tool, support AWS S3
 
-## How to allow screen recording on Mac OS?
+## How to allow screen recording on macOS?
 
 1. On your Mac, choose Apple menu  > System Preferences, click Security & Privacy, then click Privacy.
 

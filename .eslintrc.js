@@ -1,15 +1,17 @@
 module.exports = {
   extends: [
-    'erb/typescript',
+    'erb',
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:@next/next/recommended',
     'prettier',
     'prettier/@typescript-eslint', // Uses eslint-config-prettier to disable ESLint rules from @typescript-eslint/eslint-plugin that would conflict with prettier
     'prettier/react',
   ],
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'prettier'],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
+    'no-underscore-dangle': 'off',
     'import/no-extraneous-dependencies': 'off',
     '@typescript-eslint/no-var-requires': 'off',
     'react/destructuring-assignment': 'off',

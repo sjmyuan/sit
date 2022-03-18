@@ -9,12 +9,11 @@ import {
   Backdrop,
   Alert,
   Box,
-} from '@material-ui/core';
+} from '@mui/material';
 import MouseTrap from 'mousetrap';
 import { constVoid, pipe } from 'fp-ts/lib/function';
-import { makeStyles, Theme } from '@material-ui/core/styles';
 import { ipcRenderer, clipboard } from 'electron';
-import { CloudDone } from '@material-ui/icons';
+import { CloudDone } from '@mui/icons-material';
 import ImageBrowser from '../renderer/features/images/ImageBrowser';
 import Editor from '../renderer/features/canvas/Editor';
 import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
@@ -28,69 +27,18 @@ import { InfoContainer } from '../renderer/store/InfoContainer';
 import { ShapeContainer } from '../renderer/store/ShapesContainer';
 import { PreferencesContainer } from '../renderer/store/PreferencesContainer';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
-  backdrop: {
-    zIndex: theme.zIndex.drawer + 1,
-    color: '#fff',
-  },
-  modal: {
-    position: 'absolute',
-    maxWidth: '100%',
-    maxHeight: '100%',
-    backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
-    boxShadow: theme.shadows[5],
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-  },
-  container: {
-    marginTop: '10px',
-    marginBottom: '10px',
-  },
-}));
-
 const MainPage = (): React.ReactElement => {
   const notification = InfoContainer.useContainer();
   const shapes = ShapeContainer.useContainer();
   const preferences = PreferencesContainer.useContainer();
   const imageContainer = ImageContainer.useContainer();
   const { inProgress } = notification;
-  const classes = useStyles();
   const [isSyncing, toggleSyncing] = useState<boolean>(false);
   const [pasting, togglePasting] = useState<boolean>(false);
   const [croppingImage, setCroppingImage] = useState<O.Option<ImageIndex>>(
     O.none
   );
   const [workerInfo, setWorkerInfo] = useState<string>('');
-
-  const pasteImageFromClipboard = (): AppErrorOr<void> => {
-    const image = clipboard.readImage('clipboard');
-    if (!image.isEmpty()) {
-      const key = `clipboard-${Date.now()}.png`;
-      return pipe(
-        imageContainer.addImage(key, new Blob([image.toPNG()])),
-        TE.chain((_) => getImageCacheUrl(key)),
-        TE.map((url: string) => {
-          if (O.isSome(shapes.editingImageUrl)) {
-            return shapes.setEditingImage(O.some(url));
-          }
-          return constVoid();
-        })
-      );
-    }
-
-    return TE.of(constVoid());
-  };
 
   useEffect(() => {
     ipcRenderer.on('edit-image', (_, imageIndex: ImageIndex) => {
@@ -124,21 +72,40 @@ const MainPage = (): React.ReactElement => {
     ipcRenderer.on('preferences-changed', () => {
       preferences.loadPreferences();
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     preferences.loadPreferences();
     imageContainer.loadAllImageIndexes()();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     MouseTrap.bind(['ctrl+v', 'command+v'], () => togglePasting(true));
     return () => {
       MouseTrap.unbind(['ctrl+v', 'command+v']);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    const pasteImageFromClipboard = (): AppErrorOr<void> => {
+      const image = clipboard.readImage('clipboard');
+      if (!image.isEmpty()) {
+        const key = `clipboard-${Date.now()}.png`;
+        return pipe(
+          imageContainer.addImage(key, new Blob([image.toPNG()])),
+          TE.chain((_) => getImageCacheUrl(key)),
+          TE.map((url: string) => {
+            if (O.isSome(shapes.editingImageUrl)) {
+              return shapes.setEditingImage(O.some(url));
+            }
+            return constVoid();
+          })
+        );
+      }
+
+      return TE.of(constVoid());
+    };
+
     if (pasting) {
       togglePasting(false);
       pasteImageFromClipboard()();
@@ -148,7 +115,7 @@ const MainPage = (): React.ReactElement => {
       setCroppingImage(O.none);
       imageContainer.setImages([croppingImage.value, ...imageContainer.images]);
     }
-  }, [pasting, croppingImage]);
+  }, [pasting, croppingImage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box sx={{ height: '100%' }}>
@@ -224,7 +191,13 @@ const MainPage = (): React.ReactElement => {
           {O.getOrElse(() => '')(notification.error)}
         </Alert>
       </Snackbar>
-      <Backdrop className={classes.backdrop} open={inProgress}>
+      <Backdrop
+        sx={{
+          zIndex: 100,
+          color: '#fff',
+        }}
+        open={inProgress}
+      >
         <CircularProgress />
       </Backdrop>
     </Box>

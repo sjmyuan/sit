@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, IconButton } from '@material-ui/core';
-import { Crop, AddAPhoto } from '@material-ui/icons';
+import { Box, IconButton } from '@mui/material';
+import { Crop, AddAPhoto } from '@mui/icons-material';
 import { ipcRenderer } from 'electron';
 import { ChangeEvent } from 'react';
 import { pipe } from 'fp-ts/lib/function';

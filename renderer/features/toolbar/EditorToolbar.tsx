@@ -1,7 +1,7 @@
 import React from 'react';
 import * as O from 'fp-ts/Option';
-import { Box, IconButton } from '@material-ui/core';
-import { TextFields, PhotoLibrary, Crop32 } from '@material-ui/icons';
+import { Box, IconButton } from '@mui/material';
+import { TextFields, PhotoLibrary, Crop32 } from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
 
 const EditorToolbar = (): React.ReactElement => {

@@ -1,7 +1,5 @@
 import * as TE from 'fp-ts/TaskEither';
 import * as O from 'fp-ts/Option';
-import { relative } from 'path';
-import { MarkChatReadTwoTone } from '@material-ui/icons';
 
 export * as TE from 'fp-ts/TaskEither';
 export * as O from 'fp-ts/Option';
@@ -89,6 +87,23 @@ export const getRelativePosition = (
   return {
     x: absolutePosition.x - coordinate.x,
     y: absolutePosition.y - coordinate.y,
+  };
+};
+
+export const getTopLeftAndBottomRight = (rect: Rect) => {
+  const left = rect.origin.x;
+  const top = rect.origin.y;
+  const right = rect.origin.x + rect.width;
+  const bottom = rect.origin.y + rect.height;
+
+  const realLeft = left < right ? left : right;
+  const realRight = left < right ? right : left;
+  const realTop = top < bottom ? top : bottom;
+  const realBottom = top < bottom ? bottom : top;
+
+  return {
+    topLeft: { x: realLeft, y: realTop },
+    bottomRight: { x: realRight, y: realBottom },
   };
 };
 

@@ -20,29 +20,29 @@ function useInfo() {
     setError(errorMsg);
   };
 
-  const runTask = (description: string) => <A>(
-    task: AppErrorOr<A>
-  ): AppErrorOr<A> =>
-    pipe(
-      TE.fromIO<Error, void>(() => startProcess()),
-      TE.chain(() => task),
-      TE.fold(
-        (e) =>
-          pipe(
-            TE.fromIO<Error, void>(() =>
-              showError(O.some(`Failed to ${description}`))
+  const runTask =
+    (description: string) =>
+    <A>(task: AppErrorOr<A>): AppErrorOr<A> =>
+      pipe(
+        TE.fromIO<void, Error>(() => startProcess()),
+        TE.chain(() => task),
+        TE.fold(
+          (e) =>
+            pipe(
+              TE.fromIO<void, Error>(() =>
+                showError(O.some(`Failed to ${description}`))
+              ),
+              TE.chain(() => TE.left(e))
             ),
-            TE.chain(() => TE.left(e))
-          ),
-        (x) =>
-          pipe(
-            TE.fromIO<Error, void>(() =>
-              showInfo(O.some(`Succeed to ${description}`))
-            ),
-            TE.map(() => x)
-          )
-      )
-    );
+          (x) =>
+            pipe(
+              TE.fromIO<void, Error>(() =>
+                showInfo(O.some(`Succeed to ${description}`))
+              ),
+              TE.map(() => x)
+            )
+        )
+      );
   return {
     info,
     error,

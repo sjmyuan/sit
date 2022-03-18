@@ -6,7 +6,7 @@ import {
   Select,
   MenuItem,
   Box,
-} from '@material-ui/core';
+} from '@mui/material';
 import * as O from 'fp-ts/Option';
 import { pipe, constant, identity } from 'fp-ts/lib/function';
 import { regions } from '../../constants/regions.json';

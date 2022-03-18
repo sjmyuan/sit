@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Tabs, Tab, Box, Typography } from '@material-ui/core';
+import { Tabs, Tab, Box } from '@mui/material';
 import AWSSetting from '../renderer/features/settings/AWSSetting';
 import ImageSetting from '../renderer/features/settings/ImageSetting';
 import { PreferencesContainer } from '../renderer/store/PreferencesContainer';
@@ -12,7 +12,7 @@ interface TabPanelProps {
 }
 
 function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index } = props;
 
   return (
     <div
@@ -20,7 +20,6 @@ function TabPanel(props: TabPanelProps) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      {...other}
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
@@ -33,7 +32,7 @@ const PreferencesPage = (): React.ReactElement => {
 
   useEffect(() => {
     preferences.loadPreferences();
-  }, []);
+  }, [preferences]);
 
   const handleChange = (_event: unknown, newValue: number) => {
     setValue(newValue);

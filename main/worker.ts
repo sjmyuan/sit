@@ -1,5 +1,4 @@
 import { BrowserWindow } from 'electron';
-import { is } from 'electron-util';
 import { loadRoute } from './util/routes';
 
 let workerWindow: BrowserWindow | null = null;
@@ -10,7 +9,6 @@ export const openWorkerWindow = async (): Promise<void> => {
     show: false,
     webPreferences: {
       nodeIntegration: true,
-      webSecurity: !is.development, // Disable webSecurity in dev to load video over file:// protocol while serving over insecure http, this is not needed in production where we use file:// protocol for html serving.
       contextIsolation: false,
     },
   });

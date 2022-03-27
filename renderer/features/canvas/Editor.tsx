@@ -62,6 +62,8 @@ const Editor = (): React.ReactElement => {
 
   const [needCopy, setNeedCopy] = useState<boolean>(false);
 
+  const [needDelete, setNeedDelete] = useState<boolean>(false);
+
   const drawingAreaTopLeft = getAbsolutePosition(
     shapes.drawingArea.origin,
     shapes.drawingArea.topLeft
@@ -98,11 +100,18 @@ const Editor = (): React.ReactElement => {
   }, [needCopy]);
 
   useEffect(() => {
+    if (needDelete) {
+      shapes.deleteSelectedShape();
+    }
+    setNeedDelete(false);
+  }, [needDelete]);
+
+  useEffect(() => {
     MouseTrap.bind(['ctrl+c', 'command+c'], () => {
       setNeedCopy(true); // can not fetch latest state in event listener, so do this workaround
     });
     MouseTrap.bind(['delete', 'backspace'], () => {
-      shapes.deleteSelectedShape();
+      setNeedDelete(true);
     });
 
     const debouncedHandleResize = debounce(function handleResize() {

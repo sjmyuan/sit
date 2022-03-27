@@ -6,25 +6,30 @@ import { A, O, Point, Mask } from '../types';
 function useMasks(initialState: Mask[] = []) {
   const [masks, setMasks] = useState<Mask[]>(initialState);
   const [newMask, setNewMask] = useState<O.Option<Mask>>(O.none);
-  const startToDraw = (point: Point) =>
+  const [nextMaskId, setNextMaskId] = useState<number>(0);
+
+  const startToDraw = (point: Point) => {
     setNewMask(
       O.some({
         _tag: 'mask',
-        name: `mask-drawing-${masks.length + 1}`,
-        id: masks.length + 1,
+        name: `mask-drawing-${nextMaskId}`,
+        id: nextMaskId,
         origin: point,
         width: 0,
         height: 0,
       })
     );
+
+    setNextMaskId(nextMaskId + 1);
+  };
   const drawing = (point: Point) => {
     setNewMask(
       pipe(
         newMask,
-        O.map((rect) => ({
-          ...rect,
-          width: point.x - rect.origin.x,
-          height: point.y - rect.origin.y,
+        O.map((mask) => ({
+          ...mask,
+          width: point.x - mask.origin.x,
+          height: point.y - mask.origin.y,
         }))
       )
     );

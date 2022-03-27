@@ -15,6 +15,7 @@ import { ShapeContainer } from '../../store/ShapesContainer';
 import { InfoContainer } from '../../store/InfoContainer';
 import { getAbsolutePosition, getSize, Point } from '../../types';
 import { css } from '@emotion/css';
+import MaskComponent from './MaskComponent';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -194,6 +195,18 @@ const Editor = (): React.ReactElement => {
                   onSelected={() => shapes.onSelect(rect)}
                   onTransform={(transformedRect) =>
                     shapes.updateShape(transformedRect)
+                  }
+                />
+              );
+            })}
+            {shapes.getAllMasks().map((mask) => {
+              return (
+                <MaskComponent
+                  key={mask.name}
+                  mask={mask}
+                  onSelected={() => shapes.onSelect(mask)}
+                  onTransform={(transformedMask) =>
+                    shapes.updateShape(transformedMask)
                   }
                 />
               );

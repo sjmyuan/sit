@@ -1,6 +1,6 @@
 # Sit
 
-![Build Status](https://github.com/github/docs/actions/workflows/node.js.yml/badge.svg?branch=master)
+![Build Status](https://github.com/sjmyuan/sit/actions/workflows/node.js.yml/badge.svg?branch=master)
 
 A simple image tool
 

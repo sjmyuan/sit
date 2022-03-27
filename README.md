@@ -1,6 +1,8 @@
 # Sit
 
-A simple image tool, support AWS S3
+![Build Status](https://github.com/github/docs/actions/workflows/node.js.yml/badge.svg?branch=master)
+
+A simple image tool
 
 ## How to allow screen recording on macOS?
 

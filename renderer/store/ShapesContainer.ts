@@ -10,12 +10,15 @@ import {
   Area,
   getTopLeftAndBottomRight,
 } from '../types';
+import { MasksContainer } from './MaskContainer';
 import { RectsContainer } from './RectsContainer';
 import { TextsContainer } from './TextContainer';
 
 function useShapes() {
   const rectState = RectsContainer.useContainer();
   const textState = TextsContainer.useContainer();
+  const maskState = MasksContainer.useContainer();
+
   const [currentMode, setMode] = useState<MODE>('RECT');
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
   const [selectedShape, setSelectedShape] = useState<O.Option<SitShape>>(
@@ -60,7 +63,7 @@ function useShapes() {
     if (initialized) {
       updateDrawingAreaRect();
     }
-  }, [rectState.rects, textState.texts]);
+  }, [rectState.rects, textState.texts, maskState.masks]);
 
   useEffect(() => {
     if (initialized) {
@@ -96,6 +99,8 @@ function useShapes() {
         const newText = textState.startToDraw(drawingAreaPoint);
         setEditingText(O.some(newText));
       }
+    } else if (currentMode === 'MASK') {
+      maskState.startToDraw(drawingAreaPoint);
     }
   };
 
@@ -104,12 +109,20 @@ function useShapes() {
     if (currentMode === 'RECT' && isDrawing) {
       rectState.drawing(drawingAreaPoint);
     }
+
+    if (currentMode === 'MASK' && isDrawing) {
+      maskState.drawing(drawingAreaPoint);
+    }
   };
 
   const endToDraw = () => {
     toggleDrawing(false);
     if (currentMode === 'RECT') {
       rectState.endToDraw();
+    }
+
+    if (currentMode === 'MASK') {
+      maskState.endToDraw();
     }
   };
 
@@ -160,6 +173,8 @@ function useShapes() {
         // eslint-disable-next-line no-underscore-dangle
       } else if (shape._tag === 'text') {
         textState.deleteText(shape);
+      } else if (shape._tag === 'mask') {
+        maskState.deleteMask(shape);
       }
 
       setSelectedShape(O.none);
@@ -188,6 +203,16 @@ function useShapes() {
     return transformedRect;
   };
 
+  const getAllMasks = () => {
+    const originalMasks = maskState.getAllMasks();
+    const transformedMask = originalMasks.map((mask) => ({
+      ...mask,
+      origin: fromDrawingAreaToStage(mask.origin),
+    }));
+
+    return transformedMask;
+  };
+
   const getAllTexts = () =>
     textState.texts.map((text) => ({
       ...text,
@@ -208,6 +233,10 @@ function useShapes() {
     // eslint-disable-next-line no-underscore-dangle
     if (drawingAreaShape._tag === 'rect') {
       rectState.update(drawingAreaShape);
+    }
+
+    if (drawingAreaShape._tag === 'mask') {
+      maskState.update(drawingAreaShape);
     }
   };
 
@@ -255,6 +284,16 @@ function useShapes() {
       maxY = maxY > rectBottomRight.y ? maxY : rectBottomRight.y;
     });
 
+    maskState.getAllMasks().forEach((mask) => {
+      const { topLeft: maskTopLeft, bottomRight: maskBottomRight } =
+        getTopLeftAndBottomRight(mask);
+
+      minX = minX < maskTopLeft.x ? minX : maskTopLeft.x;
+      minY = minY < maskTopLeft.y ? minY : maskTopLeft.y;
+      maxX = maxX > maskBottomRight.x ? maxX : maskBottomRight.x;
+      maxY = maxY > maskBottomRight.y ? maxY : maskBottomRight.y;
+    });
+
     textState.texts.forEach((text) => {
       minX = minX < text.origin.x ? minX : text.origin.x;
       minY = minY < text.origin.y ? minY : text.origin.y;
@@ -291,6 +330,7 @@ function useShapes() {
     drawingArea,
     getAllRects,
     getAllTexts,
+    getAllMasks,
     updateShape,
     backgroundImg,
     setBackgroundImg,

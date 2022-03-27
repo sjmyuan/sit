@@ -65,6 +65,15 @@ export type Text = {
   value: string;
 };
 
+export type Mask = {
+  readonly _tag: 'mask';
+  id: number;
+  name: string;
+  origin: Point;
+  width: number;
+  height: number;
+};
+
 export const getSize = (topLeft: Point, bottomRight: Point) => ({
   width: Math.abs(bottomRight.x - topLeft.x),
   height: Math.abs(bottomRight.y - topLeft.y),
@@ -90,7 +99,7 @@ export const getRelativePosition = (
   };
 };
 
-export const getTopLeftAndBottomRight = (rect: Rect) => {
+export const getTopLeftAndBottomRight = (rect: Rect | Mask) => {
   const left = rect.origin.x;
   const top = rect.origin.y;
   const right = rect.origin.x + rect.width;
@@ -107,6 +116,6 @@ export const getTopLeftAndBottomRight = (rect: Rect) => {
   };
 };
 
-export type SitShape = Rect | Text;
+export type SitShape = Rect | Text | Mask;
 
-export type MODE = 'RECT' | 'TEXT';
+export type MODE = 'RECT' | 'TEXT' | 'MASK';

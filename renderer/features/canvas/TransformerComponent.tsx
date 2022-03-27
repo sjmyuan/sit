@@ -51,7 +51,7 @@ const TransformerComponent = (props: TransformerComponentProps) => {
         shape.strokeWidth(1);
       });
     }
-  });
+  }, []);
 
   useEffect(() => {
     checkNode();

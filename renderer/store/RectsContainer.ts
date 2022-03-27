@@ -6,17 +6,21 @@ import { A, O, Point, Rect } from '../types';
 function useRects(initialState: Rect[] = []) {
   const [rects, setRects] = useState<Rect[]>(initialState);
   const [newRect, setNewRect] = useState<O.Option<Rect>>(O.none);
-  const startToDraw = (point: Point) =>
+  const [nextRectId, setNextRectId] = useState<number>(0);
+  const startToDraw = (point: Point) => {
     setNewRect(
       O.some({
         _tag: 'rect',
-        name: `rect-drawing-${rects.length + 1}`,
-        id: rects.length + 1,
+        name: `rect-drawing-${nextRectId}`,
+        id: nextRectId,
         origin: point,
         width: 0,
         height: 0,
       })
     );
+
+    setNextRectId(nextRectId + 1);
+  };
   const drawing = (point: Point) => {
     setNewRect(
       pipe(

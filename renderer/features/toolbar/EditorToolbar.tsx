@@ -1,7 +1,7 @@
 import React from 'react';
 import * as O from 'fp-ts/Option';
 import { Box, IconButton } from '@mui/material';
-import { TextFields, PhotoLibrary, Crop32 } from '@mui/icons-material';
+import { TextFields, PhotoLibrary, Crop32, Brush } from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
 
 const EditorToolbar = (): React.ReactElement => {
@@ -29,6 +29,14 @@ const EditorToolbar = (): React.ReactElement => {
         onClick={() => shapes.setMode('TEXT')}
       >
         <TextFields />
+      </IconButton>
+      <IconButton
+        color="inherit"
+        aria-label="add mask"
+        disabled={shapes.currentMode === 'MASK'}
+        onClick={() => shapes.setMode('MASK')}
+      >
+        <Brush />
       </IconButton>
       <IconButton
         color="inherit"

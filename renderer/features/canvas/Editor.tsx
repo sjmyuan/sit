@@ -15,6 +15,7 @@ import { ShapeContainer } from '../../store/ShapesContainer';
 import { InfoContainer } from '../../store/InfoContainer';
 import { getAbsolutePosition, getSize, Point } from '../../types';
 import { css } from '@emotion/css';
+import MaskComponent from './MaskComponent';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -61,6 +62,8 @@ const Editor = (): React.ReactElement => {
 
   const [needCopy, setNeedCopy] = useState<boolean>(false);
 
+  const [needDelete, setNeedDelete] = useState<boolean>(false);
+
   const drawingAreaTopLeft = getAbsolutePosition(
     shapes.drawingArea.origin,
     shapes.drawingArea.topLeft
@@ -97,11 +100,18 @@ const Editor = (): React.ReactElement => {
   }, [needCopy]);
 
   useEffect(() => {
+    if (needDelete) {
+      shapes.deleteSelectedShape();
+    }
+    setNeedDelete(false);
+  }, [needDelete]);
+
+  useEffect(() => {
     MouseTrap.bind(['ctrl+c', 'command+c'], () => {
       setNeedCopy(true); // can not fetch latest state in event listener, so do this workaround
     });
     MouseTrap.bind(['delete', 'backspace'], () => {
-      shapes.deleteSelectedShape();
+      setNeedDelete(true);
     });
 
     const debouncedHandleResize = debounce(function handleResize() {
@@ -194,6 +204,18 @@ const Editor = (): React.ReactElement => {
                   onSelected={() => shapes.onSelect(rect)}
                   onTransform={(transformedRect) =>
                     shapes.updateShape(transformedRect)
+                  }
+                />
+              );
+            })}
+            {shapes.getAllMasks().map((mask) => {
+              return (
+                <MaskComponent
+                  key={mask.name}
+                  mask={mask}
+                  onSelected={() => shapes.onSelect(mask)}
+                  onTransform={(transformedMask) =>
+                    shapes.updateShape(transformedMask)
                   }
                 />
               );

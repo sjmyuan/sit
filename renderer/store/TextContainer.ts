@@ -5,15 +5,17 @@ import { A, Point, Text } from '../types';
 
 function useTexts(initialState: Text[] = []) {
   const [texts, setTexts] = useState<Text[]>(initialState);
+  const [nextTextId, setNextTextId] = useState<number>(0);
   const startToDraw = (point: Point) => {
     const newText: Text = {
       _tag: 'text',
-      id: texts.length + 1,
-      name: `text-${texts.length + 1}`,
+      id: nextTextId,
+      name: `text-${nextTextId}`,
       origin: point,
       value: '',
     };
     setTexts([...texts, newText]);
+    setNextTextId(nextTextId + 1);
     return newText;
   };
 

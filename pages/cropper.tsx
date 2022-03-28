@@ -6,7 +6,7 @@ import * as O from 'fp-ts/Option';
 import { constVoid, pipe } from 'fp-ts/lib/function';
 import { cacheImage } from '../renderer/utils/localImages';
 import { TE } from '../renderer/types';
-import { getVideo, takeShot } from '../renderer/utils/screen';
+import { takeShotFromImage } from '../renderer/utils/screen';
 
 type Point = {
   x: number;
@@ -16,38 +16,38 @@ type Point = {
 const overlayOpacity = 0.5;
 const overlayColor = 'gray';
 
-const takeShotAndCacheImage = async (
-  range: O.Option<[Point, Point]>,
-  stream: MediaStream
-) => {
-  const buffer = await takeShot(range, stream);
-
+const cacheImageBlob = async (blob: Blob) => {
   const key = `screenshot-${Date.now()}.png`;
 
   await pipe(
-    cacheImage(key, new Blob([buffer])),
+    cacheImage(key, blob),
     TE.map((index) => ipcRenderer.send('took-screen-shot', index))
   )();
 };
 
 const CropperPage: NextPage = () => {
-  const [videoSrc, setVideoSrc] = useState<O.Option<MediaStream>>(O.none);
   const [startPoint, setStartPoint] = useState<O.Option<Point>>(O.none);
   const [mousePoint, setMousePoint] = useState<Point>({ x: 0, y: 0 });
+  const [fullScreenBlob, setFullScreenBlob] = useState<O.Option<Blob>>(O.none);
 
   useEffect(() => {
-    ipcRenderer.on('cropper-type', (_, takeFullScreenShot: boolean) => {
-      if (takeFullScreenShot) {
-        getVideo()
-          .then((src) => takeShotAndCacheImage(O.none, src))
-          .catch((e) => console.log(e));
-      } else {
-        getVideo()
-          .then((src) => setVideoSrc(O.some(src)))
-          .catch((e) => console.log(e));
+    ipcRenderer.on(
+      'cropper-config',
+      (
+        _,
+        {
+          takeFullScreenShot,
+          fullScreen,
+        }: { takeFullScreenShot: boolean; fullScreen: Blob }
+      ) => {
+        if (takeFullScreenShot) {
+          cacheImageBlob(fullScreen);
+        } else {
+          setFullScreenBlob(O.some(fullScreen));
+        }
+        return constVoid();
       }
-      return constVoid();
-    });
+    );
 
     const handleUserKeyUp = (_: { ctrlKey: boolean; keyCode: number }) => {
       remote.getCurrentWindow().close();
@@ -66,7 +66,9 @@ const CropperPage: NextPage = () => {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: 'transparent',
+        backgroundImage: O.isSome(fullScreenBlob)
+          ? URL.createObjectURL(fullScreenBlob.value)
+          : '',
       }}
       onMouseMove={({ clientX, clientY }) =>
         setMousePoint({ x: clientX, y: clientY })
@@ -75,11 +77,12 @@ const CropperPage: NextPage = () => {
         setStartPoint(O.some({ x: clientX, y: clientY }))
       }
       onMouseUp={async () => {
-        if (O.isSome(videoSrc) && O.isSome(startPoint)) {
-          await takeShotAndCacheImage(
-            O.some([startPoint.value, mousePoint]),
-            videoSrc.value
+        if (O.isSome(fullScreenBlob) && O.isSome(startPoint)) {
+          const imageBlob = await takeShotFromImage(
+            [startPoint.value, mousePoint],
+            fullScreenBlob.value
           );
+          await cacheImageBlob(imageBlob);
         }
         setStartPoint(O.none);
       }}
@@ -162,16 +165,6 @@ const CropperPage: NextPage = () => {
           />
         </Box>
       )}
-
-      <video
-        muted
-        hidden
-        ref={(ref) => {
-          if (ref && O.isSome(videoSrc)) {
-            ref.srcObject = videoSrc.value;
-          }
-        }}
-      />
     </Box>
   );
 };

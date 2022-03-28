@@ -1,11 +1,14 @@
 import { screen, BrowserWindow, Display } from 'electron';
+import { O } from '../renderer/types';
+import { getVideo, takeShot } from '../renderer/utils/screen';
 import { loadRoute } from './util/routes';
 
 let cropperWindow: BrowserWindow | null = null;
 
 const openCropper = (
   display: Display,
-  takeFullScreenShot: boolean
+  takeFullScreenShot: boolean,
+  fullScreen: Blob
 ): BrowserWindow => {
   const { bounds } = display;
   const { x, y, width, height } = bounds;
@@ -19,8 +22,8 @@ const openCropper = (
     resizable: false,
     movable: false,
     frame: false,
-    transparent: true,
-    show: !takeFullScreenShot,
+    transparent: false,
+    show: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -29,12 +32,13 @@ const openCropper = (
 
   loadRoute(cropper, 'cropper');
 
-  if (!takeFullScreenShot) {
-    cropper.setAlwaysOnTop(true, 'screen-saver', 1);
-  }
+  cropper.setAlwaysOnTop(true, 'screen-saver', 1);
 
   cropper.webContents.on('did-finish-load', () => {
-    cropper.webContents.send('cropper-type', takeFullScreenShot);
+    cropper.webContents.send('cropper-config', {
+      takeFullScreenShot,
+      fullScreen,
+    });
   });
 
   cropper.on('closed', () => {
@@ -53,7 +57,14 @@ const openCropperWindow = async (
     screen.getCursorScreenPoint()
   );
 
-  cropperWindow = openCropper(activeDisplay, takeFullScreenShot);
+  const video = await getVideo();
+  const buffer = await takeShot(O.none, video);
+
+  cropperWindow = openCropper(
+    activeDisplay,
+    takeFullScreenShot,
+    new Blob([buffer])
+  );
 
   if (!takeFullScreenShot) {
     cropperWindow.focus();

@@ -29,6 +29,7 @@ import {
   WorkerEvents,
   showStepInformation,
 } from '../renderer/events';
+import { getVideo, takeShot } from '../renderer/utils/screen';
 
 const sendEvent = (event: WorkerEvents): AppErrorOr<void> =>
   TE.fromIO(() => {
@@ -97,6 +98,16 @@ const Worker = () => {
       .return(constVoid);
 
     // startWorker(() => worker)();
+  }, []);
+
+  useEffect(() => {
+    ipcRenderer.on('take-full-screen-shot-to-start-cropper', async () => {
+      const video = await getVideo();
+      const buffer = await takeShot(O.none, video);
+      ipcRenderer.send('open-cropper-window', {
+        screenImageBlob: new Blob([buffer]),
+      });
+    });
   }, []);
   return <div>Worker</div>;
 };

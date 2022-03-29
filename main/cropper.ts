@@ -35,6 +35,7 @@ const openCropper = (
   cropper.setAlwaysOnTop(true, 'screen-saver', 1);
 
   cropper.webContents.on('did-finish-load', () => {
+    console.log('sending image....');
     cropper.webContents.send('cropper-config', {
       takeFullScreenShot,
       fullScreen,
@@ -57,8 +58,12 @@ const openCropperWindow = async (
     screen.getCursorScreenPoint()
   );
 
+  console.log('starting cropper....');
+
   const video = await getVideo();
   const buffer = await takeShot(O.none, video);
+
+  console.log('starting window....');
 
   cropperWindow = openCropper(
     activeDisplay,

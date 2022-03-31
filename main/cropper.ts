@@ -1,6 +1,4 @@
 import { screen, BrowserWindow, Display } from 'electron';
-import { O } from '../renderer/types';
-import { getVideo, takeShot } from '../renderer/utils/screen';
 import { loadRoute } from './util/routes';
 
 let cropperWindow: BrowserWindow | null = null;
@@ -8,7 +6,7 @@ let cropperWindow: BrowserWindow | null = null;
 const openCropper = (
   display: Display,
   takeFullScreenShot: boolean,
-  fullScreen: Blob
+  fullScreen: Buffer
 ): BrowserWindow => {
   const { bounds } = display;
   const { x, y, width, height } = bounds;
@@ -50,7 +48,8 @@ const openCropper = (
 };
 
 const openCropperWindow = async (
-  takeFullScreenShot: boolean
+  takeFullScreenShot: boolean,
+  fullScreen: Buffer
 ): Promise<void> => {
   if (cropperWindow) cropperWindow.destroy();
 
@@ -60,16 +59,12 @@ const openCropperWindow = async (
 
   console.log('starting cropper....');
 
-  const video = await getVideo();
-  const buffer = await takeShot(O.none, video);
+  // const video = await getVideo();
+  // const buffer = await takeShot(O.none, video);
 
-  console.log('starting window....');
+  // console.log('starting window....');
 
-  cropperWindow = openCropper(
-    activeDisplay,
-    takeFullScreenShot,
-    new Blob([buffer])
-  );
+  cropperWindow = openCropper(activeDisplay, takeFullScreenShot, fullScreen);
 
   if (!takeFullScreenShot) {
     cropperWindow.focus();

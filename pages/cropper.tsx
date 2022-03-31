@@ -7,6 +7,7 @@ import { constVoid, pipe } from 'fp-ts/lib/function';
 import { cacheImage } from '../renderer/utils/localImages';
 import { TE } from '../renderer/types';
 import { takeShotFromImage } from '../renderer/utils/screen';
+import { css } from '@emotion/css';
 
 type Point = {
   x: number;
@@ -28,7 +29,9 @@ const cacheImageBlob = async (blob: Blob) => {
 const CropperPage: NextPage = () => {
   const [startPoint, setStartPoint] = useState<O.Option<Point>>(O.none);
   const [mousePoint, setMousePoint] = useState<Point>({ x: 0, y: 0 });
-  const [fullScreenBlob, setFullScreenBlob] = useState<O.Option<Blob>>(O.none);
+  const [fullScreenImageUrl, setFullScreenImageUrl] = useState<
+    O.Option<[string, Blob]>
+  >(O.none);
 
   useEffect(() => {
     ipcRenderer.on(
@@ -38,12 +41,14 @@ const CropperPage: NextPage = () => {
         {
           takeFullScreenShot,
           fullScreen,
-        }: { takeFullScreenShot: boolean; fullScreen: Blob }
+        }: { takeFullScreenShot: boolean; fullScreen: Buffer }
       ) => {
+        const blob = new Blob([fullScreen]);
         if (takeFullScreenShot) {
-          cacheImageBlob(fullScreen);
+          cacheImageBlob(blob);
         } else {
-          setFullScreenBlob(O.some(fullScreen));
+          const url = URL.createObjectURL(blob);
+          setFullScreenImageUrl(O.some([url, blob]));
         }
         return constVoid();
       }
@@ -66,9 +71,9 @@ const CropperPage: NextPage = () => {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundImage: O.isSome(fullScreenBlob)
-          ? URL.createObjectURL(fullScreenBlob.value)
-          : '',
+        backgroundImage: `url(${
+          O.isSome(fullScreenImageUrl) ? fullScreenImageUrl.value[0] : ''
+        })`,
       }}
       onMouseMove={({ clientX, clientY }) =>
         setMousePoint({ x: clientX, y: clientY })
@@ -77,10 +82,10 @@ const CropperPage: NextPage = () => {
         setStartPoint(O.some({ x: clientX, y: clientY }))
       }
       onMouseUp={async () => {
-        if (O.isSome(fullScreenBlob) && O.isSome(startPoint)) {
+        if (O.isSome(fullScreenImageUrl) && O.isSome(startPoint)) {
           const imageBlob = await takeShotFromImage(
             [startPoint.value, mousePoint],
-            fullScreenBlob.value
+            fullScreenImageUrl.value[1]
           );
           await cacheImageBlob(imageBlob);
         }

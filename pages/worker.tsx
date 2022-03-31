@@ -101,13 +101,20 @@ const Worker = () => {
   }, []);
 
   useEffect(() => {
-    ipcRenderer.on('take-full-screen-shot-to-start-cropper', async () => {
-      const video = await getVideo();
-      const buffer = await takeShot(O.none, video);
-      ipcRenderer.send('open-cropper-window', {
-        screenImageBlob: new Blob([buffer]),
-      });
-    });
+    ipcRenderer.on(
+      'worker_prepare-for-cropper-window',
+      async (_, { takeFullScreenShot }: { takeFullScreenShot: boolean }) => {
+        console.log('in worker.....');
+        const video = await getVideo();
+        console.log('take shot.....');
+        const buffer = await takeShot(O.none, video);
+        console.log('send back.....');
+        ipcRenderer.send('main_open-cropper-window', {
+          fullScreen: buffer,
+          takeFullScreenShot,
+        });
+      }
+    );
   }, []);
   return <div>Worker</div>;
 };

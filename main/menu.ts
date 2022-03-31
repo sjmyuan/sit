@@ -7,8 +7,8 @@ import {
 } from 'electron';
 import { is } from 'electron-util';
 
-import { openCropperWindow } from './cropper';
 import { hideMainWindow } from './main';
+import { prepareForCropperWindow } from './worker';
 // import { openPreferencesWindow } from './preferences';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
@@ -78,7 +78,7 @@ const buildDarwinTemplate = (
         accelerator: 'Shift+Command+5',
         click: async () => {
           hideMainWindow();
-          await openCropperWindow(false);
+          await prepareForCropperWindow(false);
         },
       },
       {
@@ -86,7 +86,7 @@ const buildDarwinTemplate = (
         accelerator: 'Shift+Command+6',
         click: async () => {
           hideMainWindow();
-          await openCropperWindow(true);
+          await prepareForCropperWindow(true);
         },
       },
       { type: 'separator' },
@@ -274,7 +274,7 @@ export const getTrayMenu = (): Menu => {
       accelerator: 'Shift+Command+5',
       click: async () => {
         hideMainWindow();
-        await openCropperWindow(false);
+        await prepareForCropperWindow(false);
       },
     },
     {
@@ -282,7 +282,7 @@ export const getTrayMenu = (): Menu => {
       accelerator: 'Shift+Command+6',
       click: async () => {
         hideMainWindow();
-        await openCropperWindow(true);
+        await prepareForCropperWindow(true);
       },
     },
   ];

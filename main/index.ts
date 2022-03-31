@@ -12,7 +12,7 @@ import {
   resizeMainWindow,
   sendWorkerEventToMainWindow,
 } from './main';
-import { openWorkerWindow } from './worker';
+import { openWorkerWindow, prepareForCropperWindow } from './worker';
 import { initializeAppMenu } from './menu';
 import { closeCropperWindow, openCropperWindow } from './cropper';
 import { closePreferencesWindow } from './preferences';
@@ -62,18 +62,32 @@ const checkForUpdates = async (): Promise<void> => {
 
   globalShortcut.register('CommandOrControl+Shift+5', () => {
     hideMainWindow();
-    openCropperWindow(false);
+    prepareForCropperWindow(false);
   });
 
   globalShortcut.register('CommandOrControl+Shift+6', () => {
     hideMainWindow();
-    openCropperWindow(true);
+    prepareForCropperWindow(true);
   });
 
   ipcMain.on('taking-screen-shot', (_, takeFullScreenShot: boolean) => {
     hideMainWindow();
-    openCropperWindow(takeFullScreenShot);
+    prepareForCropperWindow(takeFullScreenShot);
   });
+
+  ipcMain.on(
+    'main_open-cropper-window',
+    (
+      _,
+      {
+        fullScreen,
+        takeFullScreenShot,
+      }: { fullScreen: Buffer; takeFullScreenShot: boolean }
+    ) => {
+      hideMainWindow();
+      openCropperWindow(takeFullScreenShot, fullScreen);
+    }
+  );
 
   ipcMain.on('took-screen-shot', (_, imageIndex) => {
     closeCropperWindow();

@@ -19,3 +19,14 @@ export const openWorkerWindow = async (): Promise<void> => {
     workerWindow = null;
   });
 };
+
+export const prepareForCropperWindow = async (
+  takeFullScreenShot: boolean
+): Promise<void> => {
+  if (workerWindow) {
+    console.log('sending event to worker...');
+    workerWindow.webContents.send('worker_prepare-for-cropper-window', {
+      takeFullScreenShot: takeFullScreenShot,
+    });
+  }
+};

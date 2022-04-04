@@ -14,7 +14,11 @@ import {
 } from './main';
 import { openWorkerWindow, prepareForCropperWindow } from './worker';
 import { initializeAppMenu } from './menu';
-import { closeCropperWindow, openCropperWindow } from './cropper';
+import {
+  closeCropperWindow,
+  openCropperWindow,
+  showCropperWindow,
+} from './cropper';
 import { closePreferencesWindow } from './preferences';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
@@ -88,6 +92,10 @@ const checkForUpdates = async (): Promise<void> => {
       openCropperWindow(takeFullScreenShot, fullScreen);
     }
   );
+
+  ipcMain.on('main_show-cropper-window', () => {
+    showCropperWindow();
+  });
 
   ipcMain.on('took-screen-shot', (_, imageIndex) => {
     closeCropperWindow();

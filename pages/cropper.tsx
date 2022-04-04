@@ -50,6 +50,7 @@ const CropperPage: NextPage = () => {
           const url = URL.createObjectURL(blob);
           setFullScreenImageUrl(O.some([url, blob]));
         }
+        ipcRenderer.send('main_show-cropper-window');
         return constVoid();
       }
     );

@@ -21,7 +21,7 @@ const openCropper = (
     movable: false,
     frame: false,
     transparent: false,
-    show: true,
+    show: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -30,7 +30,7 @@ const openCropper = (
 
   loadRoute(cropper, 'cropper');
 
-  cropper.setAlwaysOnTop(true, 'screen-saver', 1);
+  // cropper.setAlwaysOnTop(true, 'screen-saver', 1);
 
   cropper.webContents.on('did-finish-load', () => {
     console.log('sending image....');
@@ -71,8 +71,16 @@ const openCropperWindow = async (
   }
 };
 
+const showCropperWindow = () => {
+  console.log('show cropper window...');
+  if (cropperWindow) {
+    cropperWindow.show();
+    cropperWindow.focus();
+  }
+};
+
 const closeCropperWindow = (): void => {
   if (cropperWindow) cropperWindow.destroy();
 };
 
-export { openCropperWindow, closeCropperWindow };
+export { openCropperWindow, closeCropperWindow, showCropperWindow };

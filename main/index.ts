@@ -97,6 +97,11 @@ const checkForUpdates = async (): Promise<void> => {
     showCropperWindow();
   });
 
+  ipcMain.on('main_close-cropper-window', () => {
+    closeCropperWindow();
+    openMainWindow(false);
+  });
+
   ipcMain.on('took-screen-shot', (_, imageIndex) => {
     closeCropperWindow();
     editImageinMainWindow(imageIndex);

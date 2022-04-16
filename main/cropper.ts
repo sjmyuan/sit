@@ -30,7 +30,7 @@ const openCropper = (
 
   loadRoute(cropper, 'cropper');
 
-  // cropper.setAlwaysOnTop(true, 'screen-saver', 1);
+  cropper.setAlwaysOnTop(true, 'screen-saver', 1);
 
   cropper.webContents.on('did-finish-load', () => {
     console.log('sending image....');
@@ -56,13 +56,6 @@ const openCropperWindow = async (
   const activeDisplay = screen.getDisplayNearestPoint(
     screen.getCursorScreenPoint()
   );
-
-  console.log('starting cropper....');
-
-  // const video = await getVideo();
-  // const buffer = await takeShot(O.none, video);
-
-  // console.log('starting window....');
 
   cropperWindow = openCropper(activeDisplay, takeFullScreenShot, fullScreen);
 

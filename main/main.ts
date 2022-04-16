@@ -10,6 +10,7 @@ export const openMainWindow = async (
   minimize: boolean
 ): Promise<BrowserWindow> => {
   if (mainWindow) {
+    mainWindow.show();
     return Promise.resolve(mainWindow);
   }
 

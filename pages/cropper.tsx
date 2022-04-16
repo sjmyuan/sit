@@ -7,7 +7,6 @@ import { constVoid, pipe } from 'fp-ts/lib/function';
 import { cacheImage } from '../renderer/utils/localImages';
 import { TE } from '../renderer/types';
 import { takeShotFromImage } from '../renderer/utils/screen';
-import { css } from '@emotion/css';
 
 type Point = {
   x: number;
@@ -55,8 +54,10 @@ const CropperPage: NextPage = () => {
       }
     );
 
-    const handleUserKeyUp = (_: { ctrlKey: boolean; keyCode: number }) => {
-      remote.getCurrentWindow().close();
+    const handleUserKeyUp = ({ keyCode }: { keyCode: number }) => {
+      if (keyCode == 27) {
+        ipcRenderer.send('main_close-cropper-window');
+      }
     };
     window.addEventListener('keyup', handleUserKeyUp);
     return () => {

@@ -186,6 +186,7 @@ function useShapes() {
   const setEditingImage = (url: O.Option<string>) => {
     rectState.clear();
     textState.clear();
+    maskState.clear();
     toggleDrawing(false);
     setSelectedShape(O.none);
     setMode('RECT');

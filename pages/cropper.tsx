@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
-import { remote, ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron';
 import { Box } from '@mui/material';
 import * as O from 'fp-ts/Option';
 import { constVoid, pipe } from 'fp-ts/lib/function';
@@ -55,7 +55,7 @@ const CropperPage: NextPage = () => {
     );
 
     const handleUserKeyUp = ({ keyCode }: { keyCode: number }) => {
-      if (keyCode == 27) {
+      if (keyCode === 27) {
         ipcRenderer.send('main_close-cropper-window');
       }
     };

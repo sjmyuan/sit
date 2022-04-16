@@ -20,6 +20,7 @@ import {
   showCropperWindow,
 } from './cropper';
 import { closePreferencesWindow } from './preferences';
+import { closeCoverWindow, openCoverWindow } from './cover';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
@@ -66,17 +67,21 @@ const checkForUpdates = async (): Promise<void> => {
 
   globalShortcut.register('CommandOrControl+Shift+5', () => {
     hideMainWindow();
-    prepareForCropperWindow(false);
+    openCoverWindow(() => prepareForCropperWindow(false));
   });
 
   globalShortcut.register('CommandOrControl+Shift+6', () => {
     hideMainWindow();
-    prepareForCropperWindow(true);
+    openCoverWindow(() => prepareForCropperWindow(true));
   });
 
   ipcMain.on('taking-screen-shot', (_, takeFullScreenShot: boolean) => {
     hideMainWindow();
-    prepareForCropperWindow(takeFullScreenShot);
+    console.log('open cover window..');
+    // openCoverWindow(() => prepareForCropperWindow(takeFullScreenShot));
+    openCoverWindow(() => {
+      console.log(takeFullScreenShot);
+    });
   });
 
   ipcMain.on(
@@ -89,6 +94,7 @@ const checkForUpdates = async (): Promise<void> => {
       }: { fullScreen: Buffer; takeFullScreenShot: boolean }
     ) => {
       hideMainWindow();
+      closeCoverWindow();
       openCropperWindow(takeFullScreenShot, fullScreen);
     }
   );

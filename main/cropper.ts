@@ -1,6 +1,13 @@
 import { screen, BrowserWindow, Display } from 'electron';
 import { loadRoute } from './util/routes';
 
+/**
+ * open cover with transparent mode and hide mouse cursor
+ * take the full screen short
+ * close cover and open cropper, set background image to the screen short, then show the mouse cursor
+ * crop
+ */
+
 let cropperWindow: BrowserWindow | null = null;
 
 const openCropper = (
@@ -30,7 +37,7 @@ const openCropper = (
 
   loadRoute(cropper, 'cropper');
 
-  // cropper.setAlwaysOnTop(true, 'screen-saver', 1);
+  cropper.setAlwaysOnTop(true, 'screen-saver', 1);
 
   cropper.webContents.on('did-finish-load', () => {
     console.log('sending image....');
@@ -56,13 +63,6 @@ const openCropperWindow = async (
   const activeDisplay = screen.getDisplayNearestPoint(
     screen.getCursorScreenPoint()
   );
-
-  console.log('starting cropper....');
-
-  // const video = await getVideo();
-  // const buffer = await takeShot(O.none, video);
-
-  // console.log('starting window....');
 
   cropperWindow = openCropper(activeDisplay, takeFullScreenShot, fullScreen);
 

@@ -12,6 +12,7 @@ module.exports = {
 
   exportPathMap: () => ({
     '/cropper': { page: '/cropper' },
+    '/cover': { page: '/cover' },
     '/main': { page: '/main' },
     '/preferences': { page: '/preferences' },
     '/worker': { page: '/worker' },

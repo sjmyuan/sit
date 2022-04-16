@@ -77,21 +77,25 @@ const CropperPage: NextPage = () => {
           O.isSome(fullScreenImageUrl) ? fullScreenImageUrl.value[0] : ''
         })`,
       }}
-      onMouseMove={({ clientX, clientY }) =>
-        setMousePoint({ x: clientX, y: clientY })
-      }
-      onMouseDown={({ clientX, clientY }) =>
-        setStartPoint(O.some({ x: clientX, y: clientY }))
-      }
-      onMouseUp={async () => {
-        if (O.isSome(fullScreenImageUrl) && O.isSome(startPoint)) {
-          const imageBlob = await takeShotFromImage(
-            [startPoint.value, mousePoint],
-            fullScreenImageUrl.value[1]
-          );
-          await cacheImageBlob(imageBlob);
+      onMouseMove={({ clientX, clientY }) => {
+        setMousePoint({ x: clientX, y: clientY });
+      }}
+      onMouseDown={({ button, clientX, clientY }) => {
+        if (button === 0) {
+          setStartPoint(O.some({ x: clientX, y: clientY }));
         }
-        setStartPoint(O.none);
+      }}
+      onMouseUp={async ({ button }) => {
+        if (button === 0) {
+          if (O.isSome(fullScreenImageUrl) && O.isSome(startPoint)) {
+            const imageBlob = await takeShotFromImage(
+              [startPoint.value, mousePoint],
+              fullScreenImageUrl.value[1]
+            );
+            await cacheImageBlob(imageBlob);
+          }
+          setStartPoint(O.none);
+        }
       }}
     >
       {O.isSome(startPoint) ? (

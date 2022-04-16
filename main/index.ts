@@ -19,7 +19,6 @@ import {
   openCropperWindow,
   showCropperWindow,
 } from './cropper';
-import { closePreferencesWindow } from './preferences';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
@@ -125,7 +124,6 @@ app.on('activate', () => {
 
 app.on('will-quit', () => {
   closeCropperWindow();
-  closePreferencesWindow();
   closeMainWindow();
   globalShortcut.unregisterAll();
 });

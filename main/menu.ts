@@ -9,7 +9,6 @@ import { is } from 'electron-util';
 
 import { hideMainWindow } from './main';
 import { prepareForCropperWindow } from './worker';
-// import { openPreferencesWindow } from './preferences';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -40,12 +39,6 @@ const buildDarwinTemplate = (
         label: 'About Sit',
         selector: 'orderFrontStandardAboutPanel:',
       },
-      // { type: 'separator' },
-      // {
-      //   label: 'Preferences…',
-      //   accelerator: 'Command+,',
-      //   click: () => openPreferencesWindow(),
-      // },
       { type: 'separator' },
       { label: 'Services', submenu: [] },
       { type: 'separator' },

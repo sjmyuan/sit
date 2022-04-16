@@ -17,6 +17,8 @@ import { getAbsolutePosition, getSize, Point } from '../../types';
 import { css } from '@emotion/css';
 import MaskComponent from './MaskComponent';
 
+const MIN_HEIGHT = 580;
+
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
   const transform = node.getAbsoluteTransform().copy();
@@ -81,7 +83,10 @@ const Editor = (): React.ReactElement => {
       image.src = editingImageUrl;
       image.addEventListener('load', () => {
         shapes.setBackgroundImg(O.some(image));
-        ipcRenderer.send('resize-main-window', [image.width, image.height]);
+        ipcRenderer.send('resize-main-window', [
+          image.width,
+          image.height > MIN_HEIGHT ? image.height : MIN_HEIGHT,
+        ]);
       });
     }
   }, [editingImageUrl]);
@@ -136,7 +141,7 @@ const Editor = (): React.ReactElement => {
     <Box
       ref={containerRef}
       sx={{
-        minHeight: '580px',
+        minHeight: `${MIN_HEIGHT}px`,
         p: 0,
         backgroundColor: 'rgb(116,116,116)',
         display: 'flex',

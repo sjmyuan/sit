@@ -22,3 +22,24 @@ A simple image tool
 * Add text to screenshot
 * Add mask to screenshot
 * Store screenshot history
+
+## Development
+
+1. Install dependencies
+   
+   ```sh
+   yarn
+   ```
+
+2. Start local environment
+
+   ```sh
+   yarn start
+   ```
+
+3. Package
+
+   ```sh
+   yarn mac_dist
+   yarn win_dist
+   ```

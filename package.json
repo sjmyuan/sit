@@ -63,8 +63,12 @@
     "win": {
       "icon": "dist/resources/icon.ico",
       "target": [
-        "nsis",
-        "msi"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "linux": {

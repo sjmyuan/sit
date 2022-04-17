@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { screen, app, BrowserWindow } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import { loadRoute } from './util/routes';
 
 let mainWindow: BrowserWindow | null = null;
@@ -10,10 +10,9 @@ export const openMainWindow = async (
   minimize: boolean
 ): Promise<BrowserWindow> => {
   if (mainWindow) {
+    mainWindow.show();
     return Promise.resolve(mainWindow);
   }
-
-  console.log('open main...');
 
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'resources')
@@ -23,18 +22,10 @@ export const openMainWindow = async (
     return path.join(RESOURCES_PATH, ...paths);
   };
 
-  const activeDisplay = screen.getDisplayNearestPoint(
-    screen.getCursorScreenPoint()
-  );
-
   mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
     height: 728,
-    minWidth: 1024,
-    minHeight: 728,
-    maxWidth: activeDisplay.bounds.width,
-    maxHeight: activeDisplay.bounds.height,
     center: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
@@ -61,7 +52,6 @@ export const openMainWindow = async (
   });
 
   mainWindow.on('closed', () => {
-    console.log('cloase main...');
     mainWindow = null;
   });
 

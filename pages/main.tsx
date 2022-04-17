@@ -9,36 +9,31 @@ import {
   Backdrop,
   Alert,
   Box,
+  Typography,
 } from '@mui/material';
 import MouseTrap from 'mousetrap';
 import { constVoid, pipe } from 'fp-ts/lib/function';
 import { ipcRenderer, clipboard } from 'electron';
-import { CloudDone } from '@mui/icons-material';
 import ImageBrowser from '../renderer/features/images/ImageBrowser';
 import Editor from '../renderer/features/canvas/Editor';
 import BrowserToolbar from '../renderer/features/toolbar/BrowserToolbar';
 import EditorToolbar from '../renderer/features/toolbar/EditorToolbar';
 import { ImageContainer } from '../renderer/store/ImageContainer';
 import { TE, AppErrorOr } from '../renderer/types';
-import { WorkerEvents } from '../renderer/events';
 import { ImageIndex } from '../renderer/utils/AppDB';
 import { getImageCacheUrl } from '../renderer/utils/localImages';
 import { InfoContainer } from '../renderer/store/InfoContainer';
 import { ShapeContainer } from '../renderer/store/ShapesContainer';
-import { PreferencesContainer } from '../renderer/store/PreferencesContainer';
 
 const MainPage = (): React.ReactElement => {
   const notification = InfoContainer.useContainer();
   const shapes = ShapeContainer.useContainer();
-  const preferences = PreferencesContainer.useContainer();
   const imageContainer = ImageContainer.useContainer();
   const { inProgress } = notification;
-  const [isSyncing, toggleSyncing] = useState<boolean>(false);
   const [pasting, togglePasting] = useState<boolean>(false);
   const [croppingImage, setCroppingImage] = useState<O.Option<ImageIndex>>(
     O.none
   );
-  const [workerInfo, setWorkerInfo] = useState<string>('');
 
   useEffect(() => {
     ipcRenderer.on('edit-image', (_, imageIndex: ImageIndex) => {
@@ -52,30 +47,9 @@ const MainPage = (): React.ReactElement => {
         )
       )();
     });
-    ipcRenderer.on('worker-event', (_, event: WorkerEvents) => {
-      if (event._tag === 'start-to-sync') {
-        toggleSyncing(true);
-        setWorkerInfo('Start to sync images....');
-      }
-      if (event._tag === 'success-to-sync') {
-        toggleSyncing(false);
-        setWorkerInfo('Succeed to sync images!');
-      }
-      if (event._tag === 'failed-to-sync') {
-        toggleSyncing(false);
-        setWorkerInfo(event.error);
-      }
-      if (event._tag === 'show-step-information') {
-        setWorkerInfo(event.info);
-      }
-    });
-    ipcRenderer.on('preferences-changed', () => {
-      preferences.loadPreferences();
-    });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    preferences.loadPreferences();
     imageContainer.loadAllImageIndexes()();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -121,13 +95,15 @@ const MainPage = (): React.ReactElement => {
     <Box sx={{ height: '100%' }}>
       <AppBar position="sticky">
         <Toolbar>
-          <Box sx={{ flexGrow: 1 }}>
-            {isSyncing ? (
-              <CircularProgress color="secondary" size={20} />
-            ) : (
-              <CloudDone />
-            )}
-          </Box>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ display: { xs: 'none', sm: 'block' } }}
+          >
+            Sit
+          </Typography>
+          <Box sx={{ flexGrow: 1 }} />
           {O.isNone(shapes.editingImageUrl) ? (
             <BrowserToolbar />
           ) : (
@@ -146,23 +122,6 @@ const MainPage = (): React.ReactElement => {
       >
         {O.isNone(shapes.editingImageUrl) ? <ImageBrowser /> : <Editor />}
       </Container>
-      <Box
-        sx={{
-          position: 'fixed',
-          left: '0px',
-          right: '0px',
-          bottom: '0px',
-          height: '20px',
-          backgroundColor: 'rgb(217,217,217)',
-          display: 'flex',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-        }}
-      >
-        <Box sx={{ fontSize: 'x-small', paddingLeft: '10px' }}>
-          {workerInfo}
-        </Box>
-      </Box>
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}

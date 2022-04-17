@@ -7,9 +7,8 @@ import {
 } from 'electron';
 import { is } from 'electron-util';
 
-import { openCropperWindow } from './cropper';
 import { hideMainWindow } from './main';
-// import { openPreferencesWindow } from './preferences';
+import { prepareForCropperWindow } from './worker';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -40,12 +39,6 @@ const buildDarwinTemplate = (
         label: 'About Sit',
         selector: 'orderFrontStandardAboutPanel:',
       },
-      // { type: 'separator' },
-      // {
-      //   label: 'Preferences…',
-      //   accelerator: 'Command+,',
-      //   click: () => openPreferencesWindow(),
-      // },
       { type: 'separator' },
       { label: 'Services', submenu: [] },
       { type: 'separator' },
@@ -78,7 +71,7 @@ const buildDarwinTemplate = (
         accelerator: 'Shift+Command+5',
         click: async () => {
           hideMainWindow();
-          await openCropperWindow(false);
+          await prepareForCropperWindow(false);
         },
       },
       {
@@ -86,7 +79,7 @@ const buildDarwinTemplate = (
         accelerator: 'Shift+Command+6',
         click: async () => {
           hideMainWindow();
-          await openCropperWindow(true);
+          await prepareForCropperWindow(true);
         },
       },
       { type: 'separator' },
@@ -274,7 +267,7 @@ export const getTrayMenu = (): Menu => {
       accelerator: 'Shift+Command+5',
       click: async () => {
         hideMainWindow();
-        await openCropperWindow(false);
+        await prepareForCropperWindow(false);
       },
     },
     {
@@ -282,7 +275,7 @@ export const getTrayMenu = (): Menu => {
       accelerator: 'Shift+Command+6',
       click: async () => {
         hideMainWindow();
-        await openCropperWindow(true);
+        await prepareForCropperWindow(true);
       },
     },
   ];

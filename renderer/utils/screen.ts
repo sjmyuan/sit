@@ -65,3 +65,20 @@ export const takeShot = async (
 
   return Promise.reject<Buffer>(new Error("Can't get the canvas context"));
 };
+
+export const takeShotFromImage = async (
+  range: [Point, Point],
+  imageBlob: Blob
+) => {
+  const [p1, p2] = range;
+  const left = Math.min(p1.x, p2.x);
+  const top = Math.min(p1.y, p2.y);
+  const right = Math.max(p1.x, p2.x);
+  const bottom = Math.max(p1.y, p2.y);
+  const arrayBuffer = await imageBlob.arrayBuffer();
+  const Jimp = await jimp.read(Buffer.from(arrayBuffer));
+  Jimp.crop(left, top, right - left, bottom - top);
+  const buffer = await Jimp.getBufferAsync(jimp.MIME_PNG);
+
+  return new Blob([buffer]);
+};

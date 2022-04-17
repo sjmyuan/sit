@@ -5,7 +5,8 @@ let cropperWindow: BrowserWindow | null = null;
 
 const openCropper = (
   display: Display,
-  takeFullScreenShot: boolean
+  takeFullScreenShot: boolean,
+  fullScreen: Buffer
 ): BrowserWindow => {
   const { bounds } = display;
   const { x, y, width, height } = bounds;
@@ -19,8 +20,8 @@ const openCropper = (
     resizable: false,
     movable: false,
     frame: false,
-    transparent: true,
-    show: !takeFullScreenShot,
+    transparent: false,
+    show: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -29,12 +30,14 @@ const openCropper = (
 
   loadRoute(cropper, 'cropper');
 
-  if (!takeFullScreenShot) {
-    cropper.setAlwaysOnTop(true, 'screen-saver', 1);
-  }
+  cropper.setAlwaysOnTop(true, 'screen-saver', 1);
 
   cropper.webContents.on('did-finish-load', () => {
-    cropper.webContents.send('cropper-type', takeFullScreenShot);
+    console.log('sending image....');
+    cropper.webContents.send('cropper-config', {
+      takeFullScreenShot,
+      fullScreen,
+    });
   });
 
   cropper.on('closed', () => {
@@ -45,7 +48,8 @@ const openCropper = (
 };
 
 const openCropperWindow = async (
-  takeFullScreenShot: boolean
+  takeFullScreenShot: boolean,
+  fullScreen: Buffer
 ): Promise<void> => {
   if (cropperWindow) cropperWindow.destroy();
 
@@ -53,9 +57,17 @@ const openCropperWindow = async (
     screen.getCursorScreenPoint()
   );
 
-  cropperWindow = openCropper(activeDisplay, takeFullScreenShot);
+  cropperWindow = openCropper(activeDisplay, takeFullScreenShot, fullScreen);
 
   if (!takeFullScreenShot) {
+    cropperWindow.focus();
+  }
+};
+
+const showCropperWindow = () => {
+  console.log('show cropper window...');
+  if (cropperWindow) {
+    cropperWindow.show();
     cropperWindow.focus();
   }
 };
@@ -64,4 +76,4 @@ const closeCropperWindow = (): void => {
   if (cropperWindow) cropperWindow.destroy();
 };
 
-export { openCropperWindow, closeCropperWindow };
+export { openCropperWindow, closeCropperWindow, showCropperWindow };

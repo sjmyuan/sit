@@ -12,10 +12,13 @@ import {
   resizeMainWindow,
   sendWorkerEventToMainWindow,
 } from './main';
-import { openWorkerWindow } from './worker';
+import { openWorkerWindow, prepareForCropperWindow } from './worker';
 import { initializeAppMenu } from './menu';
-import { closeCropperWindow, openCropperWindow } from './cropper';
-import { closePreferencesWindow } from './preferences';
+import {
+  closeCropperWindow,
+  openCropperWindow,
+  showCropperWindow,
+} from './cropper';
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
@@ -62,17 +65,40 @@ const checkForUpdates = async (): Promise<void> => {
 
   globalShortcut.register('CommandOrControl+Shift+5', () => {
     hideMainWindow();
-    openCropperWindow(false);
+    prepareForCropperWindow(false);
   });
 
   globalShortcut.register('CommandOrControl+Shift+6', () => {
     hideMainWindow();
-    openCropperWindow(true);
+    prepareForCropperWindow(true);
   });
 
   ipcMain.on('taking-screen-shot', (_, takeFullScreenShot: boolean) => {
     hideMainWindow();
-    openCropperWindow(takeFullScreenShot);
+    prepareForCropperWindow(takeFullScreenShot);
+  });
+
+  ipcMain.on(
+    'main_open-cropper-window',
+    (
+      _,
+      {
+        fullScreen,
+        takeFullScreenShot,
+      }: { fullScreen: Buffer; takeFullScreenShot: boolean }
+    ) => {
+      hideMainWindow();
+      openCropperWindow(takeFullScreenShot, fullScreen);
+    }
+  );
+
+  ipcMain.on('main_show-cropper-window', () => {
+    showCropperWindow();
+  });
+
+  ipcMain.on('main_close-cropper-window', () => {
+    closeCropperWindow();
+    openMainWindow(false);
   });
 
   ipcMain.on('took-screen-shot', (_, imageIndex) => {
@@ -98,7 +124,6 @@ app.on('activate', () => {
 
 app.on('will-quit', () => {
   closeCropperWindow();
-  closePreferencesWindow();
   closeMainWindow();
   globalShortcut.unregisterAll();
 });

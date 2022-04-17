@@ -4,7 +4,9 @@
 
 A simple image tool
 
-## How to allow screen recording on macOS?
+## Prerequisites
+
+### Allow screen recording on macOS
 
 1. On your Mac, choose Apple menu  > System Preferences, click Security & Privacy, then click Privacy.
 
@@ -12,3 +14,11 @@ A simple image tool
 
 3. Select the checkbox next to an app to allow it to record your screen.
    Deselect the checkbox to turn off access for that app.
+
+## Features
+
+* Take screenshot
+* Add rectangle to screenshot
+* Add text to screenshot
+* Add mask to screenshot
+* Store screenshot history

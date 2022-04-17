@@ -9,6 +9,7 @@ import {
   Backdrop,
   Alert,
   Box,
+  Typography,
 } from '@mui/material';
 import MouseTrap from 'mousetrap';
 import { constVoid, pipe } from 'fp-ts/lib/function';
@@ -94,6 +95,15 @@ const MainPage = (): React.ReactElement => {
     <Box sx={{ height: '100%' }}>
       <AppBar position="sticky">
         <Toolbar>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ display: { xs: 'none', sm: 'block' } }}
+          >
+            Sit
+          </Typography>
+          <Box sx={{ flexGrow: 1 }} />
           {O.isNone(shapes.editingImageUrl) ? (
             <BrowserToolbar />
           ) : (

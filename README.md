@@ -1,8 +1,13 @@
 # Sit
 
-![Build Status](https://github.com/sjmyuan/sit/actions/workflows/node.js.yml/badge.svg?branch=master)
+<p align="center">
+  <img width="128" height="128" src="resources/icons/128x128.png">
+</p>
+<p align="center">A simple image tool</p>
 
-A simple image tool
+<p align="center">
+  <img src="https://github.com/sjmyuan/sit/actions/workflows/node.js.yml/badge.svg?branch=master">
+</p>
 
 ## Prerequisites
 

@@ -25,6 +25,8 @@ import { getImageCacheUrl } from '../renderer/utils/localImages';
 import { InfoContainer } from '../renderer/store/InfoContainer';
 import { ShapeContainer } from '../renderer/store/ShapesContainer';
 
+type STATUS = 'EDITOR' | 'HISTORY';
+
 const MainPage = (): React.ReactElement => {
   const notification = InfoContainer.useContainer();
   const shapes = ShapeContainer.useContainer();
@@ -35,6 +37,8 @@ const MainPage = (): React.ReactElement => {
     O.none
   );
 
+  const [status, setStatus] = useState<STATUS>('EDITOR');
+
   useEffect(() => {
     ipcRenderer.on('edit-image', (_, imageIndex: ImageIndex) => {
       pipe(
@@ -43,6 +47,7 @@ const MainPage = (): React.ReactElement => {
           TE.fromIO(() => {
             shapes.setEditingImage(O.some(url));
             setCroppingImage(O.some(imageIndex));
+            setStatus('EDITOR');
           })
         )
       )();
@@ -70,6 +75,7 @@ const MainPage = (): React.ReactElement => {
           TE.chain((_) => getImageCacheUrl(key)),
           TE.map((url: string) => {
             if (O.isSome(shapes.editingImageUrl)) {
+              setStatus('EDITOR');
               return shapes.setEditingImage(O.some(url));
             }
             return constVoid();
@@ -104,11 +110,7 @@ const MainPage = (): React.ReactElement => {
             Sit
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
-          {O.isNone(shapes.editingImageUrl) ? (
-            <BrowserToolbar />
-          ) : (
-            <EditorToolbar />
-          )}
+          {status === 'HISTORY' ? <BrowserToolbar /> : <EditorToolbar />}
         </Toolbar>
       </AppBar>
       <Container
@@ -120,7 +122,7 @@ const MainPage = (): React.ReactElement => {
         }}
         maxWidth="xl"
       >
-        {O.isNone(shapes.editingImageUrl) ? <ImageBrowser /> : <Editor />}
+        {status === 'HISTORY' ? <ImageBrowser /> : <Editor />}
       </Container>
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}

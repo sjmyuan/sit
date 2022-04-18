@@ -1,8 +1,15 @@
 import React from 'react';
 import * as O from 'fp-ts/Option';
 import { Box, IconButton } from '@mui/material';
-import { TextFields, PhotoLibrary, Crop32, Brush } from '@mui/icons-material';
+import {
+  TextFields,
+  PhotoLibrary,
+  Crop32,
+  Brush,
+  Crop,
+} from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
+import { ipcRenderer } from 'electron';
 
 const EditorToolbar = (): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
@@ -37,6 +44,15 @@ const EditorToolbar = (): React.ReactElement => {
         onClick={() => shapes.setMode('MASK')}
       >
         <Brush />
+      </IconButton>
+      <IconButton
+        color="inherit"
+        aria-label="screen capture"
+        onClick={() => {
+          ipcRenderer.send('taking-screen-shot');
+        }}
+      >
+        <Crop />
       </IconButton>
       <IconButton
         color="inherit"

@@ -40,6 +40,10 @@ const MainPage = (): React.ReactElement => {
   const [status, setStatus] = useState<STATUS>('EDITOR');
 
   useEffect(() => {
+    setStatus('EDITOR');
+  }, [shapes.editingImageUrl]);
+
+  useEffect(() => {
     ipcRenderer.on('edit-image', (_, imageIndex: ImageIndex) => {
       pipe(
         getImageCacheUrl(imageIndex.key),
@@ -47,7 +51,6 @@ const MainPage = (): React.ReactElement => {
           TE.fromIO(() => {
             shapes.setEditingImage(O.some(url));
             setCroppingImage(O.some(imageIndex));
-            setStatus('EDITOR');
           })
         )
       )();
@@ -75,7 +78,6 @@ const MainPage = (): React.ReactElement => {
           TE.chain((_) => getImageCacheUrl(key)),
           TE.map((url: string) => {
             if (O.isSome(shapes.editingImageUrl)) {
-              setStatus('EDITOR');
               return shapes.setEditingImage(O.some(url));
             }
             return constVoid();
@@ -99,20 +101,11 @@ const MainPage = (): React.ReactElement => {
 
   return (
     <Box sx={{ height: '100%' }}>
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ display: { xs: 'none', sm: 'block' } }}
-          >
-            Sit
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          {status === 'HISTORY' ? <BrowserToolbar /> : <EditorToolbar />}
-        </Toolbar>
-      </AppBar>
+      {status === 'HISTORY' ? (
+        <BrowserToolbar onBack={() => setStatus('EDITOR')} />
+      ) : (
+        <EditorToolbar onHistory={() => setStatus('HISTORY')} />
+      )}
       <Container
         sx={{
           marginTop: '10px',

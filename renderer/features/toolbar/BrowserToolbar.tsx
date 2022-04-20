@@ -1,24 +1,31 @@
 import React from 'react';
-import { Box, IconButton } from '@mui/material';
+import { AppBar, Box, IconButton, Toolbar } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
-const BrowserToolbar = (): React.ReactElement => {
+type BrowserToolbarProps = {
+  onBack: () => void;
+};
+const BrowserToolbar = (props: BrowserToolbarProps): React.ReactElement => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <IconButton
-        color="inherit"
-        aria-label="back to editor"
-        onClick={() => {}}
-      >
-        <ArrowBackIosNewIcon />
-      </IconButton>
-    </Box>
+    <AppBar position="sticky">
+      <Toolbar>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <IconButton
+            color="inherit"
+            aria-label="back to editor"
+            onClick={props.onBack}
+          >
+            <ArrowBackIosNewIcon />
+          </IconButton>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

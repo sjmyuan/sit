@@ -43,20 +43,24 @@ function useShapes() {
   const [initialized, setInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    if (O.isSome(backgroundImg)) {
-      setDrawingArea({
-        origin: {
-          x: (stageSize[0] - backgroundImg.value.width) / 2,
-          y: (stageSize[1] - backgroundImg.value.height) / 2,
-        },
-        topLeft: { x: 0, y: 0 },
-        bottomRight: {
-          x: backgroundImg.value.width,
-          y: backgroundImg.value.height,
-        },
-      });
-      setInitialized(true);
-    }
+    const width = O.getOrElse(() => 200)(
+      O.map<HTMLImageElement, number>((x) => x.width)(backgroundImg)
+    );
+    const height = O.getOrElse(() => 200)(
+      O.map<HTMLImageElement, number>((x) => x.height)(backgroundImg)
+    );
+    setDrawingArea({
+      origin: {
+        x: (stageSize[0] - width) / 2,
+        y: (stageSize[1] - height) / 2,
+      },
+      topLeft: { x: 0, y: 0 },
+      bottomRight: {
+        x: width,
+        y: height,
+      },
+    });
+    setInitialized(true);
   }, [backgroundImg]);
 
   useEffect(() => {

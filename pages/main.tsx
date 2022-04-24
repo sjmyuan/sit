@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react';
 import * as O from 'fp-ts/Option';
 import {
   Container,
-  AppBar,
-  Toolbar,
   CircularProgress,
   Snackbar,
   Backdrop,
   Alert,
   Box,
-  Typography,
 } from '@mui/material';
 import MouseTrap from 'mousetrap';
 import { constVoid, pipe } from 'fp-ts/lib/function';
@@ -25,6 +22,8 @@ import { getImageCacheUrl } from '../renderer/utils/localImages';
 import { InfoContainer } from '../renderer/store/InfoContainer';
 import { ShapeContainer } from '../renderer/store/ShapesContainer';
 
+type STATUS = 'EDITOR' | 'HISTORY';
+
 const MainPage = (): React.ReactElement => {
   const notification = InfoContainer.useContainer();
   const shapes = ShapeContainer.useContainer();
@@ -34,6 +33,12 @@ const MainPage = (): React.ReactElement => {
   const [croppingImage, setCroppingImage] = useState<O.Option<ImageIndex>>(
     O.none
   );
+
+  const [status, setStatus] = useState<STATUS>('EDITOR');
+
+  useEffect(() => {
+    setStatus('EDITOR');
+  }, [shapes.editingImageUrl]);
 
   useEffect(() => {
     ipcRenderer.on('edit-image', (_, imageIndex: ImageIndex) => {
@@ -93,24 +98,11 @@ const MainPage = (): React.ReactElement => {
 
   return (
     <Box sx={{ height: '100%' }}>
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ display: { xs: 'none', sm: 'block' } }}
-          >
-            Sit
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          {O.isNone(shapes.editingImageUrl) ? (
-            <BrowserToolbar />
-          ) : (
-            <EditorToolbar />
-          )}
-        </Toolbar>
-      </AppBar>
+      {status === 'HISTORY' ? (
+        <BrowserToolbar onBack={() => setStatus('EDITOR')} />
+      ) : (
+        <EditorToolbar onHistory={() => setStatus('HISTORY')} />
+      )}
       <Container
         sx={{
           marginTop: '10px',
@@ -120,7 +112,7 @@ const MainPage = (): React.ReactElement => {
         }}
         maxWidth="xl"
       >
-        {O.isNone(shapes.editingImageUrl) ? <ImageBrowser /> : <Editor />}
+        {status === 'HISTORY' ? <ImageBrowser /> : <Editor />}
       </Container>
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}

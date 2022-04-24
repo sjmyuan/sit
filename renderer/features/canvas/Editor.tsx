@@ -151,49 +151,49 @@ const Editor = (): React.ReactElement => {
         overflow: 'scroll',
       }}
     >
-      {O.isSome(shapes.backgroundImg) ? (
-        <Stage
-          className={css`
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: white;
-          `}
-          ref={stageRef}
-          width={shapes.stageSize[0]}
-          height={shapes.stageSize[1]}
-          onMouseUp={() => {
-            shapes.endToDraw();
-          }}
-          onMouseMove={(e) => {
-            const stage = e.target.getStage();
-            stage && shapes.drawing(getRelativePointerPosition(stage));
-          }}
-          onMouseDown={(e) => {
-            const stage = e.target.getStage();
-            stage && shapes.startToDraw(getRelativePointerPosition(stage));
-          }}
-        >
-          <Layer>
-            <ReactKonvaRect
-              x={0}
-              y={0}
-              width={shapes.stageSize[0]}
-              height={shapes.stageSize[1]}
-              strokeWidth={0}
-              fill="rgb(116,116,116)"
-              name="full-paper"
-            />
-            <ReactKonvaRect
-              ref={drawingAreaRef}
-              x={drawingAreaTopLeft.x}
-              y={drawingAreaTopLeft.y}
-              width={drawingAreaSize.width}
-              height={drawingAreaSize.height}
-              strokeWidth={0}
-              fill="white"
-              name="drawing-area"
-            />
+      <Stage
+        className={css`
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: white;
+        `}
+        ref={stageRef}
+        width={shapes.stageSize[0]}
+        height={shapes.stageSize[1]}
+        onMouseUp={() => {
+          shapes.endToDraw();
+        }}
+        onMouseMove={(e) => {
+          const stage = e.target.getStage();
+          stage && shapes.drawing(getRelativePointerPosition(stage));
+        }}
+        onMouseDown={(e) => {
+          const stage = e.target.getStage();
+          stage && shapes.startToDraw(getRelativePointerPosition(stage));
+        }}
+      >
+        <Layer>
+          <ReactKonvaRect
+            x={0}
+            y={0}
+            width={shapes.stageSize[0]}
+            height={shapes.stageSize[1]}
+            strokeWidth={0}
+            fill="rgb(116,116,116)"
+            name="full-paper"
+          />
+          <ReactKonvaRect
+            ref={drawingAreaRef}
+            x={drawingAreaTopLeft.x}
+            y={drawingAreaTopLeft.y}
+            width={drawingAreaSize.width}
+            height={drawingAreaSize.height}
+            strokeWidth={0}
+            fill="white"
+            name="drawing-area"
+          />
+          {O.isSome(shapes.backgroundImg) && (
             <Image
               x={shapes.drawingArea.origin.x}
               y={shapes.drawingArea.origin.y}
@@ -201,70 +201,59 @@ const Editor = (): React.ReactElement => {
               height={shapes.backgroundImg.value.height}
               image={O.toUndefined(shapes.backgroundImg)}
             />
-            {shapes.getAllRects().map((rect) => {
-              return (
-                <Rectangle
-                  key={rect.name}
-                  rect={rect}
-                  onSelected={() => shapes.onSelect(rect)}
-                  onTransform={(transformedRect) =>
-                    shapes.updateShape(transformedRect)
-                  }
-                />
-              );
-            })}
-            {shapes.getAllMasks().map((mask) => {
-              return (
-                <MaskComponent
-                  key={mask.name}
-                  mask={mask}
-                  onSelected={() => shapes.onSelect(mask)}
-                  onTransform={(transformedMask) =>
-                    shapes.updateShape(transformedMask)
-                  }
-                />
-              );
-            })}
-            {shapes
-              .getAllTexts()
-              .filter((text) =>
-                pipe(
-                  shapes.getEditingText(),
-                  O.map((x) => x.id !== text.id),
-                  O.getOrElse<boolean>(() => true)
-                )
+          )}
+          {shapes.getAllRects().map((rect) => {
+            return (
+              <Rectangle
+                key={rect.name}
+                rect={rect}
+                onSelected={() => shapes.onSelect(rect)}
+                onTransform={(transformedRect) =>
+                  shapes.updateShape(transformedRect)
+                }
+              />
+            );
+          })}
+          {shapes.getAllMasks().map((mask) => {
+            return (
+              <MaskComponent
+                key={mask.name}
+                mask={mask}
+                onSelected={() => shapes.onSelect(mask)}
+                onTransform={(transformedMask) =>
+                  shapes.updateShape(transformedMask)
+                }
+              />
+            );
+          })}
+          {shapes
+            .getAllTexts()
+            .filter((text) =>
+              pipe(
+                shapes.getEditingText(),
+                O.map((x) => x.id !== text.id),
+                O.getOrElse<boolean>(() => true)
               )
-              .map((text) => {
-                return (
-                  <TextComponent
-                    key={text.name}
-                    text={text}
-                    onSelected={() => shapes.onSelect(text)}
-                    onChange={shapes.updateShape}
-                    startToEdit={shapes.startToEdit}
-                  />
-                );
-              })}
-            {O.isSome(selectedShape) ? (
-              <TransformerComponent selectedShape={selectedShape.value} />
-            ) : (
-              <></>
-            )}
-          </Layer>
-        </Stage>
-      ) : (
-        <Stage
-          className={css`
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: white;
-          `}
-          ref={stageRef}
-          width={shapes.stageSize[0]}
-          height={shapes.stageSize[1]}
-        />
-      )}
+            )
+            .map((text) => {
+              return (
+                <TextComponent
+                  key={text.name}
+                  text={text}
+                  onSelected={() => shapes.onSelect(text)}
+                  onChange={shapes.updateShape}
+                  startToEdit={shapes.startToEdit}
+                />
+              );
+            })}
+          {O.isSome(selectedShape) ? (
+            <TransformerComponent selectedShape={selectedShape.value} />
+          ) : (
+            <></>
+          )}
+        </Layer>
+      </Stage>
+
       <TextEditor
         getRelativePos={() =>
           stageRef.current

@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react';
 import * as O from 'fp-ts/Option';
 import {
   Container,
-  AppBar,
-  Toolbar,
   CircularProgress,
   Snackbar,
   Backdrop,
   Alert,
   Box,
-  Typography,
 } from '@mui/material';
 import MouseTrap from 'mousetrap';
 import { constVoid, pipe } from 'fp-ts/lib/function';

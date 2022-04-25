@@ -83,10 +83,10 @@ const Editor = (): React.ReactElement => {
       image.src = editingImageUrl;
       image.addEventListener('load', () => {
         shapes.setBackgroundImg(O.some(image));
-        ipcRenderer.send('resize-main-window', [
-          image.width,
-          image.height > MIN_HEIGHT ? image.height : MIN_HEIGHT,
-        ]);
+        // ipcRenderer.send('resize-main-window', [
+        //   image.width,
+        //   image.height > MIN_HEIGHT ? image.height : MIN_HEIGHT,
+        // ]);
       });
     }
   }, [editingImageUrl]);

@@ -6,6 +6,7 @@ import {
   Crop32,
   Brush,
   Crop,
+  NorthWest,
 } from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
 import { ipcRenderer } from 'electron';
@@ -34,6 +35,14 @@ const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
             alignItems: 'center',
           }}
         >
+          <IconButton
+            color="inherit"
+            aria-label="draw rectangle"
+            disabled={shapes.currentMode === 'NONE'}
+            onClick={() => shapes.setMode('NONE')}
+          >
+            <NorthWest />
+          </IconButton>
           <IconButton
             color="inherit"
             aria-label="draw rectangle"

@@ -19,7 +19,7 @@ function useShapes() {
   const textState = TextsContainer.useContainer();
   const maskState = MasksContainer.useContainer();
 
-  const [currentMode, setMode] = useState<MODE>('RECT');
+  const [currentMode, setMode] = useState<MODE>('NONE');
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
   const [selectedShape, setSelectedShape] = useState<O.Option<SitShape>>(
     O.none
@@ -41,6 +41,10 @@ function useShapes() {
   >(O.none);
 
   const [initialized, setInitialized] = useState<boolean>(false);
+
+  const [dragStartPoint, setDragStartPoint] = useState<O.Option<Point>>(O.none);
+
+  const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
 
   useEffect(() => {
     const width = O.getOrElse(() => 200)(
@@ -75,6 +79,16 @@ function useShapes() {
     }
   }, [stageSize, initialized]);
 
+  useEffect(() => {
+    if (O.isSome(dragVector)) {
+      const newOrigin = {
+        x: drawingArea.origin.x + dragVector.value.x,
+        y: drawingArea.origin.y + dragVector.value.y,
+      };
+      setDrawingArea({ ...drawingArea, origin: newOrigin });
+    }
+  }, [dragVector]);
+
   const fromStageToDrawingArea = (point: Point) => {
     return {
       x: point.x - drawingArea.origin.x,
@@ -105,6 +119,9 @@ function useShapes() {
       }
     } else if (currentMode === 'MASK') {
       maskState.startToDraw(drawingAreaPoint);
+    } else if (currentMode === 'NONE') {
+      setDragStartPoint(O.some(drawingAreaPoint));
+      setDragVector(O.none);
     }
   };
 
@@ -117,6 +134,17 @@ function useShapes() {
     if (currentMode === 'MASK' && isDrawing) {
       maskState.drawing(drawingAreaPoint);
     }
+
+    if (currentMode === 'NONE' && O.isSome(dragStartPoint)) {
+      setDragVector(
+        O.some({
+          x: point.x - dragStartPoint.value.x,
+          y: point.y - dragStartPoint.value.y,
+        })
+      );
+
+      setDragStartPoint(O.some(point));
+    }
   };
 
   const endToDraw = () => {
@@ -127,6 +155,11 @@ function useShapes() {
 
     if (currentMode === 'MASK') {
       maskState.endToDraw();
+    }
+
+    if (currentMode === 'NONE') {
+      setDragStartPoint(O.none);
+      setDragVector(O.none);
     }
   };
 
@@ -191,9 +224,11 @@ function useShapes() {
     rectState.clear();
     textState.clear();
     maskState.clear();
+    setDragStartPoint(O.none);
+    setDragVector(O.none);
     toggleDrawing(false);
     setSelectedShape(O.none);
-    setMode('RECT');
+    setMode('NONE');
     setEditingText(O.none);
     setEditingImageUrl(url);
   };

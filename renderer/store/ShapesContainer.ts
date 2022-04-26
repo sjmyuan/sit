@@ -47,10 +47,10 @@ function useShapes() {
   const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
 
   useEffect(() => {
-    const width = O.getOrElse(() => 200)(
+    const width = O.getOrElse(() => 400)(
       O.map<HTMLImageElement, number>((x) => x.width)(backgroundImg)
     );
-    const height = O.getOrElse(() => 200)(
+    const height = O.getOrElse(() => 400)(
       O.map<HTMLImageElement, number>((x) => x.height)(backgroundImg)
     );
     setDrawingArea({

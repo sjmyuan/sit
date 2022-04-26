@@ -7,6 +7,8 @@ import {
   Brush,
   Crop,
   NorthWest,
+  ZoomIn,
+  ZoomOut,
 } from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
 import { ipcRenderer } from 'electron';
@@ -37,11 +39,27 @@ const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
         >
           <IconButton
             color="inherit"
-            aria-label="draw rectangle"
+            aria-label="none"
             disabled={shapes.currentMode === 'NONE'}
             onClick={() => shapes.setMode('NONE')}
           >
             <NorthWest />
+          </IconButton>
+          <IconButton
+            color="inherit"
+            aria-label="zoom in"
+            disabled={shapes.currentMode === 'ZOOM_IN'}
+            onClick={() => shapes.setMode('ZOOM_IN')}
+          >
+            <ZoomIn />
+          </IconButton>
+          <IconButton
+            color="inherit"
+            aria-label="zoom out"
+            disabled={shapes.currentMode === 'ZOOM_OUT'}
+            onClick={() => shapes.setMode('ZOOM_OUT')}
+          >
+            <ZoomOut />
           </IconButton>
           <IconButton
             color="inherit"

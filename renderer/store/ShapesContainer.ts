@@ -46,6 +46,8 @@ function useShapes() {
 
   const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
 
+  const [scale, setScale] = useState<number>(1);
+
   useEffect(() => {
     const width = O.getOrElse(() => 400)(
       O.map<HTMLImageElement, number>((x) => x.width)(backgroundImg)
@@ -110,16 +112,23 @@ function useShapes() {
     }
     setSelectedShape(O.none);
     toggleDrawing(true);
+
     if (currentMode === 'RECT') {
       rectState.startToDraw(drawingAreaPoint);
-    } else if (currentMode === 'TEXT') {
+    }
+
+    if (currentMode === 'TEXT') {
       if (O.isNone(editingText)) {
         const newText = textState.startToDraw(drawingAreaPoint);
         setEditingText(O.some(newText));
       }
-    } else if (currentMode === 'MASK') {
+    }
+
+    if (currentMode === 'MASK') {
       maskState.startToDraw(drawingAreaPoint);
-    } else if (currentMode === 'NONE') {
+    }
+
+    if (currentMode === 'NONE') {
       setDragStartPoint(O.some(point));
       setDragVector(
         O.some({
@@ -127,6 +136,14 @@ function useShapes() {
           y: drawingArea.origin.y - point.y,
         })
       );
+    }
+
+    if (currentMode === 'ZOOM_IN') {
+      setScale(scale * 1.1);
+    }
+
+    if (currentMode === 'ZOOM_OUT') {
+      setScale(scale / 1.1);
     }
   };
 
@@ -372,6 +389,7 @@ function useShapes() {
     updateShape,
     backgroundImg,
     setBackgroundImg,
+    scale,
   };
 }
 

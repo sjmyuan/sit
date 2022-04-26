@@ -118,4 +118,4 @@ export const getTopLeftAndBottomRight = (rect: Rect | Mask) => {
 
 export type SitShape = Rect | Text | Mask;
 
-export type MODE = 'RECT' | 'TEXT' | 'MASK' | 'NONE';
+export type MODE = 'RECT' | 'TEXT' | 'MASK' | 'NONE' | 'ZOOM_IN' | 'ZOOM_OUT';

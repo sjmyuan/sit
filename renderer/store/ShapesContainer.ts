@@ -80,14 +80,14 @@ function useShapes() {
   }, [stageSize, initialized]);
 
   useEffect(() => {
-    if (O.isSome(dragVector)) {
+    if (O.isSome(dragVector) && O.isSome(dragStartPoint)) {
       const newOrigin = {
-        x: drawingArea.origin.x + dragVector.value.x,
-        y: drawingArea.origin.y + dragVector.value.y,
+        x: dragStartPoint.value.x + dragVector.value.x,
+        y: dragStartPoint.value.y + dragVector.value.y,
       };
       setDrawingArea({ ...drawingArea, origin: newOrigin });
     }
-  }, [dragVector]);
+  }, [dragStartPoint, dragVector]);
 
   const fromStageToDrawingArea = (point: Point) => {
     return {
@@ -120,8 +120,13 @@ function useShapes() {
     } else if (currentMode === 'MASK') {
       maskState.startToDraw(drawingAreaPoint);
     } else if (currentMode === 'NONE') {
-      setDragStartPoint(O.some(drawingAreaPoint));
-      setDragVector(O.none);
+      setDragStartPoint(O.some(point));
+      setDragVector(
+        O.some({
+          x: drawingArea.origin.x - point.x,
+          y: drawingArea.origin.y - point.y,
+        })
+      );
     }
   };
 
@@ -136,13 +141,6 @@ function useShapes() {
     }
 
     if (currentMode === 'NONE' && O.isSome(dragStartPoint)) {
-      setDragVector(
-        O.some({
-          x: point.x - dragStartPoint.value.x,
-          y: point.y - dragStartPoint.value.y,
-        })
-      );
-
       setDragStartPoint(O.some(point));
     }
   };

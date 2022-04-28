@@ -156,8 +156,10 @@ const Editor = (): React.ReactElement => {
         `}
         fill="rgb(116,116,116)"
         name="full-paper"
-        scaleX={shapes.scale}
-        scaleY={shapes.scale}
+        x={shapes.stageCoordinate[0].x}
+        y={shapes.stageCoordinate[0].y}
+        scaleX={shapes.stageCoordinate[1]}
+        scaleY={shapes.stageCoordinate[1]}
         ref={stageRef}
         width={shapes.stageSize[0]}
         height={shapes.stageSize[1]}

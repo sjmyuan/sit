@@ -46,7 +46,10 @@ function useShapes() {
 
   const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
 
-  const [scale, setScale] = useState<number>(1);
+  const [stageCoordinate, setStageCoordinate] = useState<[Point, number]>([
+    { x: 0, y: 0 },
+    1,
+  ]);
 
   useEffect(() => {
     const width = O.getOrElse(() => 400)(
@@ -138,12 +141,23 @@ function useShapes() {
       );
     }
 
-    if (currentMode === 'ZOOM_IN') {
-      setScale(scale * 1.1);
-    }
+    if (currentMode === 'ZOOM_IN' || currentMode === 'ZOOM_OUT') {
+      const [oldOffset, oldScale] = stageCoordinate;
 
-    if (currentMode === 'ZOOM_OUT') {
-      setScale(scale / 1.1);
+      const newScale =
+        currentMode === 'ZOOM_IN' ? oldScale * 1.1 : oldScale / 1.1;
+
+      const mousePointTo = {
+        x: (point.x - oldOffset.x) / oldScale,
+        y: (point.y - oldOffset.y) / oldScale,
+      };
+
+      const newOffset = {
+        x: point.x - mousePointTo.x * newScale,
+        y: point.y - mousePointTo.y * newScale,
+      };
+
+      setStageCoordinate([newOffset, newScale]);
     }
   };
 
@@ -389,7 +403,7 @@ function useShapes() {
     updateShape,
     backgroundImg,
     setBackgroundImg,
-    scale,
+    stageCoordinate,
   };
 }
 

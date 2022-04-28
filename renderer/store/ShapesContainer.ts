@@ -260,6 +260,7 @@ function useShapes() {
     setMode('NONE');
     setEditingText(O.none);
     setEditingImageUrl(url);
+    setStageCoordinate([{ x: 0, y: 0 }, 1]);
   };
 
   const getAllRects = () => {

@@ -152,10 +152,8 @@ const Editor = (): React.ReactElement => {
           display: flex;
           justify-content: center;
           align-items: center;
-          background-color: white;
+          background-color: red;
         `}
-        fill="rgb(116,116,116)"
-        name="full-paper"
         x={shapes.stageCoordinate[0].x}
         y={shapes.stageCoordinate[0].y}
         scaleX={shapes.stageCoordinate[1]}
@@ -176,7 +174,7 @@ const Editor = (): React.ReactElement => {
         }}
       >
         <Layer>
-          {/* <ReactKonvaRect
+          <ReactKonvaRect
             x={0}
             y={0}
             width={shapes.stageSize[0]}
@@ -184,7 +182,7 @@ const Editor = (): React.ReactElement => {
             strokeWidth={0}
             fill="rgb(116,116,116)"
             name="full-paper"
-          /> */}
+          />
           <ReactKonvaRect
             ref={drawingAreaRef}
             x={drawingAreaTopLeft.x}

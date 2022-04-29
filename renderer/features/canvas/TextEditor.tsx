@@ -15,14 +15,8 @@ const TextEditor = (props: {
   const position = pipe(
     editingText,
     O.map((x) => ({
-      x:
-        x.origin.x * shapes.stageCoordinate[1] -
-        shapes.stageCoordinate[0].x +
-        props.getRelativePos().x,
-      y:
-        x.origin.y * shapes.stageCoordinate[1] -
-        shapes.stageCoordinate[0].y +
-        props.getRelativePos().y,
+      x: x.origin.x / shapes.stageCoordinate[1] + props.getRelativePos().x,
+      y: x.origin.y / shapes.stageCoordinate[1] + props.getRelativePos().y,
     })),
     O.getOrElse(() => ({ x: -1, y: -1 }))
   );

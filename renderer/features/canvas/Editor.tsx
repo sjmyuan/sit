@@ -255,15 +255,17 @@ const Editor = (): React.ReactElement => {
       </Stage>
 
       <TextEditor
-        getRelativePos={() =>
-          stageRef.current
+        getRelativePos={() => {
+          const pos = stageRef.current
             ? {
                 x: stageRef.current.getStage().container().offsetLeft,
 
                 y: stageRef.current.getStage().container().offsetTop,
               }
-            : { x: -1, y: -1 }
-        }
+            : { x: -1, y: -1 };
+          console.log('editor pos...', pos);
+          return pos;
+        }}
       />
     </Box>
   );

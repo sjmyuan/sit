@@ -116,6 +116,17 @@ export const getTopLeftAndBottomRight = (rect: Rect | Mask) => {
   };
 };
 
+export type Size = {
+  width: number;
+  height: number;
+};
+
+export type StageInfo = {
+  offset: Point;
+  size: Size;
+  scale: number;
+};
+
 export type SitShape = Rect | Text | Mask;
 
 export type MODE = 'RECT' | 'TEXT' | 'MASK' | 'NONE' | 'ZOOM_IN' | 'ZOOM_OUT';

@@ -9,6 +9,8 @@ import {
   SitShape,
   Area,
   getTopLeftAndBottomRight,
+  StageInfo,
+  Size,
 } from '../types';
 import { MasksContainer } from './MaskContainer';
 import { RectsContainer } from './RectsContainer';
@@ -28,7 +30,17 @@ function useShapes() {
   const [editingImageUrl, setEditingImageUrl] = useState<O.Option<string>>(
     O.none
   );
-  const [stageSize, setStageSize] = useState<[number, number]>([400, 400]);
+
+  const [stageContainerSize, setStageContainerSize] = useState<Size>({
+    width: 400,
+    height: 400,
+  });
+
+  const [stageInfo, setStageInfo] = useState<StageInfo>({
+    offset: { x: 0, y: 0 },
+    scale: 1,
+    size: { width: 400, height: 400 },
+  });
 
   const [drawingArea, setDrawingArea] = useState<Area>({
     origin: { x: 200, y: 200 },
@@ -46,10 +58,33 @@ function useShapes() {
 
   const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
 
-  const [stageCoordinate, setStageCoordinate] = useState<[Point, number]>([
-    { x: 0, y: 0 },
-    1,
-  ]);
+  useEffect(() => {
+    const newStageWidth = stageContainerSize.width / stageInfo.scale + 200;
+    const newStageHeight = stageContainerSize.height / stageInfo.scale + 200;
+
+    // const newOffset = {
+    //   x: stageInfo.offset.x - (stageInfo.size.width - newStageWidth) / 2,
+    //   y: stageInfo.offset.y - (stageInfo.size.height - newStageHeight) / 2,
+    // };
+    const newOffset = {
+      x: stageInfo.offset.x,
+      y: stageInfo.offset.y,
+    };
+
+    setDrawingArea({
+      ...drawingArea,
+      origin: {
+        x: drawingArea.origin.x + (newStageWidth - stageInfo.size.width) / 2,
+        y: drawingArea.origin.y + (newStageHeight - stageInfo.size.height) / 2,
+      },
+    });
+
+    setStageInfo({
+      ...stageInfo,
+      offset: newOffset,
+      size: { width: newStageWidth, height: newStageHeight },
+    });
+  }, [stageContainerSize]);
 
   useEffect(() => {
     const width = O.getOrElse(() => 400)(
@@ -60,8 +95,8 @@ function useShapes() {
     );
     setDrawingArea({
       origin: {
-        x: (stageSize[0] - width) / 2,
-        y: (stageSize[1] - height) / 2,
+        x: (stageInfo.size.width - width) / 2,
+        y: (stageInfo.size.height - height) / 2,
       },
       topLeft: { x: 0, y: 0 },
       bottomRight: {
@@ -82,7 +117,7 @@ function useShapes() {
     if (initialized) {
       updateDrawingAreaOrigin();
     }
-  }, [stageSize, initialized]);
+  }, [initialized]);
 
   useEffect(() => {
     if (O.isSome(dragVector) && O.isSome(dragStartPoint)) {
@@ -111,8 +146,7 @@ function useShapes() {
   const startToDraw = (point: Point) => {
     console.log('start to draw....');
     console.log('point...', point);
-    console.log('stageXY', stageCoordinate[0]);
-    console.log('scale', stageCoordinate[1]);
+    console.log('stageInfo', stageInfo);
     const drawingAreaPoint = fromStageToDrawingArea(point);
     if (O.isSome(editingText)) {
       endToEdit();
@@ -146,10 +180,21 @@ function useShapes() {
     }
 
     if (currentMode === 'ZOOM_IN' || currentMode === 'ZOOM_OUT') {
-      const [oldOffset, oldScale] = stageCoordinate;
+      const { offset: oldOffset, scale: oldScale, size } = stageInfo;
 
       const newScale =
         currentMode === 'ZOOM_IN' ? oldScale * 1.1 : oldScale / 1.1;
+
+      const newActualStageWidth = size.width * newScale;
+      const newActualStageHeight = size.height * newScale;
+
+      //Do nothing if the stage size smaller than container size
+      if (
+        newActualStageWidth < stageContainerSize.width ||
+        newActualStageHeight < stageContainerSize.height
+      ) {
+        return;
+      }
 
       const mousePointTo = {
         x: (point.x - oldOffset.x) / oldScale,
@@ -161,7 +206,7 @@ function useShapes() {
         y: point.y - mousePointTo.y * newScale,
       };
 
-      setStageCoordinate([newOffset, newScale]);
+      setStageInfo({ ...stageInfo, offset: newOffset, scale: newScale });
     }
   };
 
@@ -264,7 +309,12 @@ function useShapes() {
     setMode('NONE');
     setEditingText(O.none);
     setEditingImageUrl(url);
-    setStageCoordinate([{ x: 0, y: 0 }, 1]);
+    setStageInfo({
+      ...stageInfo,
+      offset: { x: 0, y: 0 },
+      scale: 1,
+      size: stageContainerSize,
+    });
   };
 
   const getAllRects = () => {
@@ -324,7 +374,7 @@ function useShapes() {
     const { origin, topLeft, bottomRight } = drawingArea;
     const drawingAreaWidth = Math.abs(bottomRight.x - topLeft.x);
     const drawingAreaHeight = Math.abs(bottomRight.y - topLeft.y);
-    const [stageWidth, stageHeight] = stageSize;
+    const { width: stageWidth, height: stageHeight } = stageInfo.size;
     const oldDrawingAreaOffset: [number, number] = [
       origin.x + topLeft.x,
       origin.y + topLeft.y,
@@ -398,8 +448,6 @@ function useShapes() {
     editingImageUrl,
     getEditingImageUrl,
     deleteSelectedShape,
-    stageSize,
-    setStageSize,
     setDrawingArea,
     drawingArea,
     getAllRects,
@@ -408,7 +456,8 @@ function useShapes() {
     updateShape,
     backgroundImg,
     setBackgroundImg,
-    stageCoordinate,
+    setStageContainerSize,
+    stageInfo,
   };
 }
 

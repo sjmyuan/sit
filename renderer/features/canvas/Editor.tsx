@@ -89,7 +89,9 @@ const Editor = (): React.ReactElement => {
       const image = new window.Image();
       image.src = editingImageUrl;
       image.addEventListener('load', () => {
-        shapes.setBackgroundImg(O.some(image));
+        setTimeout(() => {
+          shapes.setBackgroundImg(O.some(image));
+        }, 100);
       });
     }
   }, [editingImageUrl]);
@@ -124,10 +126,10 @@ const Editor = (): React.ReactElement => {
 
     const debouncedHandleResize = debounce(function handleResize() {
       if (containerRef.current) {
-        shapes.setStageSize([
-          containerRef.current.getBoundingClientRect().width,
-          containerRef.current.getBoundingClientRect().height,
-        ]);
+        shapes.setStageContainerSize({
+          width: containerRef.current.getBoundingClientRect().width,
+          height: containerRef.current.getBoundingClientRect().height,
+        });
       }
     }, 500);
 
@@ -146,7 +148,7 @@ const Editor = (): React.ReactElement => {
       sx={{
         minHeight: `${MIN_HEIGHT}px`,
         p: 0,
-        backgroundColor: 'rgb(116,116,116)',
+        backgroundColor: 'green',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -161,13 +163,13 @@ const Editor = (): React.ReactElement => {
           align-items: center;
           background-color: red;
         `}
-        x={shapes.stageCoordinate[0].x}
-        y={shapes.stageCoordinate[0].y}
-        scaleX={shapes.stageCoordinate[1]}
-        scaleY={shapes.stageCoordinate[1]}
+        x={shapes.stageInfo.offset.x}
+        y={shapes.stageInfo.offset.y}
+        scaleX={shapes.stageInfo.scale}
+        scaleY={shapes.stageInfo.scale}
         ref={stageRef}
-        width={shapes.stageSize[0]}
-        height={shapes.stageSize[1]}
+        width={shapes.stageInfo.size.width}
+        height={shapes.stageInfo.size.height}
         onMouseUp={() => {
           shapes.endToDraw();
         }}
@@ -184,8 +186,8 @@ const Editor = (): React.ReactElement => {
           <ReactKonvaRect
             x={0}
             y={0}
-            width={shapes.stageSize[0]}
-            height={shapes.stageSize[1]}
+            width={shapes.stageInfo.size.width}
+            height={shapes.stageInfo.size.height}
             strokeWidth={0}
             fill="rgb(116,116,116)"
             name="full-paper"

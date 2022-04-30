@@ -38,9 +38,16 @@ const copyImageToClipboard = (
   width: number,
   height: number
 ) => {
+  const newStage: KonvaStage = stage.clone({
+    x: 0,
+    y: 0,
+    scaleX: 1,
+    scaleY: 1,
+  });
+
   clipboard.writeImage(
     nativeImage.createFromDataURL(
-      stage.toDataURL({
+      newStage.toDataURL({
         x: topLeft.x,
         y: topLeft.y,
         width,

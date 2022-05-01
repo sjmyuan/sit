@@ -11,6 +11,7 @@ import {
   getTopLeftAndBottomRight,
   StageInfo,
   Size,
+  getAbsolutePosition,
 } from '../types';
 import { MasksContainer } from './MaskContainer';
 import { RectsContainer } from './RectsContainer';
@@ -170,6 +171,15 @@ function useShapes() {
     }
 
     if (currentMode === 'NONE') {
+      if (
+        drawingAreaPoint.x < drawingArea.topLeft.x ||
+        drawingAreaPoint.x > drawingArea.bottomRight.x ||
+        drawingAreaPoint.y < drawingArea.topLeft.y ||
+        drawingAreaPoint.y > drawingArea.bottomRight.y
+      ) {
+        return;
+      }
+
       setDragStartPoint(O.some(point));
       setDragVector(
         O.some({

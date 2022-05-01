@@ -18,8 +18,6 @@ import { css } from '@emotion/css';
 import MaskComponent from './MaskComponent';
 import ToolPanel from '../toolbar/ToolPanel';
 
-const MIN_HEIGHT = 580;
-
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
   const transform = node.getAbsoluteTransform().copy();
@@ -92,10 +90,6 @@ const Editor = (): React.ReactElement => {
     });
 
     if (containerRef.current) {
-      console.log(
-        'init resize...',
-        containerRef.current.getBoundingClientRect()
-      );
       shapes.setStageContainerSize({
         width: containerRef.current.getBoundingClientRect().width,
         height: containerRef.current.getBoundingClientRect().height,
@@ -104,7 +98,6 @@ const Editor = (): React.ReactElement => {
 
     const debouncedHandleResize = debounce(function handleResize() {
       if (containerRef.current) {
-        console.log('resize...');
         shapes.setStageContainerSize({
           width: containerRef.current.getBoundingClientRect().width,
           height: containerRef.current.getBoundingClientRect().height,
@@ -159,7 +152,6 @@ const Editor = (): React.ReactElement => {
     <Box
       ref={containerRef}
       sx={{
-        minHeight: `${MIN_HEIGHT}px`,
         backgroundColor: 'green',
         display: 'flex',
         justifyContent: 'center',
@@ -181,8 +173,8 @@ const Editor = (): React.ReactElement => {
         scaleX={shapes.stageInfo.scale}
         scaleY={shapes.stageInfo.scale}
         ref={stageRef}
-        width={shapes.stageInfo.size.width}
-        height={shapes.stageInfo.size.height}
+        width={shapes.stageInfo.size.width * shapes.stageInfo.scale}
+        height={shapes.stageInfo.size.height * shapes.stageInfo.scale}
         onMouseUp={() => {
           shapes.endToDraw();
         }}
@@ -197,8 +189,8 @@ const Editor = (): React.ReactElement => {
       >
         <Layer>
           <ReactKonvaRect
-            x={0}
-            y={0}
+            x={(0 - shapes.stageInfo.offset.x) / shapes.stageInfo.scale}
+            y={(0 - shapes.stageInfo.offset.y) / shapes.stageInfo.scale}
             width={shapes.stageInfo.size.width}
             height={shapes.stageInfo.size.height}
             strokeWidth={0}

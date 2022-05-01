@@ -10,6 +10,7 @@ import {
   getTopLeftAndBottomRight,
   StageInfo,
   Size,
+  getSize,
 } from '../types';
 import { MasksContainer } from './MaskContainer';
 import { RectsContainer } from './RectsContainer';
@@ -55,9 +56,8 @@ function useShapes() {
   const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
 
   useEffect(() => {
-    console.log('continer changed...', stageContainerSize);
-    const newStageWidth = stageContainerSize.width;
-    const newStageHeight = stageContainerSize.height;
+    const newStageWidth = stageContainerSize.width / stageInfo.scale;
+    const newStageHeight = stageContainerSize.height / stageInfo.scale;
 
     setStageInfo({
       ...stageInfo,
@@ -67,17 +67,16 @@ function useShapes() {
         origin: {
           x:
             stageInfo.drawingArea.origin.x +
-            (newStageWidth - stageInfo.size.width) / stageInfo.scale / 2,
+            (newStageWidth - stageInfo.size.width) / 2,
           y:
             stageInfo.drawingArea.origin.y +
-            (newStageHeight - stageInfo.size.height) / stageInfo.scale / 2,
+            (newStageHeight - stageInfo.size.height) / 2,
         },
       },
     });
   }, [stageContainerSize]);
 
   useEffect(() => {
-    console.log('image changed...');
     const width = O.getOrElse(() => stageInfo.size.width)(
       O.map<HTMLImageElement, number>((x) => x.width)(backgroundImg)
     );
@@ -133,8 +132,6 @@ function useShapes() {
   };
 
   const startToDraw = (point: Point) => {
-    console.log('point...', point);
-    console.log('stage info...', stageInfo);
     const drawingAreaPoint = fromStageToDrawingArea(point);
     if (O.isSome(editingText)) {
       endToEdit();
@@ -178,18 +175,23 @@ function useShapes() {
     }
 
     if (currentMode === 'ZOOM_IN' || currentMode === 'ZOOM_OUT') {
-      const { offset: oldOffset, scale: oldScale, size } = stageInfo;
+      const { offset: oldOffset, scale: oldScale, drawingArea } = stageInfo;
 
       const newScale =
         currentMode === 'ZOOM_IN' ? oldScale * 1.1 : oldScale / 1.1;
 
-      const newActualStageWidth = size.width * newScale;
-      const newActualStageHeight = size.height * newScale;
+      const drawingAreaSize = getSize(
+        drawingArea.topLeft,
+        drawingArea.bottomRight
+      );
 
-      //Do nothing if the stage size smaller than container size
+      const newActualDrawingAreaWidth = drawingAreaSize.width * newScale;
+      const newActualDrawingAreaHeight = drawingAreaSize.height * newScale;
+
+      //Do nothing if the drawing area size smaller than container size
       if (
-        newActualStageWidth < stageContainerSize.width ||
-        newActualStageHeight < stageContainerSize.height
+        newActualDrawingAreaWidth < stageContainerSize.width ||
+        newActualDrawingAreaHeight < stageContainerSize.height
       ) {
         return;
       }
@@ -204,7 +206,17 @@ function useShapes() {
         y: point.y - mousePointTo.y * newScale,
       };
 
-      setStageInfo({ ...stageInfo, offset: newOffset, scale: newScale });
+      const newSize = {
+        width: stageContainerSize.width / newScale,
+        height: stageContainerSize.height / newScale,
+      };
+
+      setStageInfo({
+        ...stageInfo,
+        size: newSize,
+        offset: newOffset,
+        scale: newScale,
+      });
     }
   };
 

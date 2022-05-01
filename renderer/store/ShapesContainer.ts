@@ -145,9 +145,6 @@ function useShapes() {
   };
 
   const startToDraw = (point: Point) => {
-    console.log('start to draw....');
-    console.log('point...', point);
-    console.log('stageInfo', stageInfo);
     const drawingAreaPoint = fromStageToDrawingArea(point);
     if (O.isSome(editingText)) {
       endToEdit();

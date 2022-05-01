@@ -5,7 +5,7 @@ import { Stage, Layer, Image, Rect as ReactKonvaRect } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { Rect as KonvaRect } from 'konva/types/shapes/Rect';
 import { pipe } from 'fp-ts/lib/function';
-import { ipcRenderer, clipboard, nativeImage } from 'electron';
+import { clipboard, nativeImage } from 'electron';
 import MouseTrap from 'mousetrap';
 import Rectangle from './Rectangle';
 import TransformerComponent from './TransformerComponent';
@@ -285,7 +285,6 @@ const Editor = (): React.ReactElement => {
                 y: stageRef.current.getStage().container().offsetTop,
               }
             : { x: -1, y: -1 };
-          console.log('editor pos...', pos);
           return pos;
         }}
       />

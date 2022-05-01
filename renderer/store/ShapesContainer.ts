@@ -171,6 +171,7 @@ function useShapes() {
     }
 
     if (currentMode === 'NONE') {
+      //Don't move if it is outside of drawing area
       if (
         drawingAreaPoint.x < drawingArea.topLeft.x ||
         drawingAreaPoint.x > drawingArea.bottomRight.x ||

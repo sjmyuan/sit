@@ -16,6 +16,7 @@ import { InfoContainer } from '../../store/InfoContainer';
 import { getAbsolutePosition, getSize, Point } from '../../types';
 import { css } from '@emotion/css';
 import MaskComponent from './MaskComponent';
+import ToolPanel from '../toolbar/ToolPanel';
 
 const MIN_HEIGHT = 580;
 
@@ -147,13 +148,13 @@ const Editor = (): React.ReactElement => {
       ref={containerRef}
       sx={{
         minHeight: `${MIN_HEIGHT}px`,
-        p: 0,
         backgroundColor: 'green',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         flexGrow: 1,
         overflow: 'scroll',
+        position: 'relative',
       }}
     >
       <Stage
@@ -262,6 +263,18 @@ const Editor = (): React.ReactElement => {
           )}
         </Layer>
       </Stage>
+
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          backgroundColor: 'white',
+          borderTopRightRadius: 2,
+          borderBottomRightRadius: 2,
+        }}
+      >
+        <ToolPanel />
+      </Box>
 
       <TextEditor
         getRelativePos={() => {

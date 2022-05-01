@@ -202,7 +202,7 @@ function useShapes() {
 
       //Do nothing if the drawing area size smaller than container size
       if (
-        newActualDrawingAreaWidth < stageContainerSize.width ||
+        newActualDrawingAreaWidth < stageContainerSize.width &&
         newActualDrawingAreaHeight < stageContainerSize.height
       ) {
         return;

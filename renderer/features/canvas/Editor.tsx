@@ -89,13 +89,6 @@ const Editor = (): React.ReactElement => {
       setNeedDelete(true);
     });
 
-    if (containerRef.current) {
-      shapes.setStageContainerSize({
-        width: containerRef.current.getBoundingClientRect().width,
-        height: containerRef.current.getBoundingClientRect().height,
-      });
-    }
-
     const debouncedHandleResize = debounce(function handleResize() {
       if (containerRef.current) {
         shapes.setStageContainerSize({
@@ -113,6 +106,15 @@ const Editor = (): React.ReactElement => {
       window.removeEventListener('resize', debouncedHandleResize);
     };
   }, []);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      shapes.setStageContainerSize({
+        width: containerRef.current.getBoundingClientRect().width,
+        height: containerRef.current.getBoundingClientRect().height,
+      });
+    }
+  }, [containerRef.current]);
 
   useEffect(() => {
     if (editingImageUrl === '') {

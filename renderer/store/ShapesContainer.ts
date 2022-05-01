@@ -11,7 +11,6 @@ import {
   getTopLeftAndBottomRight,
   StageInfo,
   Size,
-  getAbsolutePosition,
 } from '../types';
 import { MasksContainer } from './MaskContainer';
 import { RectsContainer } from './RectsContainer';

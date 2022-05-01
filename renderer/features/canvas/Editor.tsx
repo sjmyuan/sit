@@ -116,7 +116,9 @@ const Editor = (): React.ReactElement => {
 
   useEffect(() => {
     if (editingImageUrl === '') {
-      shapes.setBackgroundImg(O.none);
+      setTimeout(() => {
+        shapes.setBackgroundImg(O.none);
+      }, 100);
     } else {
       const image = new window.Image();
       image.src = editingImageUrl;

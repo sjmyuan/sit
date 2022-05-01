@@ -77,19 +77,22 @@ function useShapes() {
   }, [stageContainerSize]);
 
   useEffect(() => {
-    const width = O.getOrElse(() => stageInfo.size.width)(
+    const width = O.getOrElse(() => stageContainerSize.width)(
       O.map<HTMLImageElement, number>((x) => x.width)(backgroundImg)
     );
-    const height = O.getOrElse(() => stageInfo.size.height)(
+    const height = O.getOrElse(() => stageContainerSize.height)(
       O.map<HTMLImageElement, number>((x) => x.height)(backgroundImg)
     );
 
     setStageInfo({
       ...stageInfo,
+      offset: { x: 0, y: 0 },
+      scale: 1,
+      size: stageContainerSize,
       drawingArea: {
         origin: {
-          x: (stageInfo.size.width - width) / 2,
-          y: (stageInfo.size.height - height) / 2,
+          x: (stageContainerSize.width - width) / 2,
+          y: (stageContainerSize.height - height) / 2,
         },
         topLeft: { x: 0, y: 0 },
         bottomRight: {
@@ -98,6 +101,15 @@ function useShapes() {
         },
       },
     });
+    rectState.clear();
+    textState.clear();
+    maskState.clear();
+    setDragStartPoint(O.none);
+    setDragVector(O.none);
+    toggleDrawing(false);
+    setSelectedShape(O.none);
+    setMode('NONE');
+    setEditingText(O.none);
   }, [backgroundImg]);
 
   useEffect(() => {
@@ -309,22 +321,7 @@ function useShapes() {
   const getEditingImageUrl = () => editingImageUrl;
 
   const setEditingImage = (url: O.Option<string>) => {
-    rectState.clear();
-    textState.clear();
-    maskState.clear();
-    setDragStartPoint(O.none);
-    setDragVector(O.none);
-    toggleDrawing(false);
-    setSelectedShape(O.none);
-    setMode('NONE');
-    setEditingText(O.none);
     setEditingImageUrl(url);
-    setStageInfo({
-      ...stageInfo,
-      offset: { x: 0, y: 0 },
-      scale: 1,
-      size: stageContainerSize,
-    });
   };
 
   const getAllRects = () => {

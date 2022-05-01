@@ -75,13 +75,51 @@ const Editor = (): React.ReactElement => {
   const [needDelete, setNeedDelete] = useState<boolean>(false);
 
   const drawingAreaTopLeft = getAbsolutePosition(
-    shapes.drawingArea.origin,
-    shapes.drawingArea.topLeft
+    shapes.stageInfo.drawingArea.origin,
+    shapes.stageInfo.drawingArea.topLeft
   );
   const drawingAreaSize = getSize(
-    shapes.drawingArea.topLeft,
-    shapes.drawingArea.bottomRight
+    shapes.stageInfo.drawingArea.topLeft,
+    shapes.stageInfo.drawingArea.bottomRight
   );
+
+  useEffect(() => {
+    MouseTrap.bind(['ctrl+c', 'command+c'], () => {
+      setNeedCopy(true); // can not fetch latest state in event listener, so do this workaround
+    });
+    MouseTrap.bind(['delete', 'backspace'], () => {
+      setNeedDelete(true);
+    });
+
+    if (containerRef.current) {
+      console.log(
+        'init resize...',
+        containerRef.current.getBoundingClientRect()
+      );
+      shapes.setStageContainerSize({
+        width: containerRef.current.getBoundingClientRect().width,
+        height: containerRef.current.getBoundingClientRect().height,
+      });
+    }
+
+    const debouncedHandleResize = debounce(function handleResize() {
+      if (containerRef.current) {
+        console.log('resize...');
+        shapes.setStageContainerSize({
+          width: containerRef.current.getBoundingClientRect().width,
+          height: containerRef.current.getBoundingClientRect().height,
+        });
+      }
+    }, 500);
+
+    window.addEventListener('resize', debouncedHandleResize);
+
+    return () => {
+      MouseTrap.unbind(['ctrl+c', 'command+c']);
+      MouseTrap.unbind(['delete', 'backspace']);
+      window.removeEventListener('resize', debouncedHandleResize);
+    };
+  }, []);
 
   useEffect(() => {
     if (editingImageUrl === '') {
@@ -117,32 +155,6 @@ const Editor = (): React.ReactElement => {
     setNeedDelete(false);
   }, [needDelete]);
 
-  useEffect(() => {
-    MouseTrap.bind(['ctrl+c', 'command+c'], () => {
-      setNeedCopy(true); // can not fetch latest state in event listener, so do this workaround
-    });
-    MouseTrap.bind(['delete', 'backspace'], () => {
-      setNeedDelete(true);
-    });
-
-    const debouncedHandleResize = debounce(function handleResize() {
-      if (containerRef.current) {
-        shapes.setStageContainerSize({
-          width: containerRef.current.getBoundingClientRect().width,
-          height: containerRef.current.getBoundingClientRect().height,
-        });
-      }
-    }, 500);
-
-    window.addEventListener('resize', debouncedHandleResize);
-
-    return () => {
-      MouseTrap.unbind(['ctrl+c', 'command+c']);
-      MouseTrap.unbind(['delete', 'backspace']);
-      window.removeEventListener('resize', debouncedHandleResize);
-    };
-  }, []);
-
   return (
     <Box
       ref={containerRef}
@@ -153,7 +165,7 @@ const Editor = (): React.ReactElement => {
         justifyContent: 'center',
         alignItems: 'center',
         flexGrow: 1,
-        overflow: 'scroll',
+        width: '100%',
         position: 'relative',
       }}
     >
@@ -205,8 +217,8 @@ const Editor = (): React.ReactElement => {
           />
           {O.isSome(shapes.backgroundImg) && (
             <Image
-              x={shapes.drawingArea.origin.x}
-              y={shapes.drawingArea.origin.y}
+              x={shapes.stageInfo.drawingArea.origin.x}
+              y={shapes.stageInfo.drawingArea.origin.y}
               width={shapes.backgroundImg.value.width}
               height={shapes.backgroundImg.value.height}
               image={O.toUndefined(shapes.backgroundImg)}

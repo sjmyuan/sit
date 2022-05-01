@@ -7,7 +7,6 @@ import {
   Point,
   Text,
   SitShape,
-  Area,
   getTopLeftAndBottomRight,
   StageInfo,
   Size,
@@ -40,74 +39,71 @@ function useShapes() {
     offset: { x: 0, y: 0 },
     scale: 1,
     size: { width: 400, height: 400 },
-  });
-
-  const [drawingArea, setDrawingArea] = useState<Area>({
-    origin: { x: 200, y: 200 },
-    topLeft: { x: 0, y: 0 },
-    bottomRight: { x: -1, y: -1 },
+    drawingArea: {
+      origin: { x: 100, y: 100 },
+      topLeft: { x: 0, y: 0 },
+      bottomRight: { x: 200, y: 200 },
+    },
   });
 
   const [backgroundImg, setBackgroundImg] = useState<
     O.Option<HTMLImageElement>
   >(O.none);
 
-  const [initialized, setInitialized] = useState<boolean>(false);
-
   const [dragStartPoint, setDragStartPoint] = useState<O.Option<Point>>(O.none);
 
   const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
 
   useEffect(() => {
-    const newStageWidth = stageContainerSize.width / stageInfo.scale + 200;
-    const newStageHeight = stageContainerSize.height / stageInfo.scale + 200;
-
-    setDrawingArea({
-      ...drawingArea,
-      origin: {
-        x: drawingArea.origin.x + (newStageWidth - stageInfo.size.width) / 2,
-        y: drawingArea.origin.y + (newStageHeight - stageInfo.size.height) / 2,
-      },
-    });
+    console.log('continer changed...', stageContainerSize);
+    const newStageWidth = stageContainerSize.width;
+    const newStageHeight = stageContainerSize.height;
 
     setStageInfo({
       ...stageInfo,
       size: { width: newStageWidth, height: newStageHeight },
+      drawingArea: {
+        ...stageInfo.drawingArea,
+        origin: {
+          x:
+            stageInfo.drawingArea.origin.x +
+            (newStageWidth - stageInfo.size.width) / stageInfo.scale / 2,
+          y:
+            stageInfo.drawingArea.origin.y +
+            (newStageHeight - stageInfo.size.height) / stageInfo.scale / 2,
+        },
+      },
     });
   }, [stageContainerSize]);
 
   useEffect(() => {
-    const width = O.getOrElse(() => 400)(
+    console.log('image changed...');
+    const width = O.getOrElse(() => stageInfo.size.width)(
       O.map<HTMLImageElement, number>((x) => x.width)(backgroundImg)
     );
-    const height = O.getOrElse(() => 400)(
+    const height = O.getOrElse(() => stageInfo.size.height)(
       O.map<HTMLImageElement, number>((x) => x.height)(backgroundImg)
     );
-    setDrawingArea({
-      origin: {
-        x: (stageInfo.size.width - width) / 2,
-        y: (stageInfo.size.height - height) / 2,
-      },
-      topLeft: { x: 0, y: 0 },
-      bottomRight: {
-        x: width,
-        y: height,
+
+    setStageInfo({
+      ...stageInfo,
+      drawingArea: {
+        origin: {
+          x: (stageInfo.size.width - width) / 2,
+          y: (stageInfo.size.height - height) / 2,
+        },
+        topLeft: { x: 0, y: 0 },
+        bottomRight: {
+          x: width,
+          y: height,
+        },
       },
     });
-    setInitialized(true);
   }, [backgroundImg]);
 
   useEffect(() => {
-    if (initialized) {
-      updateDrawingAreaRect();
-    }
+    updateDrawingAreaRect();
   }, [rectState.rects, textState.texts, maskState.masks]);
-
-  useEffect(() => {
-    if (initialized) {
-      updateDrawingAreaOrigin();
-    }
-  }, [initialized]);
 
   useEffect(() => {
     if (O.isSome(dragVector) && O.isSome(dragStartPoint)) {
@@ -115,25 +111,30 @@ function useShapes() {
         x: dragStartPoint.value.x + dragVector.value.x,
         y: dragStartPoint.value.y + dragVector.value.y,
       };
-      setDrawingArea({ ...drawingArea, origin: newOrigin });
+      setStageInfo({
+        ...stageInfo,
+        drawingArea: { ...stageInfo.drawingArea, origin: newOrigin },
+      });
     }
   }, [dragStartPoint, dragVector]);
 
   const fromStageToDrawingArea = (point: Point) => {
     return {
-      x: point.x - drawingArea.origin.x,
-      y: point.y - drawingArea.origin.y,
+      x: point.x - stageInfo.drawingArea.origin.x,
+      y: point.y - stageInfo.drawingArea.origin.y,
     };
   };
 
   const fromDrawingAreaToStage = (point: Point) => {
     return {
-      x: point.x + drawingArea.origin.x,
-      y: point.y + drawingArea.origin.y,
+      x: point.x + stageInfo.drawingArea.origin.x,
+      y: point.y + stageInfo.drawingArea.origin.y,
     };
   };
 
   const startToDraw = (point: Point) => {
+    console.log('point...', point);
+    console.log('stage info...', stageInfo);
     const drawingAreaPoint = fromStageToDrawingArea(point);
     if (O.isSome(editingText)) {
       endToEdit();
@@ -159,10 +160,10 @@ function useShapes() {
     if (currentMode === 'NONE') {
       //Don't move if it is outside of drawing area
       if (
-        drawingAreaPoint.x < drawingArea.topLeft.x ||
-        drawingAreaPoint.x > drawingArea.bottomRight.x ||
-        drawingAreaPoint.y < drawingArea.topLeft.y ||
-        drawingAreaPoint.y > drawingArea.bottomRight.y
+        drawingAreaPoint.x < stageInfo.drawingArea.topLeft.x ||
+        drawingAreaPoint.x > stageInfo.drawingArea.bottomRight.x ||
+        drawingAreaPoint.y < stageInfo.drawingArea.topLeft.y ||
+        drawingAreaPoint.y > stageInfo.drawingArea.bottomRight.y
       ) {
         return;
       }
@@ -170,8 +171,8 @@ function useShapes() {
       setDragStartPoint(O.some(point));
       setDragVector(
         O.some({
-          x: drawingArea.origin.x - point.x,
-          y: drawingArea.origin.y - point.y,
+          x: stageInfo.drawingArea.origin.x - point.x,
+          y: stageInfo.drawingArea.origin.y - point.y,
         })
       );
     }
@@ -367,29 +368,29 @@ function useShapes() {
    * when drawing outsize the drawing area, we want to keep the current origin and only change the position of topleft or bottomright
    */
 
-  const updateDrawingAreaOrigin = () => {
-    const { origin, topLeft, bottomRight } = drawingArea;
-    const drawingAreaWidth = Math.abs(bottomRight.x - topLeft.x);
-    const drawingAreaHeight = Math.abs(bottomRight.y - topLeft.y);
-    const { width: stageWidth, height: stageHeight } = stageInfo.size;
-    const oldDrawingAreaOffset: [number, number] = [
-      origin.x + topLeft.x,
-      origin.y + topLeft.y,
-    ];
-    const newDrawingAreaOffset: [number, number] = [
-      (stageWidth - drawingAreaWidth) / 2,
-      (stageHeight - drawingAreaHeight) / 2,
-    ];
-    const newDrawingAreaOrigin = {
-      x: origin.x + (newDrawingAreaOffset[0] - oldDrawingAreaOffset[0]),
-      y: origin.y + (newDrawingAreaOffset[1] - oldDrawingAreaOffset[1]),
-    };
+  // const updateDrawingAreaOrigin = () => {
+  //   const { origin, topLeft, bottomRight } = drawingArea;
+  //   const drawingAreaWidth = Math.abs(bottomRight.x - topLeft.x);
+  //   const drawingAreaHeight = Math.abs(bottomRight.y - topLeft.y);
+  //   const { width: stageWidth, height: stageHeight } = stageInfo.size;
+  //   const oldDrawingAreaOffset: [number, number] = [
+  //     origin.x + topLeft.x,
+  //     origin.y + topLeft.y,
+  //   ];
+  //   const newDrawingAreaOffset: [number, number] = [
+  //     (stageWidth - drawingAreaWidth) / 2,
+  //     (stageHeight - drawingAreaHeight) / 2,
+  //   ];
+  //   const newDrawingAreaOrigin = {
+  //     x: origin.x + (newDrawingAreaOffset[0] - oldDrawingAreaOffset[0]),
+  //     y: origin.y + (newDrawingAreaOffset[1] - oldDrawingAreaOffset[1]),
+  //   };
 
-    setDrawingArea({ ...drawingArea, origin: newDrawingAreaOrigin });
-  };
+  //   setDrawingArea({ ...drawingArea, origin: newDrawingAreaOrigin });
+  // };
 
   const updateDrawingAreaRect = () => {
-    const { topLeft, bottomRight } = drawingArea;
+    const { topLeft, bottomRight } = stageInfo.drawingArea;
     let minX = topLeft.x;
     let minY = topLeft.y;
     let maxX = bottomRight.x;
@@ -422,12 +423,52 @@ function useShapes() {
       maxY = maxY > text.origin.y ? maxY : text.origin.y;
     });
 
-    setDrawingArea({
-      ...drawingArea,
-      topLeft: { x: minX, y: minY },
-      bottomRight: { x: maxX, y: maxY },
+    setStageInfo({
+      ...stageInfo,
+      drawingArea: {
+        ...stageInfo.drawingArea,
+        topLeft: { x: minX, y: minY },
+        bottomRight: { x: maxX, y: maxY },
+      },
     });
   };
+
+  // const initialize = (
+  //   containerSize: Size,
+  //   image: O.Option<HTMLImageElement>
+  // ) => {
+  //   const newStageWidth = containerSize.width / stageInfo.scale;
+  //   const newStageHeight = containerSize.height / stageInfo.scale;
+
+  //   const width = O.getOrElse(() => 400)(
+  //     O.map<HTMLImageElement, number>((x) => x.width)(image)
+  //   );
+  //   const height = O.getOrElse(() => 400)(
+  //     O.map<HTMLImageElement, number>((x) => x.height)(image)
+  //   );
+  //   setDrawingArea({
+  //     origin: {
+  //       x: (newStageWidth - width) / 2,
+  //       y: (newStageHeight - height) / 2,
+  //     },
+  //     topLeft: { x: 0, y: 0 },
+  //     bottomRight: {
+  //       x: width,
+  //       y: height,
+  //     },
+  //   });
+
+  //   setStageInfo({
+  //     ...stageInfo,
+  //     size: { width: newStageWidth, height: newStageHeight },
+  //   });
+
+  //   setStageContainerSize(containerSize);
+
+  //   setBackgroundImg(image);
+
+  //   // setInitialized(true);
+  // };
 
   return {
     currentMode,
@@ -445,8 +486,8 @@ function useShapes() {
     editingImageUrl,
     getEditingImageUrl,
     deleteSelectedShape,
-    setDrawingArea,
-    drawingArea,
+    // setDrawingArea,
+    // drawingArea,
     getAllRects,
     getAllTexts,
     getAllMasks,
@@ -455,6 +496,7 @@ function useShapes() {
     setBackgroundImg,
     setStageContainerSize,
     stageInfo,
+    // initialize,
   };
 }
 

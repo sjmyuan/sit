@@ -63,15 +63,6 @@ function useShapes() {
     const newStageWidth = stageContainerSize.width / stageInfo.scale + 200;
     const newStageHeight = stageContainerSize.height / stageInfo.scale + 200;
 
-    // const newOffset = {
-    //   x: stageInfo.offset.x - (stageInfo.size.width - newStageWidth) / 2,
-    //   y: stageInfo.offset.y - (stageInfo.size.height - newStageHeight) / 2,
-    // };
-    const newOffset = {
-      x: stageInfo.offset.x,
-      y: stageInfo.offset.y,
-    };
-
     setDrawingArea({
       ...drawingArea,
       origin: {
@@ -82,7 +73,6 @@ function useShapes() {
 
     setStageInfo({
       ...stageInfo,
-      offset: newOffset,
       size: { width: newStageWidth, height: newStageHeight },
     });
   }, [stageContainerSize]);

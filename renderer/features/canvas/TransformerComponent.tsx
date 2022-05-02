@@ -57,7 +57,12 @@ const TransformerComponent = (props: TransformerComponentProps) => {
     checkNode();
   }, [props.selectedShape]);
   return (
-    <Transformer ref={transformerRef} keepRatio={false} rotateEnabled={false} />
+    <Transformer
+      ref={transformerRef}
+      keepRatio={false}
+      resizeEnabled={true}
+      rotateEnabled={false}
+    />
   );
 };
 

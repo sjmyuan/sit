@@ -21,8 +21,8 @@ const Rectangle = (props: RectangleProps): React.ReactElement => {
     props.onTransform({
       ...props.rect,
       origin: { x: rect.x(), y: rect.y() },
-      width: rect.width() * rect.scaleX(),
-      height: rect.height() * rect.scaleY(),
+      width: rect.width(),
+      height: rect.height(),
     });
   };
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {

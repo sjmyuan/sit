@@ -186,12 +186,13 @@ const Editor = (): React.ReactElement => {
           const stage = e.target.getStage();
           stage && shapes.drawing(getRelativePointerPosition(stage));
         }}
-        onMouseDown={(e) => {
-          const stage = e.target.getStage();
-          stage && shapes.startToDraw(getRelativePointerPosition(stage));
-        }}
       >
-        <Layer>
+        <Layer
+          onMouseDown={(e) => {
+            const stage = e.target.getStage();
+            stage && shapes.startToDraw(getRelativePointerPosition(stage));
+          }}
+        >
           <ReactKonvaRect
             x={(0 - shapes.stageInfo.offset.x) / shapes.stageInfo.scale}
             y={(0 - shapes.stageInfo.offset.y) / shapes.stageInfo.scale}
@@ -220,6 +221,8 @@ const Editor = (): React.ReactElement => {
               image={O.toUndefined(shapes.backgroundImg)}
             />
           )}
+        </Layer>
+        <Layer>
           {shapes.getAllRects().map((rect) => {
             return (
               <Rectangle

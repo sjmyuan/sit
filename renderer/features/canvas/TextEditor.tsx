@@ -12,11 +12,22 @@ const TextEditor = (props: {
   const shapes = ShapeContainer.useContainer();
   const editingText = shapes.getEditingText();
 
+  /**
+   * the position of shape is relative to stage without any scale
+   *
+   * the stage x, y is relative to canvas
+   */
   const position = pipe(
     editingText,
     O.map((x) => ({
-      x: x.origin.x + props.getRelativePos().x,
-      y: x.origin.y + props.getRelativePos().y,
+      x:
+        x.origin.x * shapes.stageInfo.scale +
+        shapes.stageInfo.offset.x +
+        props.getRelativePos().x,
+      y:
+        x.origin.y * shapes.stageInfo.scale +
+        shapes.stageInfo.offset.y +
+        props.getRelativePos().y,
     })),
     O.getOrElse(() => ({ x: -1, y: -1 }))
   );

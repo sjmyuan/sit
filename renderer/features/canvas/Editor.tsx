@@ -5,7 +5,7 @@ import { Stage, Layer, Image, Rect as ReactKonvaRect } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { Rect as KonvaRect } from 'konva/types/shapes/Rect';
 import { pipe } from 'fp-ts/lib/function';
-import { ipcRenderer, clipboard, nativeImage } from 'electron';
+import { clipboard, nativeImage } from 'electron';
 import MouseTrap from 'mousetrap';
 import Rectangle from './Rectangle';
 import TransformerComponent from './TransformerComponent';
@@ -16,8 +16,7 @@ import { InfoContainer } from '../../store/InfoContainer';
 import { getAbsolutePosition, getSize, Point } from '../../types';
 import { css } from '@emotion/css';
 import MaskComponent from './MaskComponent';
-
-const MIN_HEIGHT = 580;
+import ToolPanel from '../toolbar/ToolPanel';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -38,9 +37,16 @@ const copyImageToClipboard = (
   width: number,
   height: number
 ) => {
+  const newStage: KonvaStage = stage.clone({
+    x: 0,
+    y: 0,
+    scaleX: 1,
+    scaleY: 1,
+  });
+
   clipboard.writeImage(
     nativeImage.createFromDataURL(
-      stage.toDataURL({
+      newStage.toDataURL({
         x: topLeft.x,
         y: topLeft.y,
         width,
@@ -67,26 +73,61 @@ const Editor = (): React.ReactElement => {
   const [needDelete, setNeedDelete] = useState<boolean>(false);
 
   const drawingAreaTopLeft = getAbsolutePosition(
-    shapes.drawingArea.origin,
-    shapes.drawingArea.topLeft
+    shapes.stageInfo.drawingArea.origin,
+    shapes.stageInfo.drawingArea.topLeft
   );
   const drawingAreaSize = getSize(
-    shapes.drawingArea.topLeft,
-    shapes.drawingArea.bottomRight
+    shapes.stageInfo.drawingArea.topLeft,
+    shapes.stageInfo.drawingArea.bottomRight
   );
 
   useEffect(() => {
+    MouseTrap.bind(['ctrl+c', 'command+c'], () => {
+      setNeedCopy(true); // can not fetch latest state in event listener, so do this workaround
+    });
+    MouseTrap.bind(['delete', 'backspace'], () => {
+      setNeedDelete(true);
+    });
+
+    const debouncedHandleResize = debounce(function handleResize() {
+      if (containerRef.current) {
+        shapes.setStageContainerSize({
+          width: containerRef.current.getBoundingClientRect().width,
+          height: containerRef.current.getBoundingClientRect().height,
+        });
+      }
+    }, 500);
+
+    window.addEventListener('resize', debouncedHandleResize);
+
+    return () => {
+      MouseTrap.unbind(['ctrl+c', 'command+c']);
+      MouseTrap.unbind(['delete', 'backspace']);
+      window.removeEventListener('resize', debouncedHandleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      shapes.setStageContainerSize({
+        width: containerRef.current.getBoundingClientRect().width,
+        height: containerRef.current.getBoundingClientRect().height,
+      });
+    }
+  }, [containerRef.current]);
+
+  useEffect(() => {
     if (editingImageUrl === '') {
-      shapes.setBackgroundImg(O.none);
+      setTimeout(() => {
+        shapes.setBackgroundImg(O.none);
+      }, 100);
     } else {
       const image = new window.Image();
       image.src = editingImageUrl;
       image.addEventListener('load', () => {
-        shapes.setBackgroundImg(O.some(image));
-        ipcRenderer.send('resize-main-window', [
-          image.width,
-          image.height > MIN_HEIGHT ? image.height : MIN_HEIGHT,
-        ]);
+        setTimeout(() => {
+          shapes.setBackgroundImg(O.some(image));
+        }, 100);
       });
     }
   }, [editingImageUrl]);
@@ -111,44 +152,17 @@ const Editor = (): React.ReactElement => {
     setNeedDelete(false);
   }, [needDelete]);
 
-  useEffect(() => {
-    MouseTrap.bind(['ctrl+c', 'command+c'], () => {
-      setNeedCopy(true); // can not fetch latest state in event listener, so do this workaround
-    });
-    MouseTrap.bind(['delete', 'backspace'], () => {
-      setNeedDelete(true);
-    });
-
-    const debouncedHandleResize = debounce(function handleResize() {
-      if (containerRef.current) {
-        shapes.setStageSize([
-          containerRef.current.getBoundingClientRect().width,
-          containerRef.current.getBoundingClientRect().height,
-        ]);
-      }
-    }, 500);
-
-    window.addEventListener('resize', debouncedHandleResize);
-
-    return () => {
-      MouseTrap.unbind(['ctrl+c', 'command+c']);
-      MouseTrap.unbind(['delete', 'backspace']);
-      window.removeEventListener('resize', debouncedHandleResize);
-    };
-  }, []);
-
   return (
     <Box
       ref={containerRef}
       sx={{
-        minHeight: `${MIN_HEIGHT}px`,
-        p: 0,
-        backgroundColor: 'rgb(116,116,116)',
+        backgroundColor: 'green',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         flexGrow: 1,
-        overflow: 'scroll',
+        width: '100%',
+        position: 'relative',
       }}
     >
       <Stage
@@ -156,11 +170,15 @@ const Editor = (): React.ReactElement => {
           display: flex;
           justify-content: center;
           align-items: center;
-          background-color: white;
+          background-color: red;
         `}
+        x={shapes.stageInfo.offset.x}
+        y={shapes.stageInfo.offset.y}
+        scaleX={shapes.stageInfo.scale}
+        scaleY={shapes.stageInfo.scale}
         ref={stageRef}
-        width={shapes.stageSize[0]}
-        height={shapes.stageSize[1]}
+        width={shapes.stageInfo.size.width * shapes.stageInfo.scale}
+        height={shapes.stageInfo.size.height * shapes.stageInfo.scale}
         onMouseUp={() => {
           shapes.endToDraw();
         }}
@@ -175,10 +193,10 @@ const Editor = (): React.ReactElement => {
       >
         <Layer>
           <ReactKonvaRect
-            x={0}
-            y={0}
-            width={shapes.stageSize[0]}
-            height={shapes.stageSize[1]}
+            x={(0 - shapes.stageInfo.offset.x) / shapes.stageInfo.scale}
+            y={(0 - shapes.stageInfo.offset.y) / shapes.stageInfo.scale}
+            width={shapes.stageInfo.size.width}
+            height={shapes.stageInfo.size.height}
             strokeWidth={0}
             fill="rgb(116,116,116)"
             name="full-paper"
@@ -195,8 +213,8 @@ const Editor = (): React.ReactElement => {
           />
           {O.isSome(shapes.backgroundImg) && (
             <Image
-              x={shapes.drawingArea.origin.x}
-              y={shapes.drawingArea.origin.y}
+              x={shapes.stageInfo.drawingArea.origin.x}
+              y={shapes.stageInfo.drawingArea.origin.y}
               width={shapes.backgroundImg.value.width}
               height={shapes.backgroundImg.value.height}
               image={O.toUndefined(shapes.backgroundImg)}
@@ -254,16 +272,29 @@ const Editor = (): React.ReactElement => {
         </Layer>
       </Stage>
 
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          backgroundColor: 'white',
+          borderTopRightRadius: 2,
+          borderBottomRightRadius: 2,
+        }}
+      >
+        <ToolPanel />
+      </Box>
+
       <TextEditor
-        getRelativePos={() =>
-          stageRef.current
+        getRelativePos={() => {
+          const pos = stageRef.current
             ? {
                 x: stageRef.current.getStage().container().offsetLeft,
 
                 y: stageRef.current.getStage().container().offsetTop,
               }
-            : { x: -1, y: -1 }
-        }
+            : { x: -1, y: -1 };
+          return pos;
+        }}
       />
     </Box>
   );

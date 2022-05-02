@@ -73,12 +73,6 @@ export const editImageinMainWindow = async (imageIndex: any): Promise<void> => {
   }
 };
 
-export const resizeMainWindow = (width: number, height: number) => {
-  if (mainWindow) {
-    mainWindow.setContentSize(width + 160, height + 84);
-  }
-};
-
 export const sendWorkerEventToMainWindow = (info: { syncing: boolean }) => {
   if (mainWindow) {
     mainWindow.webContents.send('worker-event', info);

@@ -110,7 +110,7 @@ const MainPage = (): React.ReactElement => {
           height: 'calc(100% - (104px))',
           display: 'flex',
         }}
-        maxWidth="xl"
+        maxWidth={false}
       >
         {status === 'HISTORY' ? <ImageBrowser /> : <Editor />}
       </Container>

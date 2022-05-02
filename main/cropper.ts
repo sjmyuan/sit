@@ -33,7 +33,6 @@ const openCropper = (
   cropper.setAlwaysOnTop(true, 'screen-saver', 1);
 
   cropper.webContents.on('did-finish-load', () => {
-    console.log('sending image....');
     cropper.webContents.send('cropper-config', {
       takeFullScreenShot,
       fullScreen,
@@ -65,7 +64,6 @@ const openCropperWindow = async (
 };
 
 const showCropperWindow = () => {
-  console.log('show cropper window...');
   if (cropperWindow) {
     cropperWindow.show();
     cropperWindow.focus();

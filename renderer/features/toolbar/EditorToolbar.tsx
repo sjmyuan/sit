@@ -1,20 +1,12 @@
 import React from 'react';
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
-import {
-  TextFields,
-  PhotoLibrary,
-  Crop32,
-  Brush,
-  Crop,
-} from '@mui/icons-material';
-import { ShapeContainer } from '../../store/ShapesContainer';
+import { PhotoLibrary, Crop } from '@mui/icons-material';
 import { ipcRenderer } from 'electron';
 
 type EditorToolbarProps = {
   onHistory: () => void;
 };
 const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
-  const shapes = ShapeContainer.useContainer();
   return (
     <AppBar position="sticky">
       <Toolbar>
@@ -34,30 +26,6 @@ const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
             alignItems: 'center',
           }}
         >
-          <IconButton
-            color="inherit"
-            aria-label="draw rectangle"
-            disabled={shapes.currentMode === 'RECT'}
-            onClick={() => shapes.setMode('RECT')}
-          >
-            <Crop32 />
-          </IconButton>
-          <IconButton
-            color="inherit"
-            aria-label="add text"
-            disabled={shapes.currentMode === 'TEXT'}
-            onClick={() => shapes.setMode('TEXT')}
-          >
-            <TextFields />
-          </IconButton>
-          <IconButton
-            color="inherit"
-            aria-label="add mask"
-            disabled={shapes.currentMode === 'MASK'}
-            onClick={() => shapes.setMode('MASK')}
-          >
-            <Brush />
-          </IconButton>
           <IconButton
             color="inherit"
             aria-label="screen capture"

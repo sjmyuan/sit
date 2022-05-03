@@ -11,6 +11,7 @@ import {
   StageInfo,
   Size,
   getSize,
+  Rect,
 } from '../types';
 import { MasksContainer } from './MaskContainer';
 import { RectsContainer } from './RectsContainer';
@@ -54,6 +55,8 @@ function useShapes() {
   const [dragStartPoint, setDragStartPoint] = useState<O.Option<Point>>(O.none);
 
   const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
+
+  const [clipRect, setClipRect] = useState<O.Option<Rect>>(O.none);
 
   useEffect(() => {
     const newStageWidth = stageContainerSize.width / stageInfo.scale;
@@ -505,7 +508,8 @@ function useShapes() {
     setBackgroundImg,
     setStageContainerSize,
     stageInfo,
-    // initialize,
+    clipRect,
+    setClipRect,
   };
 }
 

@@ -7,6 +7,7 @@ import {
   NorthWest,
   ZoomIn,
   ZoomOut,
+  ContentCut,
 } from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
 
@@ -66,6 +67,14 @@ const ToolPanel = (): React.ReactElement => {
         onClick={() => shapes.setMode('MASK')}
       >
         <Brush />
+      </IconButton>
+      <IconButton
+        color="inherit"
+        aria-label="clip"
+        disabled={shapes.currentMode === 'CLIP'}
+        onClick={() => shapes.setMode('CLIP')}
+      >
+        <ContentCut />
       </IconButton>
     </Box>
   );

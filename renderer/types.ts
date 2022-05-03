@@ -134,4 +134,11 @@ export type StageInfo = {
 
 export type SitShape = Rect | Text | Mask;
 
-export type MODE = 'RECT' | 'TEXT' | 'MASK' | 'NONE' | 'ZOOM_IN' | 'ZOOM_OUT';
+export type MODE =
+  | 'RECT'
+  | 'TEXT'
+  | 'MASK'
+  | 'NONE'
+  | 'ZOOM_IN'
+  | 'ZOOM_OUT'
+  | 'CLIP';

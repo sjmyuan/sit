@@ -273,11 +273,7 @@ const Editor = (): React.ReactElement => {
             <></>
           )}
         </Layer>
-        <Layer>
-
-          
-
-        </Layer>
+        <Layer></Layer>
       </Stage>
 
       <Box

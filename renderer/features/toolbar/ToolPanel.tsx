@@ -10,10 +10,13 @@ import {
   ContentCut,
 } from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
+import ClipPanel from './ClipPanel';
 
 const ToolPanel = (): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
-  return (
+  return shapes.currentMode === 'CLIP' ? (
+    <ClipPanel />
+  ) : (
     <Box
       sx={{
         display: 'flex',

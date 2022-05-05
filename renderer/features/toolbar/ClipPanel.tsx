@@ -17,8 +17,26 @@ const ClipRect = () => {
           flexDirection: 'column',
         }}
       >
-        <TextField required id="width" label="Width" />
-        <TextField required id="height" label="Height" />
+        <TextField
+          required
+          id="width"
+          label="Width"
+          type="number"
+          value={shapes.clipRect.width}
+          onChange={(e) =>
+            shapes.setClipRect({ ...shapes.clipRect, width: +e.target.value })
+          }
+        />
+        <TextField
+          required
+          id="height"
+          label="Height"
+          type="number"
+          value={shapes.clipRect.height}
+          onChange={(e) =>
+            shapes.setClipRect({ ...shapes.clipRect, height: +e.target.value })
+          }
+        />
       </Box>
       <Box>
         <IconButton

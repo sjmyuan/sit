@@ -6,7 +6,7 @@ import { A, O, Point, Rect } from '../types';
 function useRects(initialState: Rect[] = []) {
   const [rects, setRects] = useState<Rect[]>(initialState);
   const [newRect, setNewRect] = useState<O.Option<Rect>>(O.none);
-  const [nextRectId, setNextRectId] = useState<number>(0);
+  const [nextRectId, setNextRectId] = useState<number>(100);
   const startToDraw = (point: Point) => {
     setNewRect(
       O.some({

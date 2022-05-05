@@ -17,6 +17,7 @@ import { getAbsolutePosition, getSize, Point } from '../../types';
 import { css } from '@emotion/css';
 import MaskComponent from './MaskComponent';
 import ToolPanel from '../toolbar/ToolPanel';
+import { KonvaEventObject } from 'konva/types/Node';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -152,6 +153,16 @@ const Editor = (): React.ReactElement => {
     setNeedDelete(false);
   }, [needDelete]);
 
+  const handleClipChange = (e: KonvaEventObject<any>) => {
+    const rect = e.target as KonvaRect;
+    shapes.setClipRect({
+      ...shapes.clipRect,
+      origin: { x: rect.x(), y: rect.y() },
+      width: rect.width(),
+      height: rect.height(),
+    });
+  };
+
   return (
     <Box
       ref={containerRef}
@@ -273,7 +284,26 @@ const Editor = (): React.ReactElement => {
             <></>
           )}
         </Layer>
-        <Layer></Layer>
+        <Layer>
+          {shapes.currentMode === 'CLIP' && (
+            <ReactKonvaRect
+              x={shapes.clipRect.origin.x}
+              y={shapes.clipRect.origin.y}
+              width={shapes.clipRect.width}
+              height={shapes.clipRect.height}
+              strokeWidth={2}
+              stroke="blue"
+              fill="transparent"
+              scaleX={1}
+              scaleY={1}
+              name={shapes.clipRect.name}
+              strokeScaleEnabled={false}
+              onDragEnd={handleClipChange}
+              onTransformEnd={handleClipChange}
+              draggable
+            />
+          )}
+        </Layer>
       </Stage>
 
       <Box

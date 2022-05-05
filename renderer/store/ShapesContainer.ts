@@ -56,7 +56,14 @@ function useShapes() {
 
   const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
 
-  const [clipRect, setClipRect] = useState<O.Option<Rect>>(O.none);
+  const [clipRect, setClipRect] = useState<Rect>({
+    _tag: 'rect',
+    name: `rect-clip-0`,
+    id: 0,
+    origin: { x: 0, y: 0 },
+    width: 100,
+    height: 100,
+  });
 
   useEffect(() => {
     const newStageWidth = stageContainerSize.width / stageInfo.scale;
@@ -103,6 +110,15 @@ function useShapes() {
           y: height,
         },
       },
+    });
+    setClipRect({
+      ...clipRect,
+      origin: {
+        x: (stageContainerSize.width - width) / 2,
+        y: (stageContainerSize.height - height) / 2,
+      },
+      width: width,
+      height: height,
     });
     rectState.clear();
     textState.clear();

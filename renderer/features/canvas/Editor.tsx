@@ -155,11 +155,16 @@ const Editor = (): React.ReactElement => {
 
   const handleClipChange = (e: KonvaEventObject<any>) => {
     const rect = e.target as KonvaRect;
+    console.log('clip changes...', rect);
+    console.log('clip width...', rect.width());
+    console.log('clip height...', rect.height());
     shapes.setClipRect({
       ...shapes.clipRect,
       origin: { x: rect.x(), y: rect.y() },
       width: rect.width(),
       height: rect.height(),
+      scaleX: rect.scaleX(),
+      scaleY: rect.scaleY(),
     });
   };
 
@@ -294,8 +299,8 @@ const Editor = (): React.ReactElement => {
               strokeWidth={2}
               stroke="blue"
               fill="transparent"
-              scaleX={1}
-              scaleY={1}
+              scaleX={shapes.clipRect.scaleX}
+              scaleY={shapes.clipRect.scaleY}
               name={shapes.clipRect.name}
               strokeScaleEnabled={false}
               onDragEnd={handleClipChange}

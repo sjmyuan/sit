@@ -22,9 +22,12 @@ const ClipRect = () => {
           id="width"
           label="Width"
           type="number"
-          value={shapes.clipRect.width}
+          value={Math.round(shapes.clipRect.width * shapes.clipRect.scaleX)}
           onChange={(e) =>
-            shapes.setClipRect({ ...shapes.clipRect, width: +e.target.value })
+            shapes.setClipRect({
+              ...shapes.clipRect,
+              width: +e.target.value / shapes.clipRect.scaleX,
+            })
           }
         />
         <TextField
@@ -32,9 +35,12 @@ const ClipRect = () => {
           id="height"
           label="Height"
           type="number"
-          value={shapes.clipRect.height}
+          value={Math.round(shapes.clipRect.height * shapes.clipRect.scaleY)}
           onChange={(e) =>
-            shapes.setClipRect({ ...shapes.clipRect, height: +e.target.value })
+            shapes.setClipRect({
+              ...shapes.clipRect,
+              height: +e.target.value / shapes.clipRect.scaleY,
+            })
           }
         />
       </Box>

@@ -16,6 +16,8 @@ function useRects(initialState: Rect[] = []) {
         origin: point,
         width: 0,
         height: 0,
+        scaleX: 1,
+        scaleY: 1,
       })
     );
 

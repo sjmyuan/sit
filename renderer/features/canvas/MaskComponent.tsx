@@ -21,8 +21,10 @@ const MaskComponent = (props: MaskProps): React.ReactElement => {
     props.onTransform({
       ...props.mask,
       origin: { x: rect.x(), y: rect.y() },
-      width: rect.width() * rect.scaleX(),
-      height: rect.height() * rect.scaleY(),
+      width: rect.width(),
+      height: rect.height(),
+      scaleX: rect.scaleX(),
+      scaleY: rect.scaleY(),
     });
   };
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
@@ -39,8 +41,8 @@ const MaskComponent = (props: MaskProps): React.ReactElement => {
       fill="white"
       // force no scaling
       // otherwise Transformer will change it
-      scaleX={1}
-      scaleY={1}
+      scaleX={props.mask.scaleX}
+      scaleY={props.mask.scaleY}
       name={props.mask.name}
       strokeScaleEnabled={false}
       // save state on dragend or transformend

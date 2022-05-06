@@ -66,6 +66,14 @@ function useShapes() {
   });
 
   useEffect(() => {
+    if (currentMode === 'CLIP') {
+      setSelectedShape(O.some(clipRect));
+    } else {
+      setSelectedShape(O.none);
+    }
+  }, [currentMode]);
+
+  useEffect(() => {
     const newStageWidth = stageContainerSize.width / stageInfo.scale;
     const newStageHeight = stageContainerSize.height / stageInfo.scale;
 
@@ -163,6 +171,10 @@ function useShapes() {
   };
 
   const startToDraw = (point: Point) => {
+    if (currentMode === 'CLIP') {
+      return;
+    }
+
     const drawingAreaPoint = fromStageToDrawingArea(point);
     if (O.isSome(editingText)) {
       endToEdit();
@@ -313,14 +325,22 @@ function useShapes() {
     );
   };
 
-  const onSelect = (shape: SitShape) =>
+  const onSelect = (shape: SitShape) => {
+    if (currentMode === 'CLIP') {
+      return;
+    }
     setSelectedShape(
       O.some({ ...shape, origin: fromStageToDrawingArea(shape.origin) })
     );
+  };
 
   const getSelectedShape = () => selectedShape;
 
   const deleteSelectedShape = () => {
+    if (currentMode === 'CLIP') {
+      return;
+    }
+
     if (O.isSome(selectedShape)) {
       const shape = selectedShape.value;
       // eslint-disable-next-line no-underscore-dangle
@@ -370,6 +390,9 @@ function useShapes() {
     }));
 
   const updateShape = (shape: SitShape) => {
+    if (currentMode === 'CLIP') {
+      return;
+    }
     const drawingAreaShape = {
       ...shape,
       origin: fromStageToDrawingArea(shape.origin),

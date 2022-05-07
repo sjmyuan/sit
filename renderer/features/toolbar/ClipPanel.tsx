@@ -2,7 +2,10 @@ import React from 'react';
 import { Box, IconButton, TextField } from '@mui/material';
 import { Check, Close } from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
-const ClipRect = () => {
+type ClipPanelProps = {
+  onClip: () => void;
+};
+const ClipRect = (props: ClipPanelProps) => {
   const shapes = ShapeContainer.useContainer();
   return (
     <Box
@@ -55,7 +58,10 @@ const ClipRect = () => {
         <IconButton
           color="inherit"
           aria-label="confirm"
-          onClick={() => shapes.setMode('NONE')}
+          onClick={() => {
+            shapes.setMode('NONE');
+            props.onClip();
+          }}
         >
           <Check />
         </IconButton>

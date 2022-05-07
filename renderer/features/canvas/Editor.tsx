@@ -168,6 +168,27 @@ const Editor = (): React.ReactElement => {
     });
   };
 
+  const handleClip = () => {
+    if (stageRef.current) {
+      const newStage: KonvaStage = stageRef.current.clone({
+        x: 0,
+        y: 0,
+        scaleX: 1,
+        scaleY: 1,
+      });
+
+      const image = newStage.toDataURL({
+        x: shapes.clipRect.origin.x,
+        y: shapes.clipRect.origin.y,
+        width: shapes.clipRect.width * shapes.clipRect.scaleX,
+        height: shapes.clipRect.height * shapes.clipRect.scaleY,
+        mimeType: 'image/png',
+      });
+
+      shapes.setEditingImage(O.some(image));
+    }
+  };
+
   return (
     <Box
       ref={containerRef}
@@ -320,7 +341,7 @@ const Editor = (): React.ReactElement => {
           borderBottomRightRadius: 2,
         }}
       >
-        <ToolPanel />
+        <ToolPanel onClip={handleClip} />
       </Box>
 
       <TextEditor

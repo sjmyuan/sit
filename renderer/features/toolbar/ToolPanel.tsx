@@ -12,10 +12,14 @@ import {
 import { ShapeContainer } from '../../store/ShapesContainer';
 import ClipPanel from './ClipPanel';
 
-const ToolPanel = (): React.ReactElement => {
+type ToolPanelProps = {
+  onClip: () => void;
+};
+
+const ToolPanel = (props: ToolPanelProps): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
   return shapes.currentMode === 'CLIP' ? (
-    <ClipPanel />
+    <ClipPanel onClip={props.onClip} />
   ) : (
     <Box
       sx={{

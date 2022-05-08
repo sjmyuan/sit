@@ -12,6 +12,8 @@ const ClipRect = (props: ClipPanelProps) => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
+        padding: '10px',
+        width: '120px',
       }}
     >
       <Box
@@ -21,6 +23,8 @@ const ClipRect = (props: ClipPanelProps) => {
         }}
       >
         <TextField
+          sx={{ paddingBottom: '10px' }}
+          fullWidth
           required
           id="width"
           label="Width"
@@ -34,6 +38,7 @@ const ClipRect = (props: ClipPanelProps) => {
           }
         />
         <TextField
+          fullWidth
           required
           id="height"
           label="Height"
@@ -47,7 +52,13 @@ const ClipRect = (props: ClipPanelProps) => {
           }
         />
       </Box>
-      <Box>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+        }}
+      >
         <IconButton
           color="inherit"
           aria-label="cancel"

@@ -78,7 +78,6 @@ const ToolPanel = (props: ToolPanelProps): React.ReactElement => {
       <IconButton
         color="inherit"
         aria-label="clip"
-        disabled={shapes.currentMode === 'CLIP'}
         onClick={() => shapes.setMode('CLIP')}
       >
         <ContentCut />

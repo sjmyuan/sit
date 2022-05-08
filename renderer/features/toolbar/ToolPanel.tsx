@@ -7,12 +7,20 @@ import {
   NorthWest,
   ZoomIn,
   ZoomOut,
+  ContentCut,
 } from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
+import ClipPanel from './ClipPanel';
 
-const ToolPanel = (): React.ReactElement => {
+type ToolPanelProps = {
+  onClip: () => void;
+};
+
+const ToolPanel = (props: ToolPanelProps): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
-  return (
+  return shapes.currentMode === 'CLIP' ? (
+    <ClipPanel onClip={props.onClip} />
+  ) : (
     <Box
       sx={{
         display: 'flex',
@@ -66,6 +74,13 @@ const ToolPanel = (): React.ReactElement => {
         onClick={() => shapes.setMode('MASK')}
       >
         <Brush />
+      </IconButton>
+      <IconButton
+        color="inherit"
+        aria-label="clip"
+        onClick={() => shapes.setMode('CLIP')}
+      >
+        <ContentCut />
       </IconButton>
     </Box>
   );

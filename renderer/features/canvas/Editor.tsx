@@ -17,6 +17,7 @@ import { getAbsolutePosition, getSize, Point } from '../../types';
 import { css } from '@emotion/css';
 import MaskComponent from './MaskComponent';
 import ToolPanel from '../toolbar/ToolPanel';
+import { KonvaEventObject } from 'konva/types/Node';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -152,6 +153,39 @@ const Editor = (): React.ReactElement => {
     setNeedDelete(false);
   }, [needDelete]);
 
+  const handleClipChange = (e: KonvaEventObject<any>) => {
+    const rect = e.target as KonvaRect;
+    shapes.setClipRect({
+      ...shapes.clipRect,
+      origin: { x: rect.x(), y: rect.y() },
+      width: rect.width(),
+      height: rect.height(),
+      scaleX: rect.scaleX(),
+      scaleY: rect.scaleY(),
+    });
+  };
+
+  const handleClip = () => {
+    if (stageRef.current) {
+      const newStage: KonvaStage = stageRef.current.clone({
+        x: 0,
+        y: 0,
+        scaleX: 1,
+        scaleY: 1,
+      });
+
+      const image = newStage.toDataURL({
+        x: shapes.clipRect.origin.x + 1,
+        y: shapes.clipRect.origin.y + 1,
+        width: shapes.clipRect.width * shapes.clipRect.scaleX - 2,
+        height: shapes.clipRect.height * shapes.clipRect.scaleY - 2,
+        mimeType: 'image/png',
+      });
+
+      shapes.setEditingImage(O.some(image));
+    }
+  };
+
   return (
     <Box
       ref={containerRef}
@@ -186,12 +220,13 @@ const Editor = (): React.ReactElement => {
           const stage = e.target.getStage();
           stage && shapes.drawing(getRelativePointerPosition(stage));
         }}
-        onMouseDown={(e) => {
-          const stage = e.target.getStage();
-          stage && shapes.startToDraw(getRelativePointerPosition(stage));
-        }}
       >
-        <Layer>
+        <Layer
+          onMouseDown={(e) => {
+            const stage = e.target.getStage();
+            stage && shapes.startToDraw(getRelativePointerPosition(stage));
+          }}
+        >
           <ReactKonvaRect
             x={(0 - shapes.stageInfo.offset.x) / shapes.stageInfo.scale}
             y={(0 - shapes.stageInfo.offset.y) / shapes.stageInfo.scale}
@@ -220,6 +255,8 @@ const Editor = (): React.ReactElement => {
               image={O.toUndefined(shapes.backgroundImg)}
             />
           )}
+        </Layer>
+        <Layer>
           {shapes.getAllRects().map((rect) => {
             return (
               <Rectangle
@@ -270,6 +307,31 @@ const Editor = (): React.ReactElement => {
             <></>
           )}
         </Layer>
+        <Layer>
+          {shapes.currentMode === 'CLIP' && (
+            <ReactKonvaRect
+              x={shapes.clipRect.origin.x}
+              y={shapes.clipRect.origin.y}
+              width={shapes.clipRect.width}
+              height={shapes.clipRect.height}
+              strokeWidth={2}
+              stroke="blue"
+              fill="transparent"
+              scaleX={shapes.clipRect.scaleX}
+              scaleY={shapes.clipRect.scaleY}
+              name={shapes.clipRect.name}
+              strokeScaleEnabled={false}
+              onDragEnd={handleClipChange}
+              onTransformEnd={handleClipChange}
+              draggable
+            />
+          )}
+          {shapes.currentMode === 'CLIP' ? (
+            <TransformerComponent selectedShape={shapes.clipRect} />
+          ) : (
+            <></>
+          )}
+        </Layer>
       </Stage>
 
       <Box
@@ -281,7 +343,7 @@ const Editor = (): React.ReactElement => {
           borderBottomRightRadius: 2,
         }}
       >
-        <ToolPanel />
+        <ToolPanel onClip={handleClip} />
       </Box>
 
       <TextEditor

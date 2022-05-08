@@ -278,6 +278,13 @@ export const getTrayMenu = (): Menu => {
         await prepareForCropperWindow(true);
       },
     },
+    {
+      label: 'Quit',
+      accelerator: 'Command+Q',
+      click: () => {
+        app.quit();
+      },
+    },
   ];
   return Menu.buildFromTemplate(template);
 };

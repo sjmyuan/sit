@@ -55,6 +55,8 @@ export type Rect = {
   origin: Point;
   width: number;
   height: number;
+  scaleX: number;
+  scaleY: number;
 };
 
 export type Text = {
@@ -72,6 +74,8 @@ export type Mask = {
   origin: Point;
   width: number;
   height: number;
+  scaleX: number;
+  scaleY: number;
 };
 
 export const getSize = (topLeft: Point, bottomRight: Point) => ({
@@ -102,8 +106,8 @@ export const getRelativePosition = (
 export const getTopLeftAndBottomRight = (rect: Rect | Mask) => {
   const left = rect.origin.x;
   const top = rect.origin.y;
-  const right = rect.origin.x + rect.width;
-  const bottom = rect.origin.y + rect.height;
+  const right = rect.origin.x + rect.width * rect.scaleX;
+  const bottom = rect.origin.y + rect.height * rect.scaleY;
 
   const realLeft = left < right ? left : right;
   const realRight = left < right ? right : left;
@@ -134,4 +138,11 @@ export type StageInfo = {
 
 export type SitShape = Rect | Text | Mask;
 
-export type MODE = 'RECT' | 'TEXT' | 'MASK' | 'NONE' | 'ZOOM_IN' | 'ZOOM_OUT';
+export type MODE =
+  | 'RECT'
+  | 'TEXT'
+  | 'MASK'
+  | 'NONE'
+  | 'ZOOM_IN'
+  | 'ZOOM_OUT'
+  | 'CLIP';

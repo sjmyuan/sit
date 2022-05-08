@@ -11,6 +11,7 @@ import {
   StageInfo,
   Size,
   getSize,
+  Rect,
 } from '../types';
 import { MasksContainer } from './MaskContainer';
 import { RectsContainer } from './RectsContainer';
@@ -55,6 +56,21 @@ function useShapes() {
 
   const [dragVector, setDragVector] = useState<O.Option<Point>>(O.none);
 
+  const [clipRect, setClipRect] = useState<Rect>({
+    _tag: 'rect',
+    name: `rect-clip-0`,
+    id: 0,
+    origin: { x: 0, y: 0 },
+    width: 100,
+    height: 100,
+    scaleX: 1,
+    scaleY: 1,
+  });
+
+  useEffect(() => {
+    setSelectedShape(O.none);
+  }, [currentMode]);
+
   useEffect(() => {
     const newStageWidth = stageContainerSize.width / stageInfo.scale;
     const newStageHeight = stageContainerSize.height / stageInfo.scale;
@@ -75,6 +91,18 @@ function useShapes() {
       },
     });
   }, [stageContainerSize]);
+
+  useEffect(() => {
+    setClipRect({
+      ...clipRect,
+      origin: {
+        x: stageInfo.size.width / 4 - stageInfo.offset.x / stageInfo.scale,
+        y: stageInfo.size.height / 4 - stageInfo.offset.y / stageInfo.scale,
+      },
+      width: stageInfo.size.width / 2,
+      height: stageInfo.size.height / 2,
+    });
+  }, [stageInfo]);
 
   useEffect(() => {
     const width = O.getOrElse(() => stageContainerSize.width)(
@@ -100,6 +128,15 @@ function useShapes() {
           y: height,
         },
       },
+    });
+    setClipRect({
+      ...clipRect,
+      origin: {
+        x: (stageContainerSize.width - width) / 2,
+        y: (stageContainerSize.height - height) / 2,
+      },
+      width: width,
+      height: height,
     });
     rectState.clear();
     textState.clear();
@@ -144,6 +181,10 @@ function useShapes() {
   };
 
   const startToDraw = (point: Point) => {
+    if (currentMode === 'CLIP') {
+      return;
+    }
+
     const drawingAreaPoint = fromStageToDrawingArea(point);
     if (O.isSome(editingText)) {
       endToEdit();
@@ -294,14 +335,22 @@ function useShapes() {
     );
   };
 
-  const onSelect = (shape: SitShape) =>
+  const onSelect = (shape: SitShape) => {
+    if (currentMode === 'CLIP') {
+      return;
+    }
     setSelectedShape(
       O.some({ ...shape, origin: fromStageToDrawingArea(shape.origin) })
     );
+  };
 
   const getSelectedShape = () => selectedShape;
 
   const deleteSelectedShape = () => {
+    if (currentMode === 'CLIP') {
+      return;
+    }
+
     if (O.isSome(selectedShape)) {
       const shape = selectedShape.value;
       // eslint-disable-next-line no-underscore-dangle
@@ -351,6 +400,9 @@ function useShapes() {
     }));
 
   const updateShape = (shape: SitShape) => {
+    if (currentMode === 'CLIP') {
+      return;
+    }
     const drawingAreaShape = {
       ...shape,
       origin: fromStageToDrawingArea(shape.origin),
@@ -505,7 +557,8 @@ function useShapes() {
     setBackgroundImg,
     setStageContainerSize,
     stageInfo,
-    // initialize,
+    clipRect,
+    setClipRect,
   };
 }
 

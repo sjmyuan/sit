@@ -155,9 +155,6 @@ const Editor = (): React.ReactElement => {
 
   const handleClipChange = (e: KonvaEventObject<any>) => {
     const rect = e.target as KonvaRect;
-    console.log('clip changes...', rect);
-    console.log('clip width...', rect.width());
-    console.log('clip height...', rect.height());
     shapes.setClipRect({
       ...shapes.clipRect,
       origin: { x: rect.x(), y: rect.y() },
@@ -178,10 +175,10 @@ const Editor = (): React.ReactElement => {
       });
 
       const image = newStage.toDataURL({
-        x: shapes.clipRect.origin.x,
-        y: shapes.clipRect.origin.y,
-        width: shapes.clipRect.width * shapes.clipRect.scaleX,
-        height: shapes.clipRect.height * shapes.clipRect.scaleY,
+        x: shapes.clipRect.origin.x + 1,
+        y: shapes.clipRect.origin.y + 1,
+        width: shapes.clipRect.width * shapes.clipRect.scaleX - 2,
+        height: shapes.clipRect.height * shapes.clipRect.scaleY - 2,
         mimeType: 'image/png',
       });
 
@@ -328,6 +325,11 @@ const Editor = (): React.ReactElement => {
               onTransformEnd={handleClipChange}
               draggable
             />
+          )}
+          {shapes.currentMode === 'CLIP' ? (
+            <TransformerComponent selectedShape={shapes.clipRect} />
+          ) : (
+            <></>
           )}
         </Layer>
       </Stage>

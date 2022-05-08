@@ -68,11 +68,7 @@ function useShapes() {
   });
 
   useEffect(() => {
-    if (currentMode === 'CLIP') {
-      setSelectedShape(O.some(clipRect));
-    } else {
-      setSelectedShape(O.none);
-    }
+    setSelectedShape(O.none);
   }, [currentMode]);
 
   useEffect(() => {
@@ -95,6 +91,18 @@ function useShapes() {
       },
     });
   }, [stageContainerSize]);
+
+  useEffect(() => {
+    setClipRect({
+      ...clipRect,
+      origin: {
+        x: stageInfo.size.width / 4 - stageInfo.offset.x / stageInfo.scale,
+        y: stageInfo.size.height / 4 - stageInfo.offset.y / stageInfo.scale,
+      },
+      width: stageInfo.size.width / 2,
+      height: stageInfo.size.height / 2,
+    });
+  }, [stageInfo]);
 
   useEffect(() => {
     const width = O.getOrElse(() => stageContainerSize.width)(

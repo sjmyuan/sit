@@ -183,8 +183,6 @@ function useShapes() {
   };
 
   const startToDraw = (point: Point) => {
-    console.log('point...', point);
-    console.log('stage info...', stageInfo);
     if (currentMode === 'CLIP') {
       return;
     }

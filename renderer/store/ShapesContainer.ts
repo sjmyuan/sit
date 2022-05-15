@@ -235,11 +235,7 @@ function useShapes() {
   };
 
   const zoom = (point: Point, isZoomIn: boolean) => {
-    const {
-      offsetOfCanvas: oldOffset,
-      scale: oldScale,
-      drawingArea,
-    } = stageInfo;
+    const { scale: oldScale, drawingArea } = stageInfo;
 
     const newScale = isZoomIn ? oldScale * 1.1 : oldScale / 1.1;
 

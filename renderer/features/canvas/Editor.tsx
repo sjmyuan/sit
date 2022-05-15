@@ -206,19 +206,24 @@ const Editor = (): React.ReactElement => {
           align-items: center;
           background-color: red;
         `}
-        x={shapes.stageInfo.offset.x}
-        y={shapes.stageInfo.offset.y}
+        x={shapes.stageInfo.offsetOfCanvas.x}
+        y={shapes.stageInfo.offsetOfCanvas.y}
         scaleX={shapes.stageInfo.scale}
         scaleY={shapes.stageInfo.scale}
         ref={stageRef}
-        width={shapes.stageInfo.size.width * shapes.stageInfo.scale}
-        height={shapes.stageInfo.size.height * shapes.stageInfo.scale}
+        width={shapes.stageInfo.viewPortSize.width * shapes.stageInfo.scale}
+        height={shapes.stageInfo.viewPortSize.height * shapes.stageInfo.scale}
         onMouseUp={() => {
           shapes.endToDraw();
         }}
         onMouseMove={(e) => {
           const stage = e.target.getStage();
           stage && shapes.drawing(getRelativePointerPosition(stage));
+        }}
+        onWheel={(e) => {
+          const stage = e.target.getStage();
+          stage &&
+            shapes.zoom(getRelativePointerPosition(stage), e.evt.deltaY > 0);
         }}
       >
         <Layer
@@ -228,10 +233,10 @@ const Editor = (): React.ReactElement => {
           }}
         >
           <ReactKonvaRect
-            x={(0 - shapes.stageInfo.offset.x) / shapes.stageInfo.scale}
-            y={(0 - shapes.stageInfo.offset.y) / shapes.stageInfo.scale}
-            width={shapes.stageInfo.size.width}
-            height={shapes.stageInfo.size.height}
+            x={(0 - shapes.stageInfo.offsetOfCanvas.x) / shapes.stageInfo.scale}
+            y={(0 - shapes.stageInfo.offsetOfCanvas.y) / shapes.stageInfo.scale}
+            width={shapes.stageInfo.viewPortSize.width}
+            height={shapes.stageInfo.viewPortSize.height}
             strokeWidth={0}
             fill="rgb(116,116,116)"
             name="full-paper"

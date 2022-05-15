@@ -1,7 +1,7 @@
 {
   "name": "sit",
   "productName": "Sit",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Simple image tool",
   "main": "dist/main/index.js",
   "scripts": {
@@ -11,8 +11,7 @@
     "build": "yarn clean && yarn && yarn build:main && yarn build:renderer && yarn copy:resources",
     "clean": "rm -rf dist/*",
     "copy:resources": "cp -r resources dist",
-    "mac_dist": "yarn build && electron-builder -m",
-    "win_dist": "yarn build && electron-builder -w",
+    "dist": "yarn build && electron-builder -mw",
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
     "sentry-version": "echo \"$npm_package_name@$npm_package_version\"",

@@ -22,11 +22,11 @@ const TextEditor = (props: {
     O.map((x) => ({
       x:
         x.origin.x * shapes.stageInfo.scale +
-        shapes.stageInfo.offset.x +
+        shapes.stageInfo.offsetOfCanvas.x +
         props.getRelativePos().x,
       y:
         x.origin.y * shapes.stageInfo.scale +
-        shapes.stageInfo.offset.y +
+        shapes.stageInfo.offsetOfCanvas.y +
         props.getRelativePos().y,
     })),
     O.getOrElse(() => ({ x: -1, y: -1 }))

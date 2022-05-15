@@ -125,14 +125,27 @@ export type Size = {
   height: number;
 };
 
+/**
+ * There are 3 coordinates
+ * 1. canvas, which is the lowest level coordinate, no scale concept
+ * 2. stage, which is virtual coordinate, support scale and transform
+ * 3. drawingArea, virtual coordinate, stage/canvas independence
+ */
 export type StageInfo = {
-  offset: Point;
-  size: Size;
+  offsetOfCanvas: Point; // move the origin of canvas to (-1*offsetOfCanvas.x, -1*offsetOfCanvas.y)
+
+  /**
+   * We always map the (0, 0) of stage to canvas (-1*offsetOfCanvas.x, -1*offsetOfCanvas.y)
+   * and map the view port origin to (0, 0) of canvas
+   * So the top left point of view port in stage coordinate is (-1*stageInfo.offsetOfCanvas.x / stageInfo.scale, -1*stageInfo.offsetOfCanvas.y / stageInfo.scale)
+   */
+  viewPortOrigin: Point;
+  viewPortSize: Size;
   scale: number;
   drawingArea: {
-    origin: Point; // relative to offset
-    topLeft: Point; // relative to origin
-    bottomRight: Point; // relative to origin
+    origin: Point; // drawing are top left point position in stage coordinate
+    topLeft: Point; // relative to drawing area origin
+    bottomRight: Point; // relative to drawing area origin
   };
 };
 

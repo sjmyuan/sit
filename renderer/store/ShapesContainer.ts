@@ -38,9 +38,10 @@ function useShapes() {
   });
 
   const [stageInfo, setStageInfo] = useState<StageInfo>({
-    offset: { x: 0, y: 0 },
+    offsetOfCanvas: { x: 0, y: 0 },
     scale: 1,
-    size: { width: 400, height: 400 },
+    viewPortOrigin: { x: 0, y: 0 },
+    viewPortSize: { width: 400, height: 400 },
     drawingArea: {
       origin: { x: 100, y: 100 },
       topLeft: { x: 0, y: 0 },
@@ -77,16 +78,16 @@ function useShapes() {
 
     setStageInfo({
       ...stageInfo,
-      size: { width: newStageWidth, height: newStageHeight },
+      viewPortSize: { width: newStageWidth, height: newStageHeight },
       drawingArea: {
         ...stageInfo.drawingArea,
         origin: {
           x:
             stageInfo.drawingArea.origin.x +
-            (newStageWidth - stageInfo.size.width) / 2,
+            (newStageWidth - stageInfo.viewPortSize.width) / 2,
           y:
             stageInfo.drawingArea.origin.y +
-            (newStageHeight - stageInfo.size.height) / 2,
+            (newStageHeight - stageInfo.viewPortSize.height) / 2,
         },
       },
     });
@@ -96,11 +97,11 @@ function useShapes() {
     setClipRect({
       ...clipRect,
       origin: {
-        x: stageInfo.size.width / 4 - stageInfo.offset.x / stageInfo.scale,
-        y: stageInfo.size.height / 4 - stageInfo.offset.y / stageInfo.scale,
+        x: stageInfo.viewPortSize.width / 4 + stageInfo.viewPortOrigin.x,
+        y: stageInfo.viewPortSize.height / 4 + stageInfo.viewPortOrigin.y,
       },
-      width: stageInfo.size.width / 2,
-      height: stageInfo.size.height / 2,
+      width: stageInfo.viewPortSize.width / 2,
+      height: stageInfo.viewPortSize.height / 2,
     });
   }, [stageInfo]);
 
@@ -114,9 +115,10 @@ function useShapes() {
 
     setStageInfo({
       ...stageInfo,
-      offset: { x: 0, y: 0 },
+      offsetOfCanvas: { x: 0, y: 0 },
       scale: 1,
-      size: stageContainerSize,
+      viewPortOrigin: { x: 0, y: 0 },
+      viewPortSize: stageContainerSize,
       drawingArea: {
         origin: {
           x: (stageContainerSize.width - width) / 2,
@@ -181,6 +183,8 @@ function useShapes() {
   };
 
   const startToDraw = (point: Point) => {
+    console.log('point...', point);
+    console.log('stage info...', stageInfo);
     if (currentMode === 'CLIP') {
       return;
     }
@@ -228,49 +232,62 @@ function useShapes() {
     }
 
     if (currentMode === 'ZOOM_IN' || currentMode === 'ZOOM_OUT') {
-      const { offset: oldOffset, scale: oldScale, drawingArea } = stageInfo;
-
-      const newScale =
-        currentMode === 'ZOOM_IN' ? oldScale * 1.1 : oldScale / 1.1;
-
-      const drawingAreaSize = getSize(
-        drawingArea.topLeft,
-        drawingArea.bottomRight
-      );
-
-      const newActualDrawingAreaWidth = drawingAreaSize.width * newScale;
-      const newActualDrawingAreaHeight = drawingAreaSize.height * newScale;
-
-      //Do nothing if the drawing area size smaller than container size
-      if (
-        newActualDrawingAreaWidth < stageContainerSize.width &&
-        newActualDrawingAreaHeight < stageContainerSize.height
-      ) {
-        return;
-      }
-
-      const mousePointTo = {
-        x: (point.x - oldOffset.x) / oldScale,
-        y: (point.y - oldOffset.y) / oldScale,
-      };
-
-      const newOffset = {
-        x: point.x - mousePointTo.x * newScale,
-        y: point.y - mousePointTo.y * newScale,
-      };
-
-      const newSize = {
-        width: stageContainerSize.width / newScale,
-        height: stageContainerSize.height / newScale,
-      };
-
-      setStageInfo({
-        ...stageInfo,
-        size: newSize,
-        offset: newOffset,
-        scale: newScale,
-      });
+      zoom(point, currentMode === 'ZOOM_IN');
     }
+  };
+
+  const zoom = (point: Point, isZoomIn: boolean) => {
+    const {
+      offsetOfCanvas: oldOffset,
+      scale: oldScale,
+      drawingArea,
+    } = stageInfo;
+
+    const newScale = isZoomIn ? oldScale * 1.1 : oldScale / 1.1;
+
+    const drawingAreaSize = getSize(
+      drawingArea.topLeft,
+      drawingArea.bottomRight
+    );
+
+    const newActualDrawingAreaWidth = drawingAreaSize.width * newScale;
+    const newActualDrawingAreaHeight = drawingAreaSize.height * newScale;
+
+    //Do nothing if the drawing area size smaller than container size
+    if (
+      newActualDrawingAreaWidth < stageContainerSize.width &&
+      newActualDrawingAreaHeight < stageContainerSize.height
+    ) {
+      return;
+    }
+
+    const mousePointTo = {
+      x: (point.x - stageInfo.viewPortOrigin.x) * oldScale,
+      y: (point.y - stageInfo.viewPortOrigin.y) * oldScale,
+    };
+
+    const newViewPortOrigin = {
+      x: point.x - mousePointTo.x / newScale,
+      y: point.y - mousePointTo.y / newScale,
+    };
+
+    const newOffset = {
+      x: -1 * newViewPortOrigin.x * newScale,
+      y: -1 * newViewPortOrigin.y * newScale,
+    };
+
+    const newSize = {
+      width: stageContainerSize.width / newScale,
+      height: stageContainerSize.height / newScale,
+    };
+
+    setStageInfo({
+      ...stageInfo,
+      viewPortSize: newSize,
+      viewPortOrigin: newViewPortOrigin,
+      offsetOfCanvas: newOffset,
+      scale: newScale,
+    });
   };
 
   const drawing = (point: Point) => {
@@ -423,33 +440,6 @@ function useShapes() {
     }
   };
 
-  /**
-   * when resize window, we want the drawing area to be always the center of stage, because stage size will change
-   * and the relative position of topeleft, bottomright should not be changed
-   * when drawing outsize the drawing area, we want to keep the current origin and only change the position of topleft or bottomright
-   */
-
-  // const updateDrawingAreaOrigin = () => {
-  //   const { origin, topLeft, bottomRight } = drawingArea;
-  //   const drawingAreaWidth = Math.abs(bottomRight.x - topLeft.x);
-  //   const drawingAreaHeight = Math.abs(bottomRight.y - topLeft.y);
-  //   const { width: stageWidth, height: stageHeight } = stageInfo.size;
-  //   const oldDrawingAreaOffset: [number, number] = [
-  //     origin.x + topLeft.x,
-  //     origin.y + topLeft.y,
-  //   ];
-  //   const newDrawingAreaOffset: [number, number] = [
-  //     (stageWidth - drawingAreaWidth) / 2,
-  //     (stageHeight - drawingAreaHeight) / 2,
-  //   ];
-  //   const newDrawingAreaOrigin = {
-  //     x: origin.x + (newDrawingAreaOffset[0] - oldDrawingAreaOffset[0]),
-  //     y: origin.y + (newDrawingAreaOffset[1] - oldDrawingAreaOffset[1]),
-  //   };
-
-  //   setDrawingArea({ ...drawingArea, origin: newDrawingAreaOrigin });
-  // };
-
   const updateDrawingAreaRect = () => {
     const { topLeft, bottomRight } = stageInfo.drawingArea;
     let minX = topLeft.x;
@@ -493,43 +483,6 @@ function useShapes() {
       },
     });
   };
-
-  // const initialize = (
-  //   containerSize: Size,
-  //   image: O.Option<HTMLImageElement>
-  // ) => {
-  //   const newStageWidth = containerSize.width / stageInfo.scale;
-  //   const newStageHeight = containerSize.height / stageInfo.scale;
-
-  //   const width = O.getOrElse(() => 400)(
-  //     O.map<HTMLImageElement, number>((x) => x.width)(image)
-  //   );
-  //   const height = O.getOrElse(() => 400)(
-  //     O.map<HTMLImageElement, number>((x) => x.height)(image)
-  //   );
-  //   setDrawingArea({
-  //     origin: {
-  //       x: (newStageWidth - width) / 2,
-  //       y: (newStageHeight - height) / 2,
-  //     },
-  //     topLeft: { x: 0, y: 0 },
-  //     bottomRight: {
-  //       x: width,
-  //       y: height,
-  //     },
-  //   });
-
-  //   setStageInfo({
-  //     ...stageInfo,
-  //     size: { width: newStageWidth, height: newStageHeight },
-  //   });
-
-  //   setStageContainerSize(containerSize);
-
-  //   setBackgroundImg(image);
-
-  //   // setInitialized(true);
-  // };
 
   return {
     currentMode,

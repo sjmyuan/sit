@@ -220,6 +220,11 @@ const Editor = (): React.ReactElement => {
           const stage = e.target.getStage();
           stage && shapes.drawing(getRelativePointerPosition(stage));
         }}
+        onWheel={(e) => {
+          const stage = e.target.getStage();
+          stage &&
+            shapes.zoom(getRelativePointerPosition(stage), e.evt.deltaY > 0);
+        }}
       >
         <Layer
           onMouseDown={(e) => {

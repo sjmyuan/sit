@@ -500,8 +500,6 @@ function useShapes() {
     editingImageUrl,
     getEditingImageUrl,
     deleteSelectedShape,
-    // setDrawingArea,
-    // drawingArea,
     getAllRects,
     getAllTexts,
     getAllMasks,
@@ -512,6 +510,7 @@ function useShapes() {
     stageInfo,
     clipRect,
     setClipRect,
+    zoom,
   };
 }
 

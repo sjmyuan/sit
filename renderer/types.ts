@@ -78,6 +78,13 @@ export type Mask = {
   scaleY: number;
 };
 
+export type Line = {
+  readonly _tag: 'line';
+  id: number;
+  name: string;
+  points: Point[];
+};
+
 export const getSize = (topLeft: Point, bottomRight: Point) => ({
   width: Math.abs(bottomRight.x - topLeft.x),
   height: Math.abs(bottomRight.y - topLeft.y),

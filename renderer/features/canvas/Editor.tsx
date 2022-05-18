@@ -18,6 +18,7 @@ import { css } from '@emotion/css';
 import MaskComponent from './MaskComponent';
 import ToolPanel from '../toolbar/ToolPanel';
 import { KonvaEventObject } from 'konva/types/Node';
+import LineComponent from './LineComponent';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -311,6 +312,9 @@ const Editor = (): React.ReactElement => {
           ) : (
             <></>
           )}
+          {shapes.getAllLines().map((line) => {
+            return (<LineComponent line={line} />);
+          })}
         </Layer>
         <Layer>
           {shapes.currentMode === 'CLIP' && (

@@ -26,7 +26,7 @@ function useLines(initialState: Line[] = []) {
         newLine,
         O.map((line) => ({
           ...line,
-          point: [...line.points, point],
+          points: [...line.points, point],
         }))
       )
     );
@@ -36,25 +36,25 @@ function useLines(initialState: Line[] = []) {
     if (O.isSome(newLine)) {
       setLines([
         ...lines,
-        { ...newLine.value, name: `mask-${newLine.value.id}` },
+        { ...newLine.value, name: `line-${newLine.value.id}` },
       ]);
       setNewLine(O.none);
     }
   };
 
-  const getAllMasks = () => {
+  const getAllLines = () => {
     return O.isSome(newLine) ? [...lines, newLine.value] : lines;
   };
 
   const clear = () => setLines([]);
 
   return {
-    getAllMasks,
+    getAllLines,
     startToDraw,
     drawing,
     endToDraw,
     clear,
-    masks: lines,
+    lines,
   };
 }
 

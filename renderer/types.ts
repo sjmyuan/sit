@@ -165,4 +165,5 @@ export type MODE =
   | 'NONE'
   | 'ZOOM_IN'
   | 'ZOOM_OUT'
-  | 'CLIP';
+  | 'CLIP'
+  | 'LINE';

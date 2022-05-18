@@ -13,6 +13,7 @@ import {
   getSize,
   Rect,
 } from '../types';
+import { LinesContainer } from './LineContainer';
 import { MasksContainer } from './MaskContainer';
 import { RectsContainer } from './RectsContainer';
 import { TextsContainer } from './TextContainer';
@@ -21,6 +22,7 @@ function useShapes() {
   const rectState = RectsContainer.useContainer();
   const textState = TextsContainer.useContainer();
   const maskState = MasksContainer.useContainer();
+  const linesState = LinesContainer.useContainer();
 
   const [currentMode, setMode] = useState<MODE>('NONE');
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
@@ -143,6 +145,7 @@ function useShapes() {
     rectState.clear();
     textState.clear();
     maskState.clear();
+    linesState.clear();
     setDragStartPoint(O.none);
     setDragVector(O.none);
     toggleDrawing(false);
@@ -232,6 +235,10 @@ function useShapes() {
     if (currentMode === 'ZOOM_IN' || currentMode === 'ZOOM_OUT') {
       zoom(point, currentMode === 'ZOOM_IN');
     }
+
+    if (currentMode === 'LINE') {
+      linesState.startToDraw(drawingAreaPoint);
+    }
   };
 
   const zoom = (point: Point, isZoomIn: boolean) => {
@@ -297,6 +304,10 @@ function useShapes() {
     if (currentMode === 'NONE' && O.isSome(dragStartPoint)) {
       setDragStartPoint(O.some(point));
     }
+
+    if (currentMode === 'LINE' && isDrawing) {
+      linesState.drawing(drawingAreaPoint);
+    }
   };
 
   const endToDraw = () => {
@@ -312,6 +323,10 @@ function useShapes() {
     if (currentMode === 'NONE') {
       setDragStartPoint(O.none);
       setDragVector(O.none);
+    }
+
+    if (currentMode === 'LINE') {
+      linesState.endToDraw();
     }
   };
 
@@ -410,6 +425,12 @@ function useShapes() {
       origin: fromDrawingAreaToStage(text.origin),
     }));
 
+  const getAllLines = () =>
+    linesState.getAllLines().map((line) => ({
+      ...line,
+      points: line.points.map((p) => fromDrawingAreaToStage(p)),
+    }));
+
   const updateShape = (shape: SitShape) => {
     if (currentMode === 'CLIP') {
       return;
@@ -468,6 +489,15 @@ function useShapes() {
       maxY = maxY > text.origin.y ? maxY : text.origin.y;
     });
 
+    linesState.getAllLines().forEach((line) => {
+      line.points.forEach((point) => {
+        minX = minX < point.x ? minX : point.x;
+        minY = minY < point.y ? minY : point.y;
+        maxX = maxX > point.x ? maxX : point.x;
+        maxY = maxY > point.y ? maxY : point.y;
+      });
+    });
+
     setStageInfo({
       ...stageInfo,
       drawingArea: {
@@ -497,6 +527,7 @@ function useShapes() {
     getAllRects,
     getAllTexts,
     getAllMasks,
+    getAllLines,
     updateShape,
     backgroundImg,
     setBackgroundImg,

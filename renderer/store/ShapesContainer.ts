@@ -14,14 +14,12 @@ import {
   Rect,
 } from '../types';
 import { LinesContainer } from './LineContainer';
-import { MasksContainer } from './MaskContainer';
 import { RectsContainer } from './RectsContainer';
 import { TextsContainer } from './TextContainer';
 
 function useShapes() {
   const rectState = RectsContainer.useContainer();
   const textState = TextsContainer.useContainer();
-  const maskState = MasksContainer.useContainer();
   const linesState = LinesContainer.useContainer();
 
   const [currentMode, setMode] = useState<MODE>('NONE');
@@ -144,7 +142,6 @@ function useShapes() {
     });
     rectState.clear();
     textState.clear();
-    maskState.clear();
     linesState.clear();
     setDragStartPoint(O.none);
     setDragVector(O.none);
@@ -156,7 +153,7 @@ function useShapes() {
 
   useEffect(() => {
     updateDrawingAreaRect();
-  }, [rectState.rects, textState.texts, maskState.masks]);
+  }, [rectState.rects, textState.texts, linesState.lines]);
 
   useEffect(() => {
     if (O.isSome(dragVector) && O.isSome(dragStartPoint)) {
@@ -206,10 +203,6 @@ function useShapes() {
         const newText = textState.startToDraw(drawingAreaPoint);
         setEditingText(O.some(newText));
       }
-    }
-
-    if (currentMode === 'MASK') {
-      maskState.startToDraw(drawingAreaPoint);
     }
 
     if (currentMode === 'NONE') {
@@ -297,10 +290,6 @@ function useShapes() {
       rectState.drawing(drawingAreaPoint);
     }
 
-    if (currentMode === 'MASK' && isDrawing) {
-      maskState.drawing(drawingAreaPoint);
-    }
-
     if (currentMode === 'NONE' && O.isSome(dragStartPoint)) {
       setDragStartPoint(O.some(point));
     }
@@ -314,10 +303,6 @@ function useShapes() {
     toggleDrawing(false);
     if (currentMode === 'RECT') {
       rectState.endToDraw();
-    }
-
-    if (currentMode === 'MASK') {
-      maskState.endToDraw();
     }
 
     if (currentMode === 'NONE') {
@@ -385,8 +370,6 @@ function useShapes() {
         // eslint-disable-next-line no-underscore-dangle
       } else if (shape._tag === 'text') {
         textState.deleteText(shape);
-      } else if (shape._tag === 'mask') {
-        maskState.deleteMask(shape);
       }
 
       setSelectedShape(O.none);
@@ -407,16 +390,6 @@ function useShapes() {
     }));
 
     return transformedRect;
-  };
-
-  const getAllMasks = () => {
-    const originalMasks = maskState.getAllMasks();
-    const transformedMask = originalMasks.map((mask) => ({
-      ...mask,
-      origin: fromDrawingAreaToStage(mask.origin),
-    }));
-
-    return transformedMask;
   };
 
   const getAllTexts = () =>
@@ -449,10 +422,6 @@ function useShapes() {
     if (drawingAreaShape._tag === 'rect') {
       rectState.update(drawingAreaShape);
     }
-
-    if (drawingAreaShape._tag === 'mask') {
-      maskState.update(drawingAreaShape);
-    }
   };
 
   const updateDrawingAreaRect = () => {
@@ -470,16 +439,6 @@ function useShapes() {
       minY = minY < rectTopLeft.y ? minY : rectTopLeft.y;
       maxX = maxX > rectBottomRight.x ? maxX : rectBottomRight.x;
       maxY = maxY > rectBottomRight.y ? maxY : rectBottomRight.y;
-    });
-
-    maskState.getAllMasks().forEach((mask) => {
-      const { topLeft: maskTopLeft, bottomRight: maskBottomRight } =
-        getTopLeftAndBottomRight(mask);
-
-      minX = minX < maskTopLeft.x ? minX : maskTopLeft.x;
-      minY = minY < maskTopLeft.y ? minY : maskTopLeft.y;
-      maxX = maxX > maskBottomRight.x ? maxX : maskBottomRight.x;
-      maxY = maxY > maskBottomRight.y ? maxY : maskBottomRight.y;
     });
 
     textState.texts.forEach((text) => {
@@ -526,7 +485,6 @@ function useShapes() {
     deleteSelectedShape,
     getAllRects,
     getAllTexts,
-    getAllMasks,
     getAllLines,
     updateShape,
     backgroundImg,

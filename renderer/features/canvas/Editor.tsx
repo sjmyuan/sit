@@ -15,7 +15,6 @@ import { ShapeContainer } from '../../store/ShapesContainer';
 import { InfoContainer } from '../../store/InfoContainer';
 import { getAbsolutePosition, getSize, Point } from '../../types';
 import { css } from '@emotion/css';
-import MaskComponent from './MaskComponent';
 import ToolPanel from '../toolbar/ToolPanel';
 import { KonvaEventObject } from 'konva/types/Node';
 import LineComponent from './LineComponent';
@@ -271,18 +270,6 @@ const Editor = (): React.ReactElement => {
                 onSelected={() => shapes.onSelect(rect)}
                 onTransform={(transformedRect) =>
                   shapes.updateShape(transformedRect)
-                }
-              />
-            );
-          })}
-          {shapes.getAllMasks().map((mask) => {
-            return (
-              <MaskComponent
-                key={mask.name}
-                mask={mask}
-                onSelected={() => shapes.onSelect(mask)}
-                onTransform={(transformedMask) =>
-                  shapes.updateShape(transformedMask)
                 }
               />
             );

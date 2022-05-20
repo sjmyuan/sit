@@ -8,7 +8,6 @@ import { InfoContainer } from '../renderer/store/InfoContainer';
 import { RectsContainer } from '../renderer/store/RectsContainer';
 import { TextsContainer } from '../renderer/store/TextContainer';
 import { ShapeContainer } from '../renderer/store/ShapesContainer';
-import { MasksContainer } from '../renderer/store/MaskContainer';
 import { LinesContainer } from '../renderer/store/LineContainer';
 
 const App = ({ Component, pageProps }: AppProps) => {
@@ -17,13 +16,11 @@ const App = ({ Component, pageProps }: AppProps) => {
       <ImageContainer.Provider>
         <RectsContainer.Provider>
           <TextsContainer.Provider>
-            <MasksContainer.Provider>
-              <LinesContainer.Provider>
-                <ShapeContainer.Provider>
-                  <Component {...pageProps} />
-                </ShapeContainer.Provider>
-              </LinesContainer.Provider>
-            </MasksContainer.Provider>
+            <LinesContainer.Provider>
+              <ShapeContainer.Provider>
+                <Component {...pageProps} />
+              </ShapeContainer.Provider>
+            </LinesContainer.Provider>
           </TextsContainer.Provider>
         </RectsContainer.Provider>
       </ImageContainer.Provider>

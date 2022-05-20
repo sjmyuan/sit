@@ -25,7 +25,7 @@
 * Take screenshot
 * Add rectangle to screenshot
 * Add text to screenshot
-* Add mask to screenshot
+* Add line to screenshot
 * Store screenshot history
 * Zoom In/Out by wheel or button
 * Clip Image

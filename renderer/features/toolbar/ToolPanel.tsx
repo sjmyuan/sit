@@ -8,7 +8,6 @@ import {
   ZoomIn,
   ZoomOut,
   ContentCut,
-  BorderColor,
 } from '@mui/icons-material';
 import { ShapeContainer } from '../../store/ShapesContainer';
 import ClipPanel from './ClipPanel';
@@ -70,19 +69,11 @@ const ToolPanel = (props: ToolPanelProps): React.ReactElement => {
       </IconButton>
       <IconButton
         color="inherit"
-        aria-label="add mask"
-        disabled={shapes.currentMode === 'MASK'}
-        onClick={() => shapes.setMode('MASK')}
-      >
-        <Brush />
-      </IconButton>
-      <IconButton
-        color="inherit"
         aria-label="pen"
         disabled={shapes.currentMode === 'LINE'}
         onClick={() => shapes.setMode('LINE')}
       >
-        <BorderColor />
+        <Brush />
       </IconButton>
       <IconButton
         color="inherit"

@@ -15,7 +15,7 @@ const LineComponent = (props: LineProps): React.ReactElement => {
       strokeWidth={20}
       stroke="white"
       bezier={true}
-      strokeScaleEnabled={false}
+      strokeScaleEnabled={true}
       draggable={false}
     />
   );

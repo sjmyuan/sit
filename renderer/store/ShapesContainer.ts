@@ -235,25 +235,9 @@ function useShapes() {
   };
 
   const zoom = (point: Point, isZoomIn: boolean) => {
-    const { scale: oldScale, drawingArea } = stageInfo;
+    const { scale: oldScale } = stageInfo;
 
     const newScale = isZoomIn ? oldScale * 1.1 : oldScale / 1.1;
-
-    const drawingAreaSize = getSize(
-      drawingArea.topLeft,
-      drawingArea.bottomRight
-    );
-
-    const newActualDrawingAreaWidth = drawingAreaSize.width * newScale;
-    const newActualDrawingAreaHeight = drawingAreaSize.height * newScale;
-
-    //Do nothing if the drawing area size smaller than container size
-    if (
-      newActualDrawingAreaWidth < stageContainerSize.width &&
-      newActualDrawingAreaHeight < stageContainerSize.height
-    ) {
-      return;
-    }
 
     const mousePointTo = {
       x: (point.x - stageInfo.viewPortOrigin.x) * oldScale,

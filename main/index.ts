@@ -1,7 +1,7 @@
 import { app, ipcMain, globalShortcut } from 'electron';
 import { is, enforceMacOSAppLocation } from 'electron-util';
-import log from 'electron-log';
-import { autoUpdater } from 'electron-updater';
+// import log from 'electron-log';
+// import { autoUpdater } from 'electron-updater';
 import prepareNext from 'electron-next';
 import { initializeTray } from './tray';
 import {

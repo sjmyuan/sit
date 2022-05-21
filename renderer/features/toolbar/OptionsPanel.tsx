@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import ColorPicker from './ColorPicker';
 
 const ToolPanel = (): React.ReactElement => {
   const [color, setColor] = useState<string>('#FF6900');
+  const [width, setWidth] = useState<number>(1);
   return (
     <Box
       sx={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
       }}
     >
       <ColorPicker color={color} onChange={(newColor) => setColor(newColor)} />
+      <TextField
+        size="small"
+        required
+        id="height"
+        type="number"
+        value={width}
+        onChange={(e) => setWidth(+e.target.value)}
+      />
     </Box>
   );
 };

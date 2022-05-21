@@ -347,6 +347,7 @@ const Editor = (): React.ReactElement => {
         sx={{
           position: 'absolute',
           top: 4,
+          backgroundColor: 'white',
         }}
       >
         <OptionsPanel />

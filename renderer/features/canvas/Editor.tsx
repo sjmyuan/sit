@@ -346,7 +346,7 @@ const Editor = (): React.ReactElement => {
       <Box
         sx={{
           position: 'absolute',
-          top: -100,
+          top: 4,
           backgroundColor: 'white',
         }}
       >

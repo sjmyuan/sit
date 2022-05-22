@@ -1,14 +1,14 @@
 import { app, ipcMain, globalShortcut } from 'electron';
 import { is, enforceMacOSAppLocation } from 'electron-util';
-import log from 'electron-log';
-import { autoUpdater } from 'electron-updater';
+// import log from 'electron-log';
+// import { autoUpdater } from 'electron-updater';
 import prepareNext from 'electron-next';
 import { initializeTray } from './tray';
 import {
   openMainWindow,
   closeMainWindow,
   hideMainWindow,
-  editImageinMainWindow,
+  editImageInMainWindow,
   sendWorkerEventToMainWindow,
 } from './main';
 import { openWorkerWindow, prepareForCropperWindow } from './worker';
@@ -21,21 +21,21 @@ import {
 
 app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
-const checkForUpdates = async (): Promise<void> => {
-  if (is.development) {
-    return;
-  }
+// const checkForUpdates = async (): Promise<void> => {
+//   if (is.development) {
+//     return;
+//   }
 
-  try {
-    await autoUpdater.checkForUpdates();
-  } catch (error) {
-    autoUpdater.logger?.error(error);
-  }
+//   try {
+//     await autoUpdater.checkForUpdates();
+//   } catch (error) {
+//     autoUpdater.logger?.error(error);
+//   }
 
-  autoUpdater.logger = log;
+//   autoUpdater.logger = log;
 
-  setInterval(checkForUpdates, 24 * 60 * 60 * 1000);
-};
+//   setInterval(checkForUpdates, 24 * 60 * 60 * 1000);
+// };
 
 // Prepare the renderer once the app is ready
 (async () => {
@@ -102,14 +102,14 @@ const checkForUpdates = async (): Promise<void> => {
 
   ipcMain.on('took-screen-shot', (_, imageIndex) => {
     closeCropperWindow();
-    editImageinMainWindow(imageIndex);
+    editImageInMainWindow(imageIndex);
   });
 
   ipcMain.on('worker-event', (_, event) => {
     sendWorkerEventToMainWindow(event);
   });
 
-  checkForUpdates();
+  // checkForUpdates();
 })();
 
 app.on('activate', () => {

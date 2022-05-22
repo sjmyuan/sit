@@ -67,15 +67,11 @@ export type Text = {
   value: string;
 };
 
-export type Mask = {
-  readonly _tag: 'mask';
+export type Line = {
+  readonly _tag: 'line';
   id: number;
   name: string;
-  origin: Point;
-  width: number;
-  height: number;
-  scaleX: number;
-  scaleY: number;
+  points: Point[];
 };
 
 export const getSize = (topLeft: Point, bottomRight: Point) => ({
@@ -103,7 +99,7 @@ export const getRelativePosition = (
   };
 };
 
-export const getTopLeftAndBottomRight = (rect: Rect | Mask) => {
+export const getTopLeftAndBottomRight = (rect: Rect) => {
   const left = rect.origin.x;
   const top = rect.origin.y;
   const right = rect.origin.x + rect.width * rect.scaleX;
@@ -149,13 +145,13 @@ export type StageInfo = {
   };
 };
 
-export type SitShape = Rect | Text | Mask;
+export type SitShape = Rect | Text;
 
 export type MODE =
   | 'RECT'
   | 'TEXT'
-  | 'MASK'
   | 'NONE'
   | 'ZOOM_IN'
   | 'ZOOM_OUT'
-  | 'CLIP';
+  | 'CLIP'
+  | 'LINE';

@@ -15,9 +15,10 @@ import { ShapeContainer } from '../../store/ShapesContainer';
 import { InfoContainer } from '../../store/InfoContainer';
 import { getAbsolutePosition, getSize, Point } from '../../types';
 import { css } from '@emotion/css';
-import MaskComponent from './MaskComponent';
 import ToolPanel from '../toolbar/ToolPanel';
 import { KonvaEventObject } from 'konva/types/Node';
+import LineComponent from './LineComponent';
+import OptionsPanel from '../toolbar/OptionsPanel';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -274,18 +275,6 @@ const Editor = (): React.ReactElement => {
               />
             );
           })}
-          {shapes.getAllMasks().map((mask) => {
-            return (
-              <MaskComponent
-                key={mask.name}
-                mask={mask}
-                onSelected={() => shapes.onSelect(mask)}
-                onTransform={(transformedMask) =>
-                  shapes.updateShape(transformedMask)
-                }
-              />
-            );
-          })}
           {shapes
             .getAllTexts()
             .filter((text) =>
@@ -311,6 +300,9 @@ const Editor = (): React.ReactElement => {
           ) : (
             <></>
           )}
+          {shapes.getAllLines().map((line) => {
+            return <LineComponent line={line} />;
+          })}
         </Layer>
         <Layer>
           {shapes.currentMode === 'CLIP' && (
@@ -349,6 +341,16 @@ const Editor = (): React.ReactElement => {
         }}
       >
         <ToolPanel onClip={handleClip} />
+      </Box>
+
+      <Box
+        sx={{
+          position: 'absolute',
+          top: -100,
+          backgroundColor: 'white',
+        }}
+      >
+        <OptionsPanel />
       </Box>
 
       <TextEditor

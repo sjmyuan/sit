@@ -69,9 +69,9 @@ const ToolPanel = (props: ToolPanelProps): React.ReactElement => {
       </IconButton>
       <IconButton
         color="inherit"
-        aria-label="add mask"
-        disabled={shapes.currentMode === 'MASK'}
-        onClick={() => shapes.setMode('MASK')}
+        aria-label="pen"
+        disabled={shapes.currentMode === 'LINE'}
+        onClick={() => shapes.setMode('LINE')}
       >
         <Brush />
       </IconButton>

@@ -2,6 +2,7 @@ import path from 'path';
 
 import { app, BrowserWindow } from 'electron';
 import { loadRoute } from './util/routes';
+import log from 'electron-log';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -39,7 +40,7 @@ export const openMainWindow = async (
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
   mainWindow.webContents.on('did-finish-load', () => {
-    console.log('load main...');
+    log.info('load main...');
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
@@ -58,7 +59,7 @@ export const openMainWindow = async (
   return mainWindow;
 };
 
-export const editImageinMainWindow = async (imageIndex: any): Promise<void> => {
+export const editImageInMainWindow = async (imageIndex: any): Promise<void> => {
   if (mainWindow) {
     mainWindow.show();
     mainWindow.focus();
@@ -79,7 +80,7 @@ export const sendWorkerEventToMainWindow = (info: { syncing: boolean }) => {
   }
 };
 
-export const notifyPreferrencesChangedInMainWindow = () => {
+export const notifyPreferencesChangedInMainWindow = () => {
   if (mainWindow) {
     mainWindow.webContents.send('preferences-changed');
   }

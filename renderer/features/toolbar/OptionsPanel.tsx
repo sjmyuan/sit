@@ -19,6 +19,7 @@ const ToolPanel = (): React.ReactElement => {
         id="height"
         type="number"
         value={width}
+        inputProps={{ padding: 0, inputMode: 'numeric', pattern: '[0-9]*' }}
         onChange={(e) => setWidth(+e.target.value)}
       />
     </Box>

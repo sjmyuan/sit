@@ -10,7 +10,6 @@ import {
   getTopLeftAndBottomRight,
   StageInfo,
   Size,
-  getSize,
   Rect,
 } from '../types';
 import { LinesContainer } from './LineContainer';

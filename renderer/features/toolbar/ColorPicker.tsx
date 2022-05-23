@@ -15,7 +15,7 @@ const ColorPicker = (props: ColorPicker): React.ReactElement => {
     setDisplayColorPicker(false);
   };
   return (
-    <Box>
+    <Box sx={{ height: 18, width: 18 }}>
       <Box
         sx={{
           padding: '2px',

@@ -10,6 +10,10 @@ const ToolPanel = (): React.ReactElement => {
       sx={{
         display: 'flex',
         flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        width: 100,
+        height: 30,
       }}
     >
       <ColorPicker color={color} onChange={(newColor) => setColor(newColor)} />
@@ -19,7 +23,11 @@ const ToolPanel = (): React.ReactElement => {
         id="height"
         type="number"
         value={width}
-        inputProps={{ padding: 0, inputMode: 'numeric', pattern: '[0-9]*' }}
+        inputProps={{
+          style: { paddingTop: '0px', paddingBottom: '0px', width: '40px' },
+          inputMode: 'numeric',
+          pattern: '[0-9]*',
+        }}
         onChange={(e) => setWidth(+e.target.value)}
       />
     </Box>

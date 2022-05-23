@@ -37,8 +37,8 @@ const Rectangle = (props: RectangleProps): React.ReactElement => {
       y={props.rect.origin.y}
       width={props.rect.width}
       height={props.rect.height}
-      strokeWidth={4}
-      stroke="rgb(220,50,105)"
+      strokeWidth={props.rect.props.strokeWidth}
+      stroke={props.rect.props.stroke}
       fill="transparent"
       // force no scaling
       // otherwise Transformer will change it

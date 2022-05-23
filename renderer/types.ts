@@ -48,6 +48,11 @@ export type Area = {
   bottomRight: Point;
 };
 
+export type RectProperties = {
+  strokeWidth: number;
+  stroke: string;
+};
+
 export type Rect = {
   readonly _tag: 'rect';
   id: number;
@@ -57,6 +62,12 @@ export type Rect = {
   height: number;
   scaleX: number;
   scaleY: number;
+  props: RectProperties;
+};
+
+export type TextProperties = {
+  fontSize: number;
+  stroke: string;
 };
 
 export type Text = {
@@ -65,6 +76,12 @@ export type Text = {
   name: string;
   origin: Point;
   value: string;
+  props: TextProperties;
+};
+
+export type LineProperties = {
+  strokeWidth: number;
+  stroke: string;
 };
 
 export type Line = {
@@ -72,6 +89,7 @@ export type Line = {
   id: number;
   name: string;
   points: Point[];
+  props: LineProperties;
 };
 
 export const getSize = (topLeft: Point, bottomRight: Point) => ({

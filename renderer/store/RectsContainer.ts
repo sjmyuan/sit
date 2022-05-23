@@ -1,12 +1,16 @@
 import { pipe } from 'fp-ts/lib/function';
 import { useState } from 'react';
 import { createContainer } from 'unstated-next';
-import { A, O, Point, Rect } from '../types';
+import { A, O, Point, Rect, RectProperties } from '../types';
 
 function useRects(initialState: Rect[] = []) {
   const [rects, setRects] = useState<Rect[]>(initialState);
   const [newRect, setNewRect] = useState<O.Option<Rect>>(O.none);
   const [nextRectId, setNextRectId] = useState<number>(100);
+  const [props, setProps] = useState<RectProperties>({
+    strokeWidth: 4,
+    stroke: '#dc3268',
+  });
   const startToDraw = (point: Point) => {
     setNewRect(
       O.some({
@@ -18,6 +22,7 @@ function useRects(initialState: Rect[] = []) {
         height: 0,
         scaleX: 1,
         scaleY: 1,
+        props: props,
       })
     );
 
@@ -79,6 +84,8 @@ function useRects(initialState: Rect[] = []) {
     clear,
     deleteRect,
     rects,
+    props,
+    setProps,
   };
 }
 

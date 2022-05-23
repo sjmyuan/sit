@@ -61,11 +61,11 @@ const TextEditor = (props: {
         outline: none;
         line-height: 1;
         resize: none;
-        font-size: 30px;
+        font-size: ${editingText.value.props.fontSize}px;
         font-weight: bold;
         font-family: Calibri;
         transform-origin: left top;
-        color: rgb(220, 50, 105);
+        color: ${editingText.value.props.stroke};
         z-index: 100;
       `}
       cols={getCols(editingText.value.value)}

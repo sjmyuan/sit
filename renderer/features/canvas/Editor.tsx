@@ -18,7 +18,10 @@ import { css } from '@emotion/css';
 import ToolPanel from '../toolbar/ToolPanel';
 import { KonvaEventObject } from 'konva/types/Node';
 import LineComponent from './LineComponent';
-import OptionsPanel from '../toolbar/OptionsPanel';
+import OptionsPanel from '../toolbar/RectangleOptionsPanel';
+import LineOptionsPanel from '../toolbar/LineOptionsPanel';
+import RectangleOptionsPanel from '../toolbar/RectangleOptionsPanel';
+import TextOptionsPanel from '../toolbar/TextOptionsPanel';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -350,7 +353,9 @@ const Editor = (): React.ReactElement => {
           backgroundColor: 'white',
         }}
       >
-        <OptionsPanel />
+        {shapes.currentMode === 'LINE' ? <LineOptionsPanel /> : null}
+        {shapes.currentMode === 'RECT' ? <RectangleOptionsPanel /> : null}
+        {shapes.currentMode === 'TEXT' ? <TextOptionsPanel /> : null}
       </Box>
 
       <TextEditor

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Box, TextField } from '@mui/material';
 import ColorPicker from './ColorPicker';
+import { LinesContainer } from '../../store/LineContainer';
 
-const ToolPanel = (): React.ReactElement => {
-  const [color, setColor] = useState<string>('#FF6900');
-  const [width, setWidth] = useState<number>(1);
+const LineOptionsPanel = (): React.ReactElement => {
+  const linesState = LinesContainer.useContainer();
+  const lineProps = linesState.props;
   return (
     <Box
       sx={{
@@ -16,22 +17,32 @@ const ToolPanel = (): React.ReactElement => {
         height: 30,
       }}
     >
-      <ColorPicker color={color} onChange={(newColor) => setColor(newColor)} />
+      <ColorPicker
+        color={lineProps.stroke}
+        onChange={(newColor) =>
+          linesState.setProps({ ...lineProps, stroke: newColor })
+        }
+      />
       <TextField
         size="small"
         required
         id="height"
         type="number"
-        value={width}
+        value={lineProps.strokeWidth}
         inputProps={{
           style: { paddingTop: '0px', paddingBottom: '0px', width: '40px' },
           inputMode: 'numeric',
           pattern: '[0-9]*',
         }}
-        onChange={(e) => setWidth(+e.target.value)}
+        onChange={(e) =>
+          linesState.setProps({
+            ...lineProps,
+            strokeWidth: +e.target.value,
+          })
+        }
       />
     </Box>
   );
 };
 
-export default ToolPanel;
+export default LineOptionsPanel;

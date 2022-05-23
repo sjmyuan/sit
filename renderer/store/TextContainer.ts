@@ -1,11 +1,15 @@
 import { pipe } from 'fp-ts/lib/function';
 import { useState } from 'react';
 import { createContainer } from 'unstated-next';
-import { A, Point, Text } from '../types';
+import { A, Point, Text, TextProperties } from '../types';
 
 function useTexts(initialState: Text[] = []) {
   const [texts, setTexts] = useState<Text[]>(initialState);
   const [nextTextId, setNextTextId] = useState<number>(0);
+  const [props, setProps] = useState<TextProperties>({
+    fontSize: 30,
+    stroke: '#dc3268',
+  });
   const startToDraw = (point: Point) => {
     const newText: Text = {
       _tag: 'text',
@@ -13,6 +17,7 @@ function useTexts(initialState: Text[] = []) {
       name: `text-${nextTextId}`,
       origin: point,
       value: '',
+      props: props,
     };
     setTexts([...texts, newText]);
     setNextTextId(nextTextId + 1);
@@ -34,7 +39,7 @@ function useTexts(initialState: Text[] = []) {
     setTexts(texts.filter((x) => x.id !== text.id));
   };
 
-  return { texts, startToDraw, update, clear, deleteText };
+  return { texts, startToDraw, update, clear, deleteText, props, setProps };
 }
 
 // eslint-disable-next-line import/prefer-default-export

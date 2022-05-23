@@ -1,12 +1,16 @@
 import { pipe } from 'fp-ts/lib/function';
 import { useState } from 'react';
 import { createContainer } from 'unstated-next';
-import { O, Point, Line } from '../types';
+import { O, Point, Line, LineProperties } from '../types';
 
 function useLines(initialState: Line[] = []) {
   const [lines, setLines] = useState<Line[]>(initialState);
   const [newLine, setNewLine] = useState<O.Option<Line>>(O.none);
   const [nextLineId, setNextLineId] = useState<number>(0);
+  const [props, setProps] = useState<LineProperties>({
+    stroke: '#ffffff',
+    strokeWidth: 20,
+  });
 
   const startToDraw = (point: Point) => {
     setNewLine(
@@ -15,6 +19,7 @@ function useLines(initialState: Line[] = []) {
         name: `line-drawing-${nextLineId}`,
         id: nextLineId,
         points: [point],
+        props: props,
       })
     );
 
@@ -55,6 +60,8 @@ function useLines(initialState: Line[] = []) {
     endToDraw,
     clear,
     lines,
+    props,
+    setProps,
   };
 }
 

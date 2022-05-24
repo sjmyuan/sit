@@ -55,7 +55,10 @@ const ColorPicker = (props: ColorPicker): React.ReactElement => {
           />
           <SketchPicker
             color={props.color}
-            onChange={(color) => props.onChange(color.hex)}
+            onChangeComplete={(color) => {
+              props.onChange(color.hex);
+              handleClose();
+            }}
           />
         </Box>
       ) : null}

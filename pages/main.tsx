@@ -103,17 +103,32 @@ const MainPage = (): React.ReactElement => {
       ) : (
         <EditorToolbar onHistory={() => setStatus('HISTORY')} />
       )}
-      <Container
-        sx={{
-          marginTop: '10px',
-          marginBottom: '30px',
-          height: 'calc(100% - (104px))',
-          display: 'flex',
-        }}
-        maxWidth={false}
-      >
-        {status === 'HISTORY' ? <ImageBrowser /> : <Editor />}
-      </Container>
+      {status === 'HISTORY' ? (
+        <Container
+          sx={{
+            marginTop: '10px',
+            marginBottom: '30px',
+            height: 'calc(100% - (104px))',
+            display: 'flex',
+          }}
+          maxWidth={false}
+        >
+          <ImageBrowser />
+        </Container>
+      ) : (
+        <Container
+          sx={{
+            display: 'flex',
+            justifyContent: 'stretch',
+            alignItems: 'stretch',
+            paddingLeft: 14,
+            height: 'calc(100% - (104px))',
+          }}
+          maxWidth={false}
+        >
+          <Editor />
+        </Container>
+      )}
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}

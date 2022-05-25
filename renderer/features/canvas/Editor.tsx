@@ -192,13 +192,12 @@ const Editor = (): React.ReactElement => {
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         backgroundColor: 'green',
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'stretch',
-        flexGrow: 1,
+        position: 'relative',
+        width: '100%',
+        height: '100%',
       }}
     >
       <Box
@@ -207,199 +206,172 @@ const Editor = (): React.ReactElement => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
+          position: 'absolute',
+          left: 20,
+          zIndex: 1,
         }}
       >
         <ToolPanel onClip={handleClip} />
       </Box>
       <Box
         sx={{
-          flexGrow: 1,
+          backgroundColor: 'white',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'stretch',
+          flexDirection: 'row',
+          alignItems: 'center',
+          minHeight: 40,
+          position: 'absolute',
+          top: 40,
+          zIndex: 1,
         }}
       >
-        <Box
-          sx={{
-            backgroundColor: 'white',
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: 40,
-          }}
-        >
-          {shapes.currentMode === 'LINE' ? <LineOptionsPanel /> : null}
-          {shapes.currentMode === 'RECT' ? <RectangleOptionsPanel /> : null}
-          {shapes.currentMode === 'TEXT' ? <TextOptionsPanel /> : null}
-        </Box>
-        <Box
-          ref={containerRef}
-          sx={{
-            backgroundColor: 'green',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexGrow: 1,
-            position: 'relative',
-          }}
-        >
-          <Stage
-            className={css`
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              background-color: red;
-            `}
-            x={shapes.stageInfo.offsetOfCanvas.x}
-            y={shapes.stageInfo.offsetOfCanvas.y}
-            scaleX={shapes.stageInfo.scale}
-            scaleY={shapes.stageInfo.scale}
-            ref={stageRef}
-            width={shapes.stageInfo.viewPortSize.width * shapes.stageInfo.scale}
-            height={
-              shapes.stageInfo.viewPortSize.height * shapes.stageInfo.scale
-            }
-            onMouseUp={() => {
-              shapes.endToDraw();
-            }}
-            onMouseMove={(e) => {
-              const stage = e.target.getStage();
-              stage && shapes.drawing(getRelativePointerPosition(stage));
-            }}
-            onWheel={(e) => {
-              const stage = e.target.getStage();
-              stage &&
-                shapes.zoom(
-                  getRelativePointerPosition(stage),
-                  e.evt.deltaY > 0
-                );
-            }}
-          >
-            <Layer
-              onMouseDown={(e) => {
-                const stage = e.target.getStage();
-                stage && shapes.startToDraw(getRelativePointerPosition(stage));
-              }}
-            >
-              <ReactKonvaRect
-                x={
-                  (0 - shapes.stageInfo.offsetOfCanvas.x) /
-                  shapes.stageInfo.scale
-                }
-                y={
-                  (0 - shapes.stageInfo.offsetOfCanvas.y) /
-                  shapes.stageInfo.scale
-                }
-                width={shapes.stageInfo.viewPortSize.width}
-                height={shapes.stageInfo.viewPortSize.height}
-                strokeWidth={0}
-                fill="rgb(116,116,116)"
-                name="full-paper"
-              />
-              <ReactKonvaRect
-                ref={drawingAreaRef}
-                x={drawingAreaTopLeft.x}
-                y={drawingAreaTopLeft.y}
-                width={drawingAreaSize.width}
-                height={drawingAreaSize.height}
-                strokeWidth={0}
-                fill="white"
-                name="drawing-area"
-              />
-              {O.isSome(shapes.backgroundImg) && (
-                <Image
-                  x={shapes.stageInfo.drawingArea.origin.x}
-                  y={shapes.stageInfo.drawingArea.origin.y}
-                  width={shapes.backgroundImg.value.width}
-                  height={shapes.backgroundImg.value.height}
-                  image={O.toUndefined(shapes.backgroundImg)}
-                />
-              )}
-            </Layer>
-            <Layer>
-              {shapes.getAllRects().map((rect) => {
-                return (
-                  <Rectangle
-                    key={rect.name}
-                    rect={rect}
-                    onSelected={() => shapes.onSelect(rect)}
-                    onTransform={(transformedRect) =>
-                      shapes.updateShape(transformedRect)
-                    }
-                  />
-                );
-              })}
-              {shapes
-                .getAllTexts()
-                .filter((text) =>
-                  pipe(
-                    shapes.getEditingText(),
-                    O.map((x) => x.id !== text.id),
-                    O.getOrElse<boolean>(() => true)
-                  )
-                )
-                .map((text) => {
-                  return (
-                    <TextComponent
-                      key={text.name}
-                      text={text}
-                      onSelected={() => shapes.onSelect(text)}
-                      onChange={shapes.updateShape}
-                      startToEdit={shapes.startToEdit}
-                    />
-                  );
-                })}
-              {O.isSome(selectedShape) ? (
-                <TransformerComponent selectedShape={selectedShape.value} />
-              ) : (
-                <></>
-              )}
-              {shapes.getAllLines().map((line) => {
-                return <LineComponent line={line} />;
-              })}
-            </Layer>
-            <Layer>
-              {shapes.currentMode === 'CLIP' && (
-                <ReactKonvaRect
-                  x={shapes.clipRect.origin.x}
-                  y={shapes.clipRect.origin.y}
-                  width={shapes.clipRect.width}
-                  height={shapes.clipRect.height}
-                  strokeWidth={2}
-                  stroke="blue"
-                  fill="transparent"
-                  scaleX={shapes.clipRect.scaleX}
-                  scaleY={shapes.clipRect.scaleY}
-                  name={shapes.clipRect.name}
-                  strokeScaleEnabled={false}
-                  onDragEnd={handleClipChange}
-                  onTransformEnd={handleClipChange}
-                  draggable
-                />
-              )}
-              {shapes.currentMode === 'CLIP' ? (
-                <TransformerComponent selectedShape={shapes.clipRect} />
-              ) : (
-                <></>
-              )}
-            </Layer>
-          </Stage>
-
-          <TextEditor
-            getRelativePos={() => {
-              const pos = stageRef.current
-                ? {
-                    x: stageRef.current.getStage().container().offsetLeft,
-
-                    y: stageRef.current.getStage().container().offsetTop,
-                  }
-                : { x: -1, y: -1 };
-              return pos;
-            }}
-          />
-        </Box>
+        {shapes.currentMode === 'LINE' ? <LineOptionsPanel /> : null}
+        {shapes.currentMode === 'RECT' ? <RectangleOptionsPanel /> : null}
+        {shapes.currentMode === 'TEXT' ? <TextOptionsPanel /> : null}
       </Box>
+      <Stage
+        className={css`
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: red;
+        `}
+        x={shapes.stageInfo.offsetOfCanvas.x}
+        y={shapes.stageInfo.offsetOfCanvas.y}
+        scaleX={shapes.stageInfo.scale}
+        scaleY={shapes.stageInfo.scale}
+        ref={stageRef}
+        width={shapes.stageInfo.viewPortSize.width * shapes.stageInfo.scale}
+        height={shapes.stageInfo.viewPortSize.height * shapes.stageInfo.scale}
+        onMouseUp={() => {
+          shapes.endToDraw();
+        }}
+        onMouseMove={(e) => {
+          const stage = e.target.getStage();
+          stage && shapes.drawing(getRelativePointerPosition(stage));
+        }}
+        onWheel={(e) => {
+          const stage = e.target.getStage();
+          stage &&
+            shapes.zoom(getRelativePointerPosition(stage), e.evt.deltaY > 0);
+        }}
+      >
+        <Layer
+          onMouseDown={(e) => {
+            const stage = e.target.getStage();
+            stage && shapes.startToDraw(getRelativePointerPosition(stage));
+          }}
+        >
+          <ReactKonvaRect
+            x={(0 - shapes.stageInfo.offsetOfCanvas.x) / shapes.stageInfo.scale}
+            y={(0 - shapes.stageInfo.offsetOfCanvas.y) / shapes.stageInfo.scale}
+            width={shapes.stageInfo.viewPortSize.width}
+            height={shapes.stageInfo.viewPortSize.height}
+            strokeWidth={0}
+            fill="rgb(116,116,116)"
+            name="full-paper"
+          />
+          <ReactKonvaRect
+            ref={drawingAreaRef}
+            x={drawingAreaTopLeft.x}
+            y={drawingAreaTopLeft.y}
+            width={drawingAreaSize.width}
+            height={drawingAreaSize.height}
+            strokeWidth={0}
+            fill="white"
+            name="drawing-area"
+          />
+          {O.isSome(shapes.backgroundImg) && (
+            <Image
+              x={shapes.stageInfo.drawingArea.origin.x}
+              y={shapes.stageInfo.drawingArea.origin.y}
+              width={shapes.backgroundImg.value.width}
+              height={shapes.backgroundImg.value.height}
+              image={O.toUndefined(shapes.backgroundImg)}
+            />
+          )}
+        </Layer>
+        <Layer>
+          {shapes.getAllRects().map((rect) => {
+            return (
+              <Rectangle
+                key={rect.name}
+                rect={rect}
+                onSelected={() => shapes.onSelect(rect)}
+                onTransform={(transformedRect) =>
+                  shapes.updateShape(transformedRect)
+                }
+              />
+            );
+          })}
+          {shapes
+            .getAllTexts()
+            .filter((text) =>
+              pipe(
+                shapes.getEditingText(),
+                O.map((x) => x.id !== text.id),
+                O.getOrElse<boolean>(() => true)
+              )
+            )
+            .map((text) => {
+              return (
+                <TextComponent
+                  key={text.name}
+                  text={text}
+                  onSelected={() => shapes.onSelect(text)}
+                  onChange={shapes.updateShape}
+                  startToEdit={shapes.startToEdit}
+                />
+              );
+            })}
+          {O.isSome(selectedShape) ? (
+            <TransformerComponent selectedShape={selectedShape.value} />
+          ) : (
+            <></>
+          )}
+          {shapes.getAllLines().map((line) => {
+            return <LineComponent line={line} />;
+          })}
+        </Layer>
+        <Layer>
+          {shapes.currentMode === 'CLIP' && (
+            <ReactKonvaRect
+              x={shapes.clipRect.origin.x}
+              y={shapes.clipRect.origin.y}
+              width={shapes.clipRect.width}
+              height={shapes.clipRect.height}
+              strokeWidth={2}
+              stroke="blue"
+              fill="transparent"
+              scaleX={shapes.clipRect.scaleX}
+              scaleY={shapes.clipRect.scaleY}
+              name={shapes.clipRect.name}
+              strokeScaleEnabled={false}
+              onDragEnd={handleClipChange}
+              onTransformEnd={handleClipChange}
+              draggable
+            />
+          )}
+          {shapes.currentMode === 'CLIP' ? (
+            <TransformerComponent selectedShape={shapes.clipRect} />
+          ) : (
+            <></>
+          )}
+        </Layer>
+      </Stage>
+
+      <TextEditor
+        getRelativePos={() => {
+          const pos = stageRef.current
+            ? {
+                x: stageRef.current.getStage().container().offsetLeft,
+
+                y: stageRef.current.getStage().container().offsetTop,
+              }
+            : { x: -1, y: -1 };
+          return pos;
+        }}
+      />
     </Box>
   );
 };

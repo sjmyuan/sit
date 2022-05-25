@@ -116,18 +116,20 @@ const MainPage = (): React.ReactElement => {
           <ImageBrowser />
         </Container>
       ) : (
-        <Container
+        <Box
           sx={{
             display: 'flex',
             justifyContent: 'stretch',
             alignItems: 'stretch',
-            paddingLeft: 14,
-            height: 'calc(100% - (104px))',
+            paddingLeft: 0,
+            paddingRight: 0,
+            paddingTop: 10,
+            paddingBottom: 10,
+            width: '100%',
           }}
-          maxWidth={false}
         >
           <Editor />
-        </Container>
+        </Box>
       )}
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}

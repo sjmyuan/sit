@@ -97,7 +97,7 @@ const MainPage = (): React.ReactElement => {
   }, [pasting, croppingImage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Box sx={{ height: '100%' }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {status === 'HISTORY' ? (
         <BrowserToolbar onBack={() => setStatus('EDITOR')} />
       ) : (
@@ -110,6 +110,7 @@ const MainPage = (): React.ReactElement => {
             marginBottom: '30px',
             height: 'calc(100% - (104px))',
             display: 'flex',
+            flexGrow: 1,
           }}
           maxWidth={false}
         >
@@ -123,9 +124,9 @@ const MainPage = (): React.ReactElement => {
             alignItems: 'stretch',
             paddingLeft: 0,
             paddingRight: 0,
-            paddingTop: 10,
-            paddingBottom: 10,
+            paddingBottom: 2,
             width: '100%',
+            flexGrow: 1,
           }}
         >
           <Editor />

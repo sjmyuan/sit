@@ -202,32 +202,41 @@ const Editor = (): React.ReactElement => {
     >
       <Box
         sx={{
-          backgroundColor: 'white',
+          background: 'transparent',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           position: 'absolute',
+          top: 0,
+          bottom: 0,
           left: 20,
           zIndex: 1,
         }}
       >
-        <ToolPanel onClip={handleClip} />
+        <Box sx={{ background: 'white' }}>
+          <ToolPanel onClip={handleClip} />
+        </Box>
       </Box>
       <Box
         sx={{
-          backgroundColor: 'white',
+          backgroundColor: 'transparent',
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
+          justifyContent: 'center',
           minHeight: 40,
           position: 'absolute',
-          top: 40,
+          top: 20,
+          left: 0,
+          right: 0,
           zIndex: 1,
         }}
       >
-        {shapes.currentMode === 'LINE' ? <LineOptionsPanel /> : null}
-        {shapes.currentMode === 'RECT' ? <RectangleOptionsPanel /> : null}
-        {shapes.currentMode === 'TEXT' ? <TextOptionsPanel /> : null}
+        <Box sx={{ background: 'white' }}>
+          {shapes.currentMode === 'LINE' ? <LineOptionsPanel /> : null}
+          {shapes.currentMode === 'RECT' ? <RectangleOptionsPanel /> : null}
+          {shapes.currentMode === 'TEXT' ? <TextOptionsPanel /> : null}
+        </Box>
       </Box>
       <Stage
         className={css`

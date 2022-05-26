@@ -23,24 +23,28 @@ const LineOptionsPanel = (): React.ReactElement => {
           linesState.setProps({ ...lineProps, stroke: newColor })
         }
       />
-      <TextField
-        size="small"
-        required
-        id="height"
-        type="number"
-        value={lineProps.strokeWidth}
-        inputProps={{
-          style: { paddingTop: '0px', paddingBottom: '0px', width: '40px' },
-          inputMode: 'numeric',
-          pattern: '[0-9]*',
-        }}
-        onChange={(e) =>
-          linesState.setProps({
-            ...lineProps,
-            strokeWidth: +e.target.value,
-          })
-        }
-      />
+
+      <Box sx={{ marginLeft: 10 }}>
+        <p>width:</p>
+        <TextField
+          size="small"
+          required
+          id="height"
+          type="number"
+          value={lineProps.strokeWidth}
+          inputProps={{
+            style: { paddingTop: '0px', paddingBottom: '0px', width: '40px' },
+            inputMode: 'numeric',
+            pattern: '[0-9]*',
+          }}
+          onChange={(e) =>
+            linesState.setProps({
+              ...lineProps,
+              strokeWidth: +e.target.value,
+            })
+          }
+        />
+      </Box>
     </Box>
   );
 };

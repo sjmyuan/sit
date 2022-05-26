@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, TextField } from '@mui/material';
+import { Box, Slider, TextField } from '@mui/material';
 import ColorPicker from './ColorPicker';
 import { LinesContainer } from '../../store/LineContainer';
 
@@ -13,7 +13,7 @@ const LineOptionsPanel = (): React.ReactElement => {
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        width: 100,
+        width: 200,
         height: 30,
       }}
     >
@@ -24,25 +24,25 @@ const LineOptionsPanel = (): React.ReactElement => {
         }
       />
 
-      <Box sx={{ marginLeft: 10 }}>
-        <p>width:</p>
-        <TextField
-          size="small"
-          required
-          id="height"
-          type="number"
+      <Box sx={{ margin: 2, flexGrow: 1 }}>
+        <Slider
+          size={'small'}
+          aria-label="Temperature"
+          defaultValue={1}
+          getAriaValueText={(v) => v.toString()}
           value={lineProps.strokeWidth}
-          inputProps={{
-            style: { paddingTop: '0px', paddingBottom: '0px', width: '40px' },
-            inputMode: 'numeric',
-            pattern: '[0-9]*',
+          valueLabelDisplay="auto"
+          onChangeCommitted={(_e, v) => {
+            if (typeof v === 'number') {
+              linesState.setProps({
+                ...lineProps,
+                strokeWidth: v,
+              });
+            }
           }}
-          onChange={(e) =>
-            linesState.setProps({
-              ...lineProps,
-              strokeWidth: +e.target.value,
-            })
-          }
+          marks
+          min={1}
+          max={30}
         />
       </Box>
     </Box>

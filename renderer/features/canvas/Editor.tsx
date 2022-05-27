@@ -18,10 +18,10 @@ import { css } from '@emotion/css';
 import ToolPanel from '../toolbar/ToolPanel';
 import { KonvaEventObject } from 'konva/types/Node';
 import LineComponent from './LineComponent';
-import OptionsPanel from '../toolbar/RectangleOptionsPanel';
-import LineOptionsPanel from '../toolbar/LineOptionsPanel';
-import RectangleOptionsPanel from '../toolbar/RectangleOptionsPanel';
-import TextOptionsPanel from '../toolbar/TextOptionsPanel';
+import OptionsPanel from '../toolbar/RectPropertiesPanel';
+import LinePropertiesPanel from '../toolbar/LinePropertiesPanel';
+import RectPropertiesPanel from '../toolbar/RectPropertiesPanel';
+import TextPropertiesPanel from '../toolbar/TextPropertiesPanel';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -213,7 +213,7 @@ const Editor = (): React.ReactElement => {
           zIndex: 1,
         }}
       >
-        <Box sx={{ background: 'white' }}>
+        <Box sx={{ background: 'white', borderRadius: 1 }}>
           <ToolPanel onClip={handleClip} />
         </Box>
       </Box>
@@ -232,10 +232,10 @@ const Editor = (): React.ReactElement => {
           zIndex: 1,
         }}
       >
-        <Box sx={{ background: 'white' }}>
-          {shapes.currentMode === 'LINE' ? <LineOptionsPanel /> : null}
-          {shapes.currentMode === 'RECT' ? <RectangleOptionsPanel /> : null}
-          {shapes.currentMode === 'TEXT' ? <TextOptionsPanel /> : null}
+        <Box sx={{ background: 'white', borderRadius: 1 }}>
+          {shapes.currentMode === 'LINE' ? <LinePropertiesPanel /> : null}
+          {shapes.currentMode === 'RECT' ? <RectPropertiesPanel /> : null}
+          {shapes.currentMode === 'TEXT' ? <TextPropertiesPanel /> : null}
         </Box>
       </Box>
       <Stage

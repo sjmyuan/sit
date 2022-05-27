@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Box, TextField } from '@mui/material';
+import React from 'react';
+import { Box, Slider } from '@mui/material';
 import ColorPicker from './ColorPicker';
 import { RectsContainer } from '../../store/RectsContainer';
 
-const RectangleOptionsPanel = (): React.ReactElement => {
+const RectPropertiesPanel = (): React.ReactElement => {
   const rectsState = RectsContainer.useContainer();
   const rectProps = rectsState.props;
   return (
@@ -13,7 +13,7 @@ const RectangleOptionsPanel = (): React.ReactElement => {
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        width: 100,
+        width: 200,
         height: 30,
       }}
     >
@@ -23,26 +23,28 @@ const RectangleOptionsPanel = (): React.ReactElement => {
           rectsState.setProps({ ...rectProps, stroke: newColor })
         }
       />
-      <TextField
-        size="small"
-        required
-        id="height"
-        type="number"
+
+      <Slider
+        sx={{ width: 120 }}
+        size={'small'}
+        aria-label="line-width"
+        defaultValue={1}
+        getAriaValueText={(v) => v.toString()}
         value={rectProps.strokeWidth}
-        inputProps={{
-          style: { paddingTop: '0px', paddingBottom: '0px', width: '40px' },
-          inputMode: 'numeric',
-          pattern: '[0-9]*',
+        valueLabelDisplay="auto"
+        onChange={(_e, v) => {
+          if (typeof v === 'number') {
+            rectsState.setProps({
+              ...rectProps,
+              strokeWidth: v,
+            });
+          }
         }}
-        onChange={(e) =>
-          rectsState.setProps({
-            ...rectProps,
-            strokeWidth: +e.target.value,
-          })
-        }
+        min={1}
+        max={30}
       />
     </Box>
   );
 };
 
-export default RectangleOptionsPanel;
+export default RectPropertiesPanel;

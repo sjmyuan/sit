@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Box, TextField } from '@mui/material';
+import React from 'react';
+import { Box, Slider } from '@mui/material';
 import ColorPicker from './ColorPicker';
 import { TextsContainer } from '../../store/TextContainer';
 
-const TextOptionsPanel = (): React.ReactElement => {
+const TextPropertiesPanel = (): React.ReactElement => {
   const textsState = TextsContainer.useContainer();
   const textProps = textsState.props;
   return (
@@ -13,7 +13,7 @@ const TextOptionsPanel = (): React.ReactElement => {
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        width: 100,
+        width: 200,
         height: 30,
       }}
     >
@@ -23,26 +23,28 @@ const TextOptionsPanel = (): React.ReactElement => {
           textsState.setProps({ ...textProps, stroke: newColor })
         }
       />
-      <TextField
-        size="small"
-        required
-        id="height"
-        type="number"
+
+      <Slider
+        sx={{ width: 120 }}
+        size={'small'}
+        aria-label="font-size"
+        defaultValue={1}
+        getAriaValueText={(v) => v.toString()}
         value={textProps.fontSize}
-        inputProps={{
-          style: { paddingTop: '0px', paddingBottom: '0px', width: '40px' },
-          inputMode: 'numeric',
-          pattern: '[0-9]*',
+        valueLabelDisplay="auto"
+        onChange={(_e, v) => {
+          if (typeof v === 'number') {
+            textsState.setProps({
+              ...textProps,
+              fontSize: v,
+            });
+          }
         }}
-        onChange={(e) =>
-          textsState.setProps({
-            ...textProps,
-            fontSize: +e.target.value,
-          })
-        }
+        min={1}
+        max={30}
       />
     </Box>
   );
 };
 
-export default TextOptionsPanel;
+export default TextPropertiesPanel;

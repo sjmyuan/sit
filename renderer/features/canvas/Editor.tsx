@@ -18,7 +18,6 @@ import { css } from '@emotion/css';
 import ToolPanel from '../toolbar/ToolPanel';
 import { KonvaEventObject } from 'konva/types/Node';
 import LineComponent from './LineComponent';
-import OptionsPanel from '../toolbar/RectPropertiesPanel';
 import LinePropertiesPanel from '../toolbar/LinePropertiesPanel';
 import RectPropertiesPanel from '../toolbar/RectPropertiesPanel';
 import TextPropertiesPanel from '../toolbar/TextPropertiesPanel';
@@ -349,8 +348,8 @@ const Editor = (): React.ReactElement => {
               y={shapes.clipRect.origin.y}
               width={shapes.clipRect.width}
               height={shapes.clipRect.height}
-              strokeWidth={2}
-              stroke="blue"
+              strokeWidth={shapes.clipRect.props.strokeWidth}
+              stroke={shapes.clipRect.props.stroke}
               fill="transparent"
               scaleX={shapes.clipRect.scaleX}
               scaleY={shapes.clipRect.scaleY}

@@ -12,8 +12,8 @@ const LineComponent = (props: LineProps): React.ReactElement => {
     <ReactKonvaLine
       points={props.line.points.flatMap((point) => [point.x, point.y])}
       name={props.line.name}
-      strokeWidth={20}
-      stroke="white"
+      strokeWidth={props.line.props.strokeWidth}
+      stroke={props.line.props.stroke}
       bezier={true}
       strokeScaleEnabled={true}
       draggable={false}

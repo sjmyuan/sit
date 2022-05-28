@@ -97,23 +97,46 @@ const MainPage = (): React.ReactElement => {
   }, [pasting, croppingImage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Box sx={{ height: '100%' }}>
+    <Box
+      sx={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      }}
+    >
       {status === 'HISTORY' ? (
         <BrowserToolbar onBack={() => setStatus('EDITOR')} />
       ) : (
         <EditorToolbar onHistory={() => setStatus('HISTORY')} />
       )}
-      <Container
-        sx={{
-          marginTop: '10px',
-          marginBottom: '30px',
-          height: 'calc(100% - (104px))',
-          display: 'flex',
-        }}
-        maxWidth={false}
-      >
-        {status === 'HISTORY' ? <ImageBrowser /> : <Editor />}
-      </Container>
+      {status === 'HISTORY' ? (
+        <Container
+          sx={{
+            marginTop: '10px',
+            marginBottom: '30px',
+            height: 'calc(100% - (64px))',
+            display: 'flex',
+            flexGrow: 1,
+          }}
+          maxWidth={false}
+        >
+          <ImageBrowser />
+        </Container>
+      ) : (
+        <Box
+          sx={{
+            display: 'flex',
+            paddingLeft: 0,
+            paddingRight: 0,
+            paddingBottom: 2,
+            height: 'calc(100% - (80px))',
+          }}
+        >
+          <Editor />
+        </Box>
+      )}
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         open={O.isSome(notification.info)}

@@ -17,9 +17,9 @@ const TextComponent = (props: TextProps): React.ReactElement => {
   };
   return (
     <ReactKonvaText
-      stroke="rgb(220,50,105)"
-      fill="rgb(220,50,105)"
-      fontSize={30}
+      stroke={props.text.props.stroke}
+      fill={props.text.props.stroke}
+      fontSize={props.text.props.fontSize}
       fontFamily="Calibri"
       fontWeight="bold"
       verticalAlign="middle"

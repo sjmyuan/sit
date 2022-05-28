@@ -8,7 +8,7 @@ type EditorToolbarProps = {
 };
 const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
   return (
-    <AppBar position="sticky">
+    <AppBar position="relative">
       <Toolbar>
         <Typography
           variant="h6"

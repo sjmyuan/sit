@@ -18,7 +18,9 @@ import { css } from '@emotion/css';
 import ToolPanel from '../toolbar/ToolPanel';
 import { KonvaEventObject } from 'konva/types/Node';
 import LineComponent from './LineComponent';
-import OptionsPanel from '../toolbar/OptionsPanel';
+import LinePropertiesPanel from '../toolbar/LinePropertiesPanel';
+import RectPropertiesPanel from '../toolbar/RectPropertiesPanel';
+import TextPropertiesPanel from '../toolbar/TextPropertiesPanel';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -192,14 +194,49 @@ const Editor = (): React.ReactElement => {
       ref={containerRef}
       sx={{
         backgroundColor: 'green',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexGrow: 1,
-        width: '100%',
         position: 'relative',
+        width: '100%',
+        height: '100%',
       }}
     >
+      <Box
+        sx={{
+          background: 'transparent',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 20,
+          zIndex: 1,
+        }}
+      >
+        <Box sx={{ background: 'white', borderRadius: 1 }}>
+          <ToolPanel onClip={handleClip} />
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          backgroundColor: 'transparent',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 40,
+          position: 'absolute',
+          top: 20,
+          left: 0,
+          right: 0,
+          zIndex: 1,
+        }}
+      >
+        <Box sx={{ background: 'white', borderRadius: 1 }}>
+          {shapes.currentMode === 'LINE' ? <LinePropertiesPanel /> : null}
+          {shapes.currentMode === 'RECT' ? <RectPropertiesPanel /> : null}
+          {shapes.currentMode === 'TEXT' ? <TextPropertiesPanel /> : null}
+        </Box>
+      </Box>
       <Stage
         className={css`
           display: flex;
@@ -311,8 +348,8 @@ const Editor = (): React.ReactElement => {
               y={shapes.clipRect.origin.y}
               width={shapes.clipRect.width}
               height={shapes.clipRect.height}
-              strokeWidth={2}
-              stroke="blue"
+              strokeWidth={shapes.clipRect.props.strokeWidth}
+              stroke={shapes.clipRect.props.stroke}
               fill="transparent"
               scaleX={shapes.clipRect.scaleX}
               scaleY={shapes.clipRect.scaleY}
@@ -330,28 +367,6 @@ const Editor = (): React.ReactElement => {
           )}
         </Layer>
       </Stage>
-
-      <Box
-        sx={{
-          position: 'absolute',
-          left: 0,
-          backgroundColor: 'white',
-          borderTopRightRadius: 2,
-          borderBottomRightRadius: 2,
-        }}
-      >
-        <ToolPanel onClip={handleClip} />
-      </Box>
-
-      <Box
-        sx={{
-          position: 'absolute',
-          top: -100,
-          backgroundColor: 'white',
-        }}
-      >
-        <OptionsPanel />
-      </Box>
 
       <TextEditor
         getRelativePos={() => {

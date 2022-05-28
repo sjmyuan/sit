@@ -15,7 +15,7 @@ const ColorPicker = (props: ColorPicker): React.ReactElement => {
     setDisplayColorPicker(false);
   };
   return (
-    <Box>
+    <Box sx={{ height: 18, width: 18 }}>
       <Box
         sx={{
           padding: '2px',
@@ -55,7 +55,10 @@ const ColorPicker = (props: ColorPicker): React.ReactElement => {
           />
           <SketchPicker
             color={props.color}
-            onChange={(color) => props.onChange(color.hex)}
+            onChangeComplete={(color) => {
+              props.onChange(color.hex);
+              handleClose();
+            }}
           />
         </Box>
       ) : null}

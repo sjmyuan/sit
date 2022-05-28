@@ -65,6 +65,7 @@ function useShapes() {
     height: 100,
     scaleX: 1,
     scaleY: 1,
+    props: {stroke: '#0000ff', strokeWidth: 2}
   });
 
   useEffect(() => {

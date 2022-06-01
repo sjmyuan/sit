@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 
@@ -9,6 +9,7 @@ export default {
   component: ColorPicker,
 } as ComponentMeta<typeof ColorPicker>;
 
-export const Primary: ComponentStory<typeof ColorPicker> = () => (
-  <ColorPicker color={'red'} onChange={(color) => {}}></ColorPicker>
-);
+export const PickColor: ComponentStory<typeof ColorPicker> = () => {
+  const [color, setColor] = useState<string>('red');
+  return <ColorPicker color={color} onChange={setColor}></ColorPicker>;
+};

@@ -13,7 +13,7 @@ import { pipe, constant, identity } from 'fp-ts/lib/function';
 import { regions } from '../../constants/regions.json';
 
 type AWSPreferencesProps = {
-  key: string;
+  imgKey: string;
   onCancel: () => void;
   onUpload: (
     accessId: string,
@@ -31,14 +31,14 @@ const AWSPreferences = (props: AWSPreferencesProps): React.ReactElement => {
   );
   const [bucket, setBucket] = useState<O.Option<string>>(O.none);
   const [region, setRegion] = useState<O.Option<string>>(O.none);
-  const [key, setKey] = useState<string>(props.key);
+  const [imgKey, setImgKey] = useState<string>(props.imgKey);
 
   return (
     <Box>
       <Box
         sx={{
           minWidth: 200,
-          minHeight: 300,
+          minHeight: 350,
           padding: 2,
           display: 'flex',
           flexDirection: 'column',
@@ -99,7 +99,7 @@ const AWSPreferences = (props: AWSPreferencesProps): React.ReactElement => {
           }}
         />
         <FormControl fullWidth>
-          <InputLabel required error={O.isNone(region)} id="region_lable">
+          <InputLabel required error={O.isNone(region)} id="region_label">
             Region
           </InputLabel>
           <Select
@@ -127,13 +127,13 @@ const AWSPreferences = (props: AWSPreferencesProps): React.ReactElement => {
         <TextField
           fullWidth
           required
-          error={key === ''}
-          id="key"
+          error={imgKey === ''}
+          id="image-key"
           label="Key"
-          name="key"
-          value={key}
+          name="image-key"
+          value={imgKey}
           onChange={(event) => {
-            setKey(event.target.value as string);
+            setImgKey(event.target.value as string);
           }}
         />
       </Box>
@@ -168,7 +168,7 @@ const AWSPreferences = (props: AWSPreferencesProps): React.ReactElement => {
                 secretAccessKey.value,
                 bucket.value,
                 region.value,
-                key
+                imgKey
               );
           }}
         >

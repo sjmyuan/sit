@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-
+import React from 'react';
+import { action } from '@storybook/addon-actions';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 
 import AWSPreferences from '../../../../renderer/features/preferences/AWSPreferences';
@@ -13,12 +13,12 @@ export default {
 export const SetAWS: ComponentStory<typeof AWSPreferences> = () => {
   return (
     <AWSPreferences
-      key="key"
+      imgKey="key"
       onUpload={() => {
-        console.log('upload');
+        action('upload');
       }}
       onCancel={() => {
-        console.log('cancel');
+        action('cancel');
       }}
     ></AWSPreferences>
   );

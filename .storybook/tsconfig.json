@@ -2,7 +2,10 @@
   "compilerOptions": {
     "target": "ES2018",
     "module": "CommonJS",
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "declaration": true,
     "declarationMap": true,
     "noEmit": true,
@@ -22,7 +25,13 @@
     "resolveJsonModule": true,
     "allowJs": true
   },
-  "include": ["app/**/*"],
+  "include": [
+    "../next-env.d.ts",
+    "../common.d.ts",
+    "../renderer/**/*.ts",
+    "../renderer/**/*.tsx",
+    "../pages/**/*.tsx"
+  ],
   "exclude": [
     "test",
     "release",
@@ -31,6 +40,6 @@
     "app/dist",
     "app/node_modules",
     "dll",
-    "node_modules"
+    "../node_modules"
   ]
 }

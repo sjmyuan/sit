@@ -1,7 +1,7 @@
 {
   "name": "sit",
   "productName": "Sit",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Simple image tool",
   "main": "dist/main/index.js",
   "scripts": {
@@ -18,7 +18,9 @@
     "lint": "cross-env NODE_ENV=development eslint . --cache --ext .js,.jsx,.ts,.tsx",
     "lint-fix": "yarn --silent lint --fix; exit 0",
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
-    "lint-styles-fix": "yarn --silent lint-styles --fix; exit 0"
+    "lint-styles-fix": "yarn --silent lint-styles --fix; exit 0",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -144,7 +146,16 @@
     ]
   },
   "devDependencies": {
+    "@babel/core": "^7.18.2",
     "@next/eslint-plugin-next": "^12.0.8",
+    "@storybook/addon-actions": "^6.5.6",
+    "@storybook/addon-essentials": "^6.5.6",
+    "@storybook/addon-interactions": "^6.5.6",
+    "@storybook/addon-links": "^6.5.6",
+    "@storybook/builder-webpack5": "^6.5.6",
+    "@storybook/manager-webpack5": "^6.5.6",
+    "@storybook/react": "^6.5.6",
+    "@storybook/testing-library": "^0.0.11",
     "@teamsupercell/typings-for-css-modules-loader": "^2.2.1",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
@@ -164,6 +175,7 @@
     "@types/w3c-image-capture": "^1.0.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "babel-loader": "^8.2.5",
     "browserslist-config-erb": "^0.0.1",
     "chalk": "^4.1.0",
     "concurrently": "^5.3.0",
@@ -203,6 +215,7 @@
     "pnpapi": "^0.0.0",
     "prettier": "^2.0.5",
     "probe-image-size": "^6.0.0",
+    "react-docgen-typescript-loader": "^3.7.2",
     "react-test-renderer": "^16.12.0",
     "redux-logger": "^3.0.6",
     "rimraf": "^3.0.0",
@@ -211,9 +224,11 @@
     "stylelint": "^13.6.1",
     "stylelint-config-prettier": "^8.0.2",
     "stylelint-config-standard": "^20.0.0",
+    "ts-loader": "^9.3.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.6.2",
-    "url-loader": "^4.1.0"
+    "url-loader": "^4.1.0",
+    "webpack": "^5.0.0"
   },
   "dependencies": {
     "@emotion/css": "^11.7.1",

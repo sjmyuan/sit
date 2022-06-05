@@ -6,34 +6,48 @@ import {
   Select,
   MenuItem,
   Box,
+  Button,
 } from '@mui/material';
 import * as O from 'fp-ts/Option';
 import { pipe, constant, identity } from 'fp-ts/lib/function';
 import { regions } from '../../constants/regions.json';
 
-const AWSPreferences = (): React.ReactElement => {
+type AWSPreferencesProps = {
+  key: string;
+  onCancel: () => void;
+  onUpload: (
+    accessId: string,
+    secretAccessKey: string,
+    bucket: string,
+    region: string,
+    key: string
+  ) => void;
+};
+
+const AWSPreferences = (props: AWSPreferencesProps): React.ReactElement => {
   const [accessId, setAccessId] = useState<O.Option<string>>(O.none);
   const [secretAccessKey, setSecretAccessKey] = useState<O.Option<string>>(
     O.none
   );
   const [bucket, setBucket] = useState<O.Option<string>>(O.none);
   const [region, setRegion] = useState<O.Option<string>>(O.none);
+  const [key, setKey] = useState<string>(props.key);
 
   return (
-    <Box
-      sx={{
-        maxWidth: '100%',
-        display: 'flex',
-        flexWrap: 'wrap',
-        flexDirection: 'row',
-        '& .MuiTextField-root': {
-          margin: '10px',
-          minWidth: 194,
-        },
-      }}
-    >
-      <Box sx={{ padding: '24px' }}>
+    <Box>
+      <Box
+        sx={{
+          minWidth: 200,
+          minHeight: 300,
+          padding: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          justifyContent: 'space-around',
+        }}
+      >
         <TextField
+          fullWidth
           required
           error={O.isNone(accessId)}
           id="access_id"
@@ -49,9 +63,8 @@ const AWSPreferences = (): React.ReactElement => {
             );
           }}
         />
-      </Box>
-      <Box sx={{ padding: '24px' }}>
         <TextField
+          fullWidth
           required
           error={O.isNone(secretAccessKey)}
           id="secret_access_key"
@@ -68,9 +81,8 @@ const AWSPreferences = (): React.ReactElement => {
             );
           }}
         />
-      </Box>
-      <Box sx={{ padding: '24px' }}>
         <TextField
+          fullWidth
           required
           error={O.isNone(bucket)}
           id="bucket"
@@ -86,9 +98,7 @@ const AWSPreferences = (): React.ReactElement => {
             );
           }}
         />
-      </Box>
-      <Box sx={{ padding: '24px' }}>
-        <FormControl>
+        <FormControl fullWidth>
           <InputLabel required error={O.isNone(region)} id="region_lable">
             Region
           </InputLabel>
@@ -114,6 +124,56 @@ const AWSPreferences = (): React.ReactElement => {
             ))}
           </Select>
         </FormControl>
+        <TextField
+          fullWidth
+          required
+          error={key === ''}
+          id="key"
+          label="Key"
+          name="key"
+          value={key}
+          onChange={(event) => {
+            setKey(event.target.value as string);
+          }}
+        />
+      </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+        }}
+      >
+        <Button variant="contained" onClick={props.onCancel}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          disabled={
+            O.isNone(accessId) ||
+            O.isNone(secretAccessKey) ||
+            O.isNone(bucket) ||
+            O.isNone(region)
+          }
+          onClick={() => {
+            if (
+              O.isSome(accessId) &&
+              O.isSome(secretAccessKey) &&
+              O.isSome(bucket) &&
+              O.isSome(region)
+            )
+              props.onUpload(
+                accessId.value,
+                secretAccessKey.value,
+                bucket.value,
+                region.value,
+                key
+              );
+          }}
+        >
+          Upload
+        </Button>
       </Box>
     </Box>
   );

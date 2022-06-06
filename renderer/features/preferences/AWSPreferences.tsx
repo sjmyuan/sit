@@ -20,7 +20,7 @@ type AWSPreferencesProps = {
     secretAccessKey: string,
     bucket: string,
     region: string,
-    key: string
+    remoteKey: string
   ) => void;
 };
 

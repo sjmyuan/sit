@@ -7,7 +7,6 @@ import AWSPreferences from '../../../../renderer/features/preferences/AWSPrefere
 export default {
   title: 'AWSPreferences',
   component: AWSPreferences,
-  argTypes: { onUpload: { action: 'upload' }, onCancel: { action: 'cancel' } },
 } as ComponentMeta<typeof AWSPreferences>;
 
 export const SetAWS: ComponentStory<typeof AWSPreferences> = () => {

@@ -1,18 +1,18 @@
-import { S3 } from "aws-sdk";
-import { pipe } from "fp-ts/lib/function";
-import { E, TE } from "../types";
-import { getImageCache } from "./localImages";
+import { S3 } from 'aws-sdk';
+import { pipe } from 'fp-ts/lib/function';
+import { AppErrorOr, E, TE } from '../types';
+import { getImageCache } from './localImages';
 
 export const uploadImage = (
   accessId: string,
   secretAccessKey: string,
   bucket: string,
   region: string,
-  imgKey: string,
+  localKey: string,
   remoteKey: string
-) => {
+): AppErrorOr<string> => {
   return pipe(
-    getImageCache(imgKey),
+    getImageCache(localKey),
     TE.chain((blob) => {
       const s3 = new S3({
         accessKeyId: accessId,

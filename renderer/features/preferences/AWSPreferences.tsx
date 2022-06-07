@@ -13,14 +13,14 @@ import { pipe, constant, identity } from 'fp-ts/lib/function';
 import { regions } from '../../constants/regions.json';
 
 type AWSPreferencesProps = {
-  imgKey: string;
+  initKey: string;
   onCancel: () => void;
   onUpload: (
     accessId: string,
     secretAccessKey: string,
     bucket: string,
     region: string,
-    remoteKey: string
+    key: string
   ) => void;
 };
 
@@ -31,7 +31,7 @@ const AWSPreferences = (props: AWSPreferencesProps): React.ReactElement => {
   );
   const [bucket, setBucket] = useState<O.Option<string>>(O.none);
   const [region, setRegion] = useState<O.Option<string>>(O.none);
-  const [imgKey, setImgKey] = useState<string>(props.imgKey);
+  const [imgKey, setImgKey] = useState<string>(props.initKey);
 
   return (
     <Box>

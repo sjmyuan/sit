@@ -11,6 +11,7 @@ import {
   StageInfo,
   Size,
   Rect,
+  Command,
 } from '../types';
 import { LinesContainer } from './LineContainer';
 import { RectsContainer } from './RectsContainer';
@@ -65,8 +66,10 @@ function useShapes() {
     height: 100,
     scaleX: 1,
     scaleY: 1,
-    props: {stroke: '#0000ff', strokeWidth: 2}
+    props: { stroke: '#0000ff', strokeWidth: 2 },
   });
+
+  const [history, setHistory] = useState<Command[]>([]);
 
   useEffect(() => {
     setSelectedShape(O.none);
@@ -181,6 +184,9 @@ function useShapes() {
       y: point.y + stageInfo.drawingArea.origin.y,
     };
   };
+
+  const addCommand = (command: Command) => setHistory([...history, command]);
+  const doCommand = (command: Command) => setHistory([...history, command]);
 
   const startToDraw = (point: Point) => {
     if (currentMode === 'CLIP') {
@@ -331,7 +337,7 @@ function useShapes() {
   };
 
   const onSelect = (shape: SitShape) => {
-    if (currentMode === 'CLIP') {
+    if (currentMode === 'CLIP' || shape._tag === 'line') {
       return;
     }
     setSelectedShape(
@@ -389,7 +395,7 @@ function useShapes() {
     }));
 
   const updateShape = (shape: SitShape) => {
-    if (currentMode === 'CLIP') {
+    if (currentMode === 'CLIP' || shape._tag === 'line') {
       return;
     }
     const drawingAreaShape = {

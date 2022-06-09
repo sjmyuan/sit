@@ -11,7 +11,6 @@ import {
   StageInfo,
   Size,
   Rect,
-  Command,
 } from '../types';
 import { LinesContainer } from './LineContainer';
 import { RectsContainer } from './RectsContainer';
@@ -68,8 +67,6 @@ function useShapes() {
     scaleY: 1,
     props: { stroke: '#0000ff', strokeWidth: 2 },
   });
-
-  const [history, setHistory] = useState<Command[]>([]);
 
   useEffect(() => {
     setSelectedShape(O.none);
@@ -184,9 +181,6 @@ function useShapes() {
       y: point.y + stageInfo.drawingArea.origin.y,
     };
   };
-
-  const addCommand = (command: Command) => setHistory([...history, command]);
-  const doCommand = (command: Command) => setHistory([...history, command]);
 
   const startToDraw = (point: Point) => {
     if (currentMode === 'CLIP') {

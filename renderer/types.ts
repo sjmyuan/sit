@@ -211,3 +211,9 @@ export const reDoCommand =
     }
     return commandStack;
   };
+
+export const canUndo = (commandStack: CommandStack): boolean =>
+  commandStack.index > -1;
+
+export const canRedo = (commandStack: CommandStack): boolean =>
+  commandStack.index + 1 < commandStack.history.length;

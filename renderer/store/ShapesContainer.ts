@@ -12,6 +12,7 @@ import {
   Size,
   Rect,
 } from '../types';
+import { CommandsContainer } from './CommandContainer';
 import { LinesContainer } from './LineContainer';
 import { RectsContainer } from './RectsContainer';
 import { TextsContainer } from './TextContainer';
@@ -20,6 +21,7 @@ function useShapes() {
   const rectState = RectsContainer.useContainer();
   const textState = TextsContainer.useContainer();
   const linesState = LinesContainer.useContainer();
+  const commandState = CommandsContainer.useContainer();
 
   const [currentMode, setMode] = useState<MODE>('NONE');
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
@@ -143,6 +145,7 @@ function useShapes() {
     rectState.clear();
     textState.clear();
     linesState.clear();
+    commandState.clear();
     setDragStartPoint(O.none);
     setDragVector(O.none);
     toggleDrawing(false);

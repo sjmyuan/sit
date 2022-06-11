@@ -47,11 +47,10 @@ function useLines(initialState: Line[] = []) {
       };
       setLines([...lines, completedNewLine]);
       setNewLine(O.none);
-      // commands.addShape(completedNewLine);
-      commands.addNewCommand(
-        () => setLines([...lines, completedNewLine]),
-        () => setLines(lines.filter((x) => x.id !== newLine.value.id))
-      );
+      commands.push({
+        do: () => setLines([...lines, completedNewLine]),
+        undo: () => setLines(lines.filter((x) => x.id !== newLine.value.id)),
+      });
     }
   };
 

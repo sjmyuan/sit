@@ -32,6 +32,11 @@ function useTexts(initialState: Text[] = []) {
       A.findFirst((x) => x.id === text.id)
     );
 
+    //Ignore the new text with empty string
+    if (O.isNone(oldText) && text.value === '') {
+      return;
+    }
+
     pipe(
       texts,
       A.filter((x) => x.id !== text.id),
@@ -39,34 +44,32 @@ function useTexts(initialState: Text[] = []) {
       setTexts
     );
 
-    // commands.updateShape(oldText, text);
-    commands.addNewCommand(
-      () =>
+    commands.push({
+      do: () =>
         pipe(
           texts,
           A.filter((x) => x.id !== text.id),
           (x) => [...x, text],
           setTexts
         ),
-      () =>
+      undo: () =>
         pipe(
           texts,
           A.filter((x) => x.id !== text.id),
           (x) => (O.isSome(oldText) ? [...x, oldText.value] : x),
           setTexts
-        )
-    );
+        ),
+    });
   };
 
   const clear = () => setTexts([]);
 
   const deleteText = (text: Text) => {
     setTexts(texts.filter((x) => x.id !== text.id));
-    // commands.deleteShape(text);
-    commands.addNewCommand(
-      () => setTexts(texts.filter((x) => x.id !== text.id)),
-      () => setTexts([...texts, text])
-    );
+    commands.push({
+      do: () => setTexts(texts.filter((x) => x.id !== text.id)),
+      undo: () => setTexts([...texts, text]),
+    });
   };
 
   return { texts, startToDraw, update, clear, deleteText, props, setProps };

@@ -31,7 +31,7 @@ const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
           <IconButton
             color="inherit"
             aria-label="undo"
-            disabled={!commands.canUndo1()}
+            disabled={!commands.hasUndoCommand()}
             onClick={() => {
               commands.undo();
             }}
@@ -41,7 +41,7 @@ const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
           <IconButton
             color="inherit"
             aria-label="redo"
-            disabled={!commands.canRedo1()}
+            disabled={!commands.hasRedoCommand()}
             onClick={() => {
               commands.redo();
             }}

@@ -175,9 +175,6 @@ export type MODE =
   | 'LINE';
 
 export type Command = {
-  op: 'ADD' | 'DELETE' | 'UPDATE';
-  newShape: O.Option<SitShape>;
-  oldShape: O.Option<SitShape>;
   do: () => void;
   undo: () => void;
 };
@@ -196,23 +193,6 @@ export const addCommand =
     ],
   });
 
-// export const undoCommand =
-//   (commandStack: CommandStack) => (f: (command: Command) => void) => {
-//     if (commandStack.index > -1) {
-//       f(commandStack.history[commandStack.index]);
-//       return { ...commandStack, index: commandStack.index - 1 };
-//     }
-//     return commandStack;
-//   };
-
-// export const reDoCommand =
-//   (commandStack: CommandStack) => (f: (command: Command) => void) => {
-//     if (commandStack.index + 1 < commandStack.history.length) {
-//       f(commandStack.history[commandStack.index + 1]);
-//       return { ...commandStack, index: commandStack.index + 1 };
-//     }
-//     return commandStack;
-//   };
 export const undoCommand = (commandStack: CommandStack) => {
   if (commandStack.index > -1) {
     commandStack.history[commandStack.index].undo();

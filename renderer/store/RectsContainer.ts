@@ -55,11 +55,10 @@ function useRects(initialState: Rect[] = []) {
         Math.abs(newRect.value.height) > 0
       ) {
         setRects([...rects, completedNewRect]);
-        // commands.addShape(completedNewRect);
-        commands.addNewCommand(
-          () => setRects([...rects, completedNewRect]),
-          () => setRects(rects.filter((x) => x.id !== newRect.value.id))
-        );
+        commands.push({
+          do: () => setRects([...rects, completedNewRect]),
+          undo: () => setRects(rects.filter((x) => x.id !== newRect.value.id)),
+        });
       }
     }
   };
@@ -79,32 +78,30 @@ function useRects(initialState: Rect[] = []) {
       (x) => [...x, rect],
       setRects
     );
-    // commands.updateShape(oldRect, rect);
-    commands.addNewCommand(
-      () =>
+    commands.push({
+      do: () =>
         pipe(
           rects,
           A.filter((x) => x.id !== rect.id),
           (x) => [...x, rect],
           setRects
         ),
-      () =>
+      undo: () =>
         pipe(
           rects,
           A.filter((x) => x.id !== rect.id),
           (x) => (O.isSome(oldRect) ? [...x, oldRect.value] : x),
           setRects
-        )
-    );
+        ),
+    });
   };
 
   const deleteRect = (rect: Rect) => {
     setRects(rects.filter((x) => x.id !== rect.id));
-    // commands.deleteShape(rect);
-    commands.addNewCommand(
-      () => setRects(rects.filter((x) => x.id !== rect.id)),
-      () => setRects([...rects, rect])
-    );
+    commands.push({
+      do: () => setRects(rects.filter((x) => x.id !== rect.id)),
+      undo: () => setRects([...rects, rect]),
+    });
   };
 
   const clear = () => setRects([]);

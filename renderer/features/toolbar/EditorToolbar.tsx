@@ -1,12 +1,14 @@
 import React from 'react';
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
-import { PhotoLibrary, Crop } from '@mui/icons-material';
+import { PhotoLibrary, Crop, Undo, Redo } from '@mui/icons-material';
 import { ipcRenderer } from 'electron';
+import { CommandsContainer } from '../../store/CommandContainer';
 
 type EditorToolbarProps = {
   onHistory: () => void;
 };
 const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
+  const commands = CommandsContainer.useContainer();
   return (
     <AppBar position="relative">
       <Toolbar>
@@ -26,6 +28,26 @@ const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
             alignItems: 'center',
           }}
         >
+          <IconButton
+            color="inherit"
+            aria-label="undo"
+            disabled={!commands.canUndo1()}
+            onClick={() => {
+              commands.undo();
+            }}
+          >
+            <Undo />
+          </IconButton>
+          <IconButton
+            color="inherit"
+            aria-label="redo"
+            disabled={!commands.canRedo1()}
+            onClick={() => {
+              commands.redo();
+            }}
+          >
+            <Redo />
+          </IconButton>
           <IconButton
             color="inherit"
             aria-label="screen capture"

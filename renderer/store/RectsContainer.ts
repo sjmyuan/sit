@@ -55,7 +55,11 @@ function useRects(initialState: Rect[] = []) {
         Math.abs(newRect.value.height) > 0
       ) {
         setRects([...rects, completedNewRect]);
-        commands.addShape(completedNewRect);
+        // commands.addShape(completedNewRect);
+        commands.addNewCommand(
+          () => setRects([...rects, completedNewRect]),
+          () => setRects(rects.filter((x) => x.id !== newRect.value.id))
+        );
       }
     }
   };
@@ -75,12 +79,32 @@ function useRects(initialState: Rect[] = []) {
       (x) => [...x, rect],
       setRects
     );
-    commands.updateShape(oldRect, rect);
+    // commands.updateShape(oldRect, rect);
+    commands.addNewCommand(
+      () =>
+        pipe(
+          rects,
+          A.filter((x) => x.id !== rect.id),
+          (x) => [...x, rect],
+          setRects
+        ),
+      () =>
+        pipe(
+          rects,
+          A.filter((x) => x.id !== rect.id),
+          (x) => (O.isSome(oldRect) ? [...x, oldRect.value] : x),
+          setRects
+        )
+    );
   };
 
   const deleteRect = (rect: Rect) => {
     setRects(rects.filter((x) => x.id !== rect.id));
-    commands.deleteShape(rect);
+    // commands.deleteShape(rect);
+    commands.addNewCommand(
+      () => setRects(rects.filter((x) => x.id !== rect.id)),
+      () => setRects([...rects, rect])
+    );
   };
 
   const clear = () => setRects([]);

@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/lib/function';
 import { useState } from 'react';
 import { createContainer } from 'unstated-next';
-import { A, Point, Text, TextProperties } from '../types';
+import { A, O, Point, Text, TextProperties } from '../types';
 import { CommandsContainer } from './CommandContainer';
 
 function useTexts(initialState: Text[] = []) {
@@ -39,14 +39,34 @@ function useTexts(initialState: Text[] = []) {
       setTexts
     );
 
-    commands.updateShape(oldText, text);
+    // commands.updateShape(oldText, text);
+    commands.addNewCommand(
+      () =>
+        pipe(
+          texts,
+          A.filter((x) => x.id !== text.id),
+          (x) => [...x, text],
+          setTexts
+        ),
+      () =>
+        pipe(
+          texts,
+          A.filter((x) => x.id !== text.id),
+          (x) => (O.isSome(oldText) ? [...x, oldText.value] : x),
+          setTexts
+        )
+    );
   };
 
   const clear = () => setTexts([]);
 
   const deleteText = (text: Text) => {
     setTexts(texts.filter((x) => x.id !== text.id));
-    commands.deleteShape(text);
+    // commands.deleteShape(text);
+    commands.addNewCommand(
+      () => setTexts(texts.filter((x) => x.id !== text.id)),
+      () => setTexts([...texts, text])
+    );
   };
 
   return { texts, startToDraw, update, clear, deleteText, props, setProps };

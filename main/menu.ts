@@ -85,6 +85,8 @@ const buildDarwinTemplate = (
       { type: 'separator' },
       { label: 'Copy', accelerator: 'Command+C', selector: 'copy:' },
       { label: 'Paste', accelerator: 'Command+V', selector: 'paste:' },
+      { label: 'Undo', accelerator: 'Command+Z', selector: 'undo:' },
+      { label: 'Redo', accelerator: 'Shift+Command+Z', selector: 'redo:' },
     ],
   };
   const subMenuViewDev: MenuItemConstructorOptions = {

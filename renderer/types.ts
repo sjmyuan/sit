@@ -163,7 +163,7 @@ export type StageInfo = {
   };
 };
 
-export type SitShape = Rect | Text;
+export type SitShape = Rect | Text | Line;
 
 export type MODE =
   | 'RECT'
@@ -173,3 +173,44 @@ export type MODE =
   | 'ZOOM_OUT'
   | 'CLIP'
   | 'LINE';
+
+export type Command = {
+  do: () => void;
+  undo: () => void;
+};
+
+export type CommandStack = {
+  history: Command[];
+  index: number; // the index of latest executed command
+};
+
+export const addCommand =
+  (commandStack: CommandStack) => (command: Command) => ({
+    index: commandStack.index + 1,
+    history: [
+      ...commandStack.history.slice(0, commandStack.index + 1),
+      command,
+    ],
+  });
+
+export const undoCommand = (commandStack: CommandStack) => {
+  if (commandStack.index > -1) {
+    commandStack.history[commandStack.index].undo();
+    return { ...commandStack, index: commandStack.index - 1 };
+  }
+  return commandStack;
+};
+
+export const reDoCommand = (commandStack: CommandStack) => {
+  if (commandStack.index + 1 < commandStack.history.length) {
+    commandStack.history[commandStack.index + 1].do();
+    return { ...commandStack, index: commandStack.index + 1 };
+  }
+  return commandStack;
+};
+
+export const canUndo = (commandStack: CommandStack): boolean =>
+  commandStack.index > -1;
+
+export const canRedo = (commandStack: CommandStack): boolean =>
+  commandStack.index + 1 < commandStack.history.length;

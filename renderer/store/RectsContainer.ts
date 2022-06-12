@@ -2,8 +2,10 @@ import { pipe } from 'fp-ts/lib/function';
 import { useState } from 'react';
 import { createContainer } from 'unstated-next';
 import { A, O, Point, Rect, RectProperties } from '../types';
+import { CommandsContainer } from './CommandContainer';
 
 function useRects(initialState: Rect[] = []) {
+  const commands = CommandsContainer.useContainer();
   const [rects, setRects] = useState<Rect[]>(initialState);
   const [newRect, setNewRect] = useState<O.Option<Rect>>(O.none);
   const [nextRectId, setNextRectId] = useState<number>(100);
@@ -43,16 +45,21 @@ function useRects(initialState: Rect[] = []) {
 
   const endToDraw = () => {
     if (O.isSome(newRect)) {
+      const completedNewRect = {
+        ...newRect.value,
+        name: `rect-${newRect.value.id}`,
+      };
+      setNewRect(O.none);
       if (
         Math.abs(newRect.value.width) > 0 &&
         Math.abs(newRect.value.height) > 0
       ) {
-        setRects([
-          ...rects,
-          { ...newRect.value, name: `rect-${newRect.value.id}` },
-        ]);
+        setRects([...rects, completedNewRect]);
+        commands.push({
+          do: () => setRects([...rects, completedNewRect]),
+          undo: () => setRects(rects.filter((x) => x.id !== newRect.value.id)),
+        });
       }
-      setNewRect(O.none);
     }
   };
 
@@ -61,16 +68,40 @@ function useRects(initialState: Rect[] = []) {
   };
 
   const update = (rect: Rect) => {
+    const oldRect = pipe(
+      rects,
+      A.findFirst((x) => x.id === rect.id)
+    );
     pipe(
       rects,
       A.filter((x) => x.id !== rect.id),
       (x) => [...x, rect],
       setRects
     );
+    commands.push({
+      do: () =>
+        pipe(
+          rects,
+          A.filter((x) => x.id !== rect.id),
+          (x) => [...x, rect],
+          setRects
+        ),
+      undo: () =>
+        pipe(
+          rects,
+          A.filter((x) => x.id !== rect.id),
+          (x) => (O.isSome(oldRect) ? [...x, oldRect.value] : x),
+          setRects
+        ),
+    });
   };
 
   const deleteRect = (rect: Rect) => {
     setRects(rects.filter((x) => x.id !== rect.id));
+    commands.push({
+      do: () => setRects(rects.filter((x) => x.id !== rect.id)),
+      undo: () => setRects([...rects, rect]),
+    });
   };
 
   const clear = () => setRects([]);

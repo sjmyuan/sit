@@ -21,6 +21,7 @@ import LineComponent from './LineComponent';
 import LinePropertiesPanel from '../toolbar/LinePropertiesPanel';
 import RectPropertiesPanel from '../toolbar/RectPropertiesPanel';
 import TextPropertiesPanel from '../toolbar/TextPropertiesPanel';
+import { CommandsContainer } from '../../store/CommandContainer';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -65,6 +66,7 @@ const Editor = (): React.ReactElement => {
   const shapes = ShapeContainer.useContainer();
   const selectedShape = shapes.getSelectedShape();
   const notification = InfoContainer.useContainer();
+  const commands = CommandsContainer.useContainer();
   const stageRef = useRef<KonvaStage>(null);
   const drawingAreaRef = useRef<KonvaRect>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,6 +77,10 @@ const Editor = (): React.ReactElement => {
   const [needCopy, setNeedCopy] = useState<boolean>(false);
 
   const [needDelete, setNeedDelete] = useState<boolean>(false);
+
+  const [needUndo, setNeedUndo] = useState<boolean>(false);
+
+  const [needRedo, setNeedRedo] = useState<boolean>(false);
 
   const drawingAreaTopLeft = getAbsolutePosition(
     shapes.stageInfo.drawingArea.origin,
@@ -92,6 +98,12 @@ const Editor = (): React.ReactElement => {
     MouseTrap.bind(['delete', 'backspace'], () => {
       setNeedDelete(true);
     });
+    MouseTrap.bind(['ctrl+z', 'command+z'], () => {
+      setNeedUndo(true);
+    });
+    MouseTrap.bind(['shift+ctrl+z', 'shift+command+z'], () => {
+      setNeedRedo(true);
+    });
 
     const debouncedHandleResize = debounce(function handleResize() {
       if (containerRef.current) {
@@ -107,6 +119,8 @@ const Editor = (): React.ReactElement => {
     return () => {
       MouseTrap.unbind(['ctrl+c', 'command+c']);
       MouseTrap.unbind(['delete', 'backspace']);
+      MouseTrap.unbind(['ctrl+z', 'command+z']);
+      MouseTrap.unbind(['shift+ctrl+z', 'shift+command+z']);
       window.removeEventListener('resize', debouncedHandleResize);
     };
   }, []);
@@ -155,6 +169,20 @@ const Editor = (): React.ReactElement => {
     }
     setNeedDelete(false);
   }, [needDelete]);
+
+  useEffect(() => {
+    if (needUndo) {
+      commands.undo();
+    }
+    setNeedUndo(false);
+  }, [needUndo]);
+
+  useEffect(() => {
+    if (needRedo) {
+      commands.redo();
+    }
+    setNeedRedo(false);
+  }, [needRedo]);
 
   const handleClipChange = (e: KonvaEventObject<any>) => {
     const rect = e.target as KonvaRect;

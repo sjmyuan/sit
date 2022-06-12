@@ -12,6 +12,7 @@ import {
   Size,
   Rect,
 } from '../types';
+import { CommandsContainer } from './CommandContainer';
 import { LinesContainer } from './LineContainer';
 import { RectsContainer } from './RectsContainer';
 import { TextsContainer } from './TextContainer';
@@ -20,6 +21,7 @@ function useShapes() {
   const rectState = RectsContainer.useContainer();
   const textState = TextsContainer.useContainer();
   const linesState = LinesContainer.useContainer();
+  const commandState = CommandsContainer.useContainer();
 
   const [currentMode, setMode] = useState<MODE>('NONE');
   const [isDrawing, toggleDrawing] = useState<boolean>(false);
@@ -65,7 +67,7 @@ function useShapes() {
     height: 100,
     scaleX: 1,
     scaleY: 1,
-    props: {stroke: '#0000ff', strokeWidth: 2}
+    props: { stroke: '#0000ff', strokeWidth: 2 },
   });
 
   useEffect(() => {
@@ -143,6 +145,7 @@ function useShapes() {
     rectState.clear();
     textState.clear();
     linesState.clear();
+    commandState.clear();
     setDragStartPoint(O.none);
     setDragVector(O.none);
     toggleDrawing(false);
@@ -331,7 +334,7 @@ function useShapes() {
   };
 
   const onSelect = (shape: SitShape) => {
-    if (currentMode === 'CLIP') {
+    if (currentMode === 'CLIP' || shape._tag === 'line') {
       return;
     }
     setSelectedShape(
@@ -389,7 +392,7 @@ function useShapes() {
     }));
 
   const updateShape = (shape: SitShape) => {
-    if (currentMode === 'CLIP') {
+    if (currentMode === 'CLIP' || shape._tag === 'line') {
       return;
     }
     const drawingAreaShape = {

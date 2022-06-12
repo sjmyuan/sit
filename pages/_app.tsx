@@ -9,20 +9,23 @@ import { RectsContainer } from '../renderer/store/RectsContainer';
 import { TextsContainer } from '../renderer/store/TextContainer';
 import { ShapeContainer } from '../renderer/store/ShapesContainer';
 import { LinesContainer } from '../renderer/store/LineContainer';
+import { CommandsContainer } from '../renderer/store/CommandContainer';
 
 const App = ({ Component, pageProps }: AppProps) => {
   return (
     <InfoContainer.Provider>
       <ImageContainer.Provider>
-        <RectsContainer.Provider>
-          <TextsContainer.Provider>
-            <LinesContainer.Provider>
-              <ShapeContainer.Provider>
-                <Component {...pageProps} />
-              </ShapeContainer.Provider>
-            </LinesContainer.Provider>
-          </TextsContainer.Provider>
-        </RectsContainer.Provider>
+        <CommandsContainer.Provider>
+          <RectsContainer.Provider>
+            <TextsContainer.Provider>
+              <LinesContainer.Provider>
+                <ShapeContainer.Provider>
+                  <Component {...pageProps} />
+                </ShapeContainer.Provider>
+              </LinesContainer.Provider>
+            </TextsContainer.Provider>
+          </RectsContainer.Provider>
+        </CommandsContainer.Provider>
       </ImageContainer.Provider>
     </InfoContainer.Provider>
   );

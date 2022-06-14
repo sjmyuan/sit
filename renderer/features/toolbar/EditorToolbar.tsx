@@ -1,14 +1,17 @@
 import React from 'react';
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
-import { PhotoLibrary, Crop, Undo, Redo } from '@mui/icons-material';
+import { PhotoLibrary, Crop, Undo, Redo, Check } from '@mui/icons-material';
 import { ipcRenderer } from 'electron';
 import { CommandsContainer } from '../../store/CommandContainer';
+import { ShapeContainer } from '../../store/ShapesContainer';
 
 type EditorToolbarProps = {
+  onSave: () => void;
   onHistory: () => void;
 };
 const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
   const commands = CommandsContainer.useContainer();
+  const shapes = ShapeContainer.useContainer();
   return (
     <AppBar position="relative">
       <Toolbar>
@@ -47,6 +50,16 @@ const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
             }}
           >
             <Redo />
+          </IconButton>
+          <IconButton
+            color="inherit"
+            aria-label="save"
+            disabled={!commands.hasUndoCommand()}
+            onClick={() => {
+              shapes.setSaveChanges(true);
+            }}
+          >
+            <Check />
           </IconButton>
           <IconButton
             color="inherit"

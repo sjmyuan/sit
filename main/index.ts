@@ -72,6 +72,14 @@ app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
     prepareForCropperWindow(true);
   });
 
+  globalShortcut.register('CommandOrControl+Shift+7', () => {
+    prepareForCropperWindow(false);
+  });
+
+  globalShortcut.register('CommandOrControl+Shift+8', () => {
+    prepareForCropperWindow(true);
+  });
+
   ipcMain.on('taking-screen-shot', (_, takeFullScreenShot: boolean) => {
     hideMainWindow();
     prepareForCropperWindow(takeFullScreenShot);
@@ -86,7 +94,6 @@ app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
         takeFullScreenShot,
       }: { fullScreen: Buffer; takeFullScreenShot: boolean }
     ) => {
-      hideMainWindow();
       openCropperWindow(takeFullScreenShot, fullScreen);
     }
   );

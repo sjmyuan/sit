@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
-import { PhotoLibrary, Crop, Undo, Redo, Check } from '@mui/icons-material';
+import { PhotoLibrary, Crop, Check } from '@mui/icons-material';
 import { ipcRenderer } from 'electron';
 import { CommandsContainer } from '../../store/CommandContainer';
 import { ShapeContainer } from '../../store/ShapesContainer';
@@ -31,26 +31,6 @@ const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
             alignItems: 'center',
           }}
         >
-          <IconButton
-            color="inherit"
-            aria-label="undo"
-            disabled={!commands.hasUndoCommand()}
-            onClick={() => {
-              commands.undo();
-            }}
-          >
-            <Undo />
-          </IconButton>
-          <IconButton
-            color="inherit"
-            aria-label="redo"
-            disabled={!commands.hasRedoCommand()}
-            onClick={() => {
-              commands.redo();
-            }}
-          >
-            <Redo />
-          </IconButton>
           <IconButton
             color="inherit"
             aria-label="save"

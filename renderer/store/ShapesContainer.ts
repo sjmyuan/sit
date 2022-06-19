@@ -70,6 +70,8 @@ function useShapes() {
     props: { stroke: '#0000ff', strokeWidth: 2 },
   });
 
+  const [saveChanges, setSaveChanges] = useState<boolean>(false);
+
   useEffect(() => {
     setSelectedShape(O.none);
   }, [currentMode]);
@@ -481,6 +483,8 @@ function useShapes() {
     clipRect,
     setClipRect,
     zoom,
+    saveChanges,
+    setSaveChanges,
   };
 }
 

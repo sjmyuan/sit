@@ -4,7 +4,7 @@ import { Box, debounce } from '@mui/material';
 import { Stage, Layer, Image, Rect as ReactKonvaRect } from 'react-konva';
 import { Stage as KonvaStage } from 'konva/types/Stage';
 import { Rect as KonvaRect } from 'konva/types/shapes/Rect';
-import { pipe } from 'fp-ts/lib/function';
+import { constVoid, pipe } from 'fp-ts/lib/function';
 import { clipboard, nativeImage } from 'electron';
 import MouseTrap from 'mousetrap';
 import Rectangle from './Rectangle';
@@ -13,7 +13,7 @@ import TextComponent from './TextComponent';
 import TextEditor from './TextEditor';
 import { ShapeContainer } from '../../store/ShapesContainer';
 import { InfoContainer } from '../../store/InfoContainer';
-import { getAbsolutePosition, getSize, Point } from '../../types';
+import { getAbsolutePosition, getSize, Point, TE } from '../../types';
 import { css } from '@emotion/css';
 import ToolPanel from '../toolbar/ToolPanel';
 import { KonvaEventObject } from 'konva/types/Node';
@@ -22,6 +22,8 @@ import LinePropertiesPanel from '../toolbar/LinePropertiesPanel';
 import RectPropertiesPanel from '../toolbar/RectPropertiesPanel';
 import TextPropertiesPanel from '../toolbar/TextPropertiesPanel';
 import { CommandsContainer } from '../../store/CommandContainer';
+import { ImageContainer } from '../../store/ImageContainer';
+import { getImageCacheUrl } from '../../utils/localImages';
 
 const getRelativePointerPosition = (node: KonvaStage) => {
   // the function will return pointer position relative to the passed node
@@ -67,6 +69,7 @@ const Editor = (): React.ReactElement => {
   const selectedShape = shapes.getSelectedShape();
   const notification = InfoContainer.useContainer();
   const commands = CommandsContainer.useContainer();
+  const imageContainer = ImageContainer.useContainer();
   const stageRef = useRef<KonvaStage>(null);
   const drawingAreaRef = useRef<KonvaRect>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -183,6 +186,40 @@ const Editor = (): React.ReactElement => {
     }
     setNeedRedo(false);
   }, [needRedo]);
+
+  useEffect(() => {
+    if (shapes.saveChanges && stageRef && stageRef.current) {
+      const newStage: KonvaStage = stageRef.current.getStage().clone({
+        x: 0,
+        y: 0,
+        scaleX: 1,
+        scaleY: 1,
+      });
+
+      const image = nativeImage.createFromDataURL(
+        newStage.toDataURL({
+          x: drawingAreaTopLeft.x,
+          y: drawingAreaTopLeft.y,
+          width: drawingAreaSize.width,
+          height: drawingAreaSize.height,
+          mimeType: 'image/png',
+        })
+      );
+      const key = `clipboard-${Date.now()}.png`;
+      pipe(
+        imageContainer.addImage(key, new Blob([image.toPNG()])),
+        TE.chain((_) => getImageCacheUrl(key)),
+        TE.map((url: string) => {
+          if (O.isSome(shapes.editingImageUrl)) {
+            return shapes.setEditingImage(O.some(url));
+          }
+          return constVoid();
+        })
+      )();
+    }
+
+    shapes.setSaveChanges(false);
+  }, [shapes.saveChanges]);
 
   const handleClipChange = (e: KonvaEventObject<any>) => {
     const rect = e.target as KonvaRect;

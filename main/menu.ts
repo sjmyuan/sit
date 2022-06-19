@@ -82,6 +82,20 @@ const buildDarwinTemplate = (
           await prepareForCropperWindow(true);
         },
       },
+      {
+        label: 'Screen Shot Without Hiding Window',
+        accelerator: 'Shift+Command+7',
+        click: async () => {
+          await prepareForCropperWindow(false);
+        },
+      },
+      {
+        label: 'Full Screen Shot Without Hiding Window',
+        accelerator: 'Shift+Command+6',
+        click: async () => {
+          await prepareForCropperWindow(true);
+        },
+      },
       { type: 'separator' },
       { label: 'Copy', accelerator: 'Command+C', selector: 'copy:' },
       { label: 'Paste', accelerator: 'Command+V', selector: 'paste:' },
@@ -277,6 +291,20 @@ export const getTrayMenu = (): Menu => {
       accelerator: 'Shift+Command+6',
       click: async () => {
         hideMainWindow();
+        await prepareForCropperWindow(true);
+      },
+    },
+    {
+      label: 'Screen Shot Without Hiding Window',
+      accelerator: 'Shift+Command+7',
+      click: async () => {
+        await prepareForCropperWindow(false);
+      },
+    },
+    {
+      label: 'Full Screen Shot Without Hiding Window',
+      accelerator: 'Shift+Command+8',
+      click: async () => {
         await prepareForCropperWindow(true);
       },
     },

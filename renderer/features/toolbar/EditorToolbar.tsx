@@ -6,7 +6,6 @@ import { CommandsContainer } from '../../store/CommandContainer';
 import { ShapeContainer } from '../../store/ShapesContainer';
 
 type EditorToolbarProps = {
-  onSave: () => void;
   onHistory: () => void;
 };
 const EditorToolbar = (props: EditorToolbarProps): React.ReactElement => {
